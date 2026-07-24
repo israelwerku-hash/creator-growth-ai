@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Agency Elite Companion",
+  "version": "1.0",
+  "description": "The elite AI companion bridging your creator platform to the Growth Engine.",
+  "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
+  "host_permissions": [
+    "https://*.onlyfans.com/*",
+    "http://localhost:3000/*"
+  ],
+  "action": {
+    "default_title": "Open Companion"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.onlyfans.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

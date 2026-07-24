@@ -1,0 +1,64 @@
+name: Security Automation Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * 0' # Run weekly on Sundays
+
+jobs:
+  dependency-audit:
+    name: Software Composition Analysis (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+        
+      - name: Run NPM Audit (High/Critical Only)
+        run: npm audit --audit-level=high
+
+  sast-codeql:
+    name: CodeQL Static Analysis (SAST)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript,typescript"
+
+  secret-scanning:
+    name: Gitleaks Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository (Full History)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

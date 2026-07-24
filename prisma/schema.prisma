@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Used for the Next.js app runtime
+  directUrl = env("DIRECT_URL") // Used to bypass the pooler during db push
+}
+
+enum UserRole {
+  CREATOR
+  MANAGER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model Creator {
+  id                       String        @id
+  email                    String        @unique
+  name                     String?
+  role                     UserRole      @default(CREATOR)
+  status                   AccountStatus @default(ACTIVE)
+  tier                     String        @default("FREE")
+  aiCredits                Int           @default(25)
+  has_completed_onboarding Boolean       @default(false)
+  has_completed_pricing    Boolean       @default(false)
+  paddleSubscriptionId     String?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  // These must be arrays pointing to your other tables, not Json!
+  metrics       Metric[]
+  goals         Goal[]
+  fans          Fan[]
+  revenueEvents RevenueEvent[]
+}
+
+model Metric {
+  id        String   @id @default(uuid())
+  creatorId String
+  name      String   @default("Live Metric")
+  value     String   @default("0")
+  platform  String
+  views     Int      @default(0)
+  earnings  Float    @default(0.0)
+  date      DateTime @default(now())
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+}
+
+model Goal {
+  id        String   @id @default(uuid())
+  creatorId String
+  title     String
+  target    Float
+  current   Float    @default(0.0)
+  deadline  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
+}
+
+model Fan {
+  id                  String         @id @default(uuid())
+  username            String?
+  displayName         String?
+  creatorId           String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  engagementScore     Int            @default(0)
+  isPriority          Boolean        @default(false)
+  lastInteractionDate DateTime?
+  streakCount         Int            @default(0)
+  aiRecommendation    String         @default("Awaiting analytical execution scan cycle.")
+  averageSpend        Float          @default(0.0)
+  churnRiskScore      Int            @default(0)
+  confidenceScore     Int            @default(0)
+  email               String?
+  lastActivityDate    DateTime       @default(now())
+  lastSegmentedAt     DateTime       @default(now())
+  loginActivity       Int            @default(0)
+  messageFrequency    Int            @default(0)
+  name                String?
+  opportunityScore    Int            @default(0)
+  ppvPurchases        Int            @default(0)
+  purchaseCount       Int            @default(0)
+  responseRate        Float          @default(100.0)
+  revenuePotential    Int            @default(0)
+  segment             String         @default("Ghost Fan")
+  subscriptionAge     Int            @default(0)
+  totalSpend          Float          @default(0.0)
+  creator             Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  memories            FanMemory[]
+  messages            Message[]
+  revenueEvents       RevenueEvent[]
+
+  @@index([creatorId])
+  @@index([email])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  fanId     String
+  fan       Fan      @relation(fields: [fanId], references: [id], onDelete: Cascade)
+
+  @@index([fanId])
+}
+
+model FanMemory {
+  id         String   @id @default(uuid())
+  fanId      String
+  keyFact    String
+  category   String
+  confidence Float    @default(1.0)
+  createdAt  DateTime @default(now())
+  isPriority Boolean  @default(false)
+  fan        Fan      @relation(fields: [fanId], references: [id], onDelete: Cascade)
+
+  @@index([fanId])
+}
+
+model RevenueEvent {
+  id        String   @id @default(uuid())
+  fanId     String?
+  creatorId String?
+  amount    Int
+  source    String
+  createdAt DateTime @default(now())
+  fan       Fan?     @relation(fields: [fanId], references: [id], onDelete: Cascade)
+  creator   Creator? @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([fanId])
+  @@index([creatorId])
+}
+
+model FeatureFlag {
+  id        String   @id
+  name      String
+  isEnabled Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+model WebhookEvent {
+  id           String        @id @default(uuid())
+  provider     String        @default("PADDLE")
+  payload      Json
+  status       WebhookStatus @default(PENDING)
+  errorMessage String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+  actor     String
+  action    String
+  metadata  Json
+}

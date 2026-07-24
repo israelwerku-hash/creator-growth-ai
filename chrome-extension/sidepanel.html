@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Elite Companion</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- Ambient Background -->
+  <div class="ambient-glow purple-glow"></div>
+  <div class="ambient-glow blue-glow"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">Ω</div>
+      <div>
+        <h1 class="title">Agency Elite</h1>
+        <p class="subtitle">AI Growth Companion</p>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-target="memory-vault">Vault</button>
+      <button class="tab" data-target="dm-gen">DM Gen</button>
+      <button class="tab" data-target="segmentation">Stats</button>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="content">
+      
+      <!-- Tab 1: Memory Vault -->
+      <section id="memory-vault" class="tab-pane active">
+        <div class="card">
+          <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            <h2>Memory Vault</h2>
+          </div>
+          <div class="fan-id-display">
+            Target: <span id="current-fan-id" class="neon-text">Loading...</span>
+          </div>
+          <div class="empty-state">
+            <svg class="icon empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p>No memory records found.</p>
+            <span>Log intimacy contexts and spend history to build AI memory.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: AI DM Gen -->
+      <section id="dm-gen" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <svg class="icon text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h2>AI Outreach Engine</h2>
+          </div>
+          
+          <form id="dm-form" class="form">
+            <div class="input-group">
+              <label>Campaign Goal</label>
+              <select id="goal-input" class="input">
+                <option value="PPV Upsell">PPV Upsell</option>
+                <option value="Re-engagement">Re-engagement</option>
+                <option value="Custom Request">Custom Request</option>
+                <option value="Tipping Conversion">Tipping Conversion</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Tone & Vibe</label>
+              <select id="tone-input" class="input">
+                <option value="Flirty & Playful">Flirty & Playful</option>
+                <option value="Direct & Confident">Direct & Confident</option>
+                <option value="Girlfriend Experience">Girlfriend Experience</option>
+                <option value="Teasing">Teasing</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Context / Hook</label>
+              <textarea id="context-input" class="input" rows="3" placeholder="e.g., They bought the last mass PPV..."></textarea>
+            </div>
+
+            <button type="submit" id="generate-btn" class="btn primary-btn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Generate AI Outreach
+            </button>
+          </form>
+
+          <div id="output-container" class="output-container hidden">
+            <pre id="dm-output" class="output-text"></pre>
+            <button id="copy-btn" class="btn secondary-btn small-btn">Copy to Clipboard</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 3: Segmentation & Stats -->
+      <section id="segmentation" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <svg class="icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+            <h2>Segmentation</h2>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Spend Tier</span>
+              <span class="stat-value text-emerald">Whale 🐋</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">LTV</span>
+              <span class="stat-value">$1,250</span>
+            </div>
+          </div>
+
+          <button class="btn secondary-btn w-full mt-4">Refresh Stats</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
