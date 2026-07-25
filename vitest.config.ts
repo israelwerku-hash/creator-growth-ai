@@ -13,7 +13,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      'next/server': path.resolve(__dirname, './tests/__mocks__/next-server.ts')
     },
     setupFiles: ['./vitest.setup.ts']
   }

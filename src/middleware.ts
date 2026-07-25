@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { aiRateLimiter, publicRateLimiter, getRequestIdentifier } from "@/lib/ratelimit";
+import { aiRateLimiter, publicRateLimiter, authRateLimiter, getRequestIdentifier } from "@/lib/ratelimit";
 
 // Routes that pass through immediately with ZERO auth checks.
 const PUBLIC_ROUTES = [
@@ -17,7 +17,7 @@ export const config = {
   ],
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // ──────────────────────────────────────────────────────────
@@ -54,8 +54,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  // Pure public UI routes skip everything.
-  if (PUBLIC_ROUTES.includes(pathname)) {
+  const isServerAction = request.headers.has("Next-Action") || request.headers.has("next-action");
+
+  // Pure public UI routes skip everything, UNLESS they are Server Actions.
+  if (PUBLIC_ROUTES.includes(pathname) && !isServerAction) {
     return NextResponse.next({ request });
   }
 
@@ -98,6 +100,21 @@ export async function proxy(request: NextRequest) {
     const { success } = await publicRateLimiter.limit(identifier);
     if (!success) {
       return NextResponse.json({ error: "Rate limit exceeded. Please try again shortly." }, { status: 429 });
+    }
+  }
+  
+  // Rate Limit: Next.js Server Actions (Next-Action header) & standard Auth routes
+  if (isServerAction || AUTH_ROUTES.includes(pathname)) {
+    const identifier = getRequestIdentifier(request);
+    // Apply stricter auth rate limit (3 req/15min) if it's an auth route, otherwise standard
+    const limiter = AUTH_ROUTES.includes(pathname) ? authRateLimiter : publicRateLimiter;
+    const { success } = await limiter.limit(identifier);
+    if (!success) {
+      if (isServerAction || pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+      }
+      // For page routes, redirect to a generic error or just return 429
+      return new NextResponse("429 Too Many Requests. Please try again later.", { status: 429 });
     }
   }
 
