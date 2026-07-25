@@ -34,8 +34,8 @@ import { getUserTierAction } from "@/app/dashboard/actions";
 //    NEXT_PUBLIC_PADDLE_GROWTH_PRICE_ID=pri_01j...your_real_id...
 //    NEXT_PUBLIC_PADDLE_ELITE_PRICE_ID=pri_01j...your_real_id...
 //
-// 4. Your client token is already set:
-//    NEXT_PUBLIC_PADDLE_CLIENT_TOKEN=test_1336f71bda8da651f56f09e3896
+// 4. Your client token should be set in .env.local:
+//    NEXT_PUBLIC_PADDLE_CLIENT_TOKEN=your_client_token_here
 //
 // 5. Restart `npm run dev` after editing .env.local for changes to take effect.
 // ─────────────────────────────────────────────────────────────────────────────

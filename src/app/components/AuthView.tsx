@@ -413,7 +413,9 @@ export default function AuthView({
 
         // Admin override fallback
         if (!isAuthorized && !verificationRequired) {
-          if (authEmail.trim() === "israelwerku@gmail.com" && authPassword === "Punisherharsh2molashwe2") {
+          const { checkAdminOverrideAction } = await import("@/app/actions/auth");
+          const adminCheck = await checkAdminOverrideAction(authEmail, authPassword);
+          if (adminCheck.success) {
             isAuthorized = true;
           }
         }

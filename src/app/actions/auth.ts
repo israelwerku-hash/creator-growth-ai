@@ -100,3 +100,17 @@ export async function getLoginRedirectAction(email: string) {
     return { redirectPath: "/dashboard" }; // Let layout middleware handle it as a fallback
   }
 }
+
+// ==========================================
+// 4. ADMIN OVERRIDE ACTION
+// ==========================================
+export async function checkAdminOverrideAction(email?: string, password?: string) {
+  if (!email || !password) return { success: false };
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (adminEmail && adminPassword && email.trim() === adminEmail && password === adminPassword) {
+    return { success: true };
+  }
+  return { success: false };
+}
