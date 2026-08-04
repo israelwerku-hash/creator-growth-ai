@@ -100,7 +100,6 @@ export default function LoginPage() {
           return;
         }
 
-        console.log("[Auth] Post-signup session obtained. Routing to onboarding...");
         router.refresh();
         router.push("/onboarding");
         return;
@@ -129,7 +128,6 @@ export default function LoginPage() {
       }
 
       if (res.ok && result.success) {
-        console.log("[Auth] Session obtained. Routing to dashboard (server layout will handle state)...");
         router.push("/dashboard");
         router.refresh();
         return; // Keep loading state while navigating

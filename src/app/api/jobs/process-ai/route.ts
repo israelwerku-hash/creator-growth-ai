@@ -10,7 +10,6 @@ async function handler(req: Request) {
     const body = await req.json();
     
     // Example: Process the AI payload here
-    console.log("[QStash Worker] Processing job payload:", body);
 
     // ... AI Processing Logic ...
 

@@ -161,7 +161,7 @@ async function coreHandler(req: Request) {
           orderBy: { createdAt: 'desc' }
         });
 
-        console.log('[DM_GEN_RESOLVED_FAN]', { inputFanId: fanId, resolvedFan: fan, memoryCount: memories.length });
+        console.log('[DM_GEN_RESOLVED_FAN]', { inputFanId: fanId, resolvedFanId: fan?.id, memoryCount: memories.length });
 
         if (memories.length > 0) {
           const facts = memories.map((m: any) => `- ${m.keyFact}`).join("\n");

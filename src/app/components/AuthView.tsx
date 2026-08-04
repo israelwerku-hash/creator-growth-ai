@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 interface AuthViewProps {
   authMode: "login" | "signup";
@@ -51,6 +52,7 @@ export default function AuthView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -330,6 +332,7 @@ export default function AuthView({
             data: {
               name: displayName,
             },
+            ...(turnstileToken ? { captchaToken: turnstileToken } : {}),
           },
         });
 
@@ -391,6 +394,7 @@ export default function AuthView({
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: authEmail.trim(),
           password: authPassword,
+          ...(turnstileToken ? { options: { captchaToken: turnstileToken } } : {}),
         });
 
         if (!signInError && data?.user) {
@@ -719,6 +723,16 @@ export default function AuthView({
                       </div>
                     )}
                   </div>
+
+                  {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                    <div className="flex justify-center mt-2" style={{ transformStyle: "preserve-3d", transform: "translateZ(10px)" }}>
+                      <Turnstile
+                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                        onSuccess={(token) => setTurnstileToken(token)}
+                        options={{ theme: "dark" }}
+                      />
+                    </div>
+                  )}
 
                   <button
                     type="submit"
