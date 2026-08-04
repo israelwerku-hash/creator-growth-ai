@@ -14,7 +14,8 @@ export default defineConfig({
     globals: true,
     alias: {
       '@': path.resolve(__dirname, './src'),
-      'next/server': path.resolve(__dirname, './tests/__mocks__/next-server.ts')
+      'next/server': path.resolve(__dirname, './tests/__mocks__/next-server.ts'),
+      'next/headers': path.resolve(__dirname, './tests/__mocks__/next-headers.ts')
     },
     setupFiles: ['./vitest.setup.ts']
   }

@@ -191,7 +191,7 @@ export default function PaywallPage() {
             <div className="bg-[#111111] border border-neutral-800/80 rounded-xl p-4 mb-8 flex items-center justify-between shadow-inner">
               <div className="flex items-center gap-2.5">
                 <Zap className="w-4 h-4 text-[#800020]" />
-                <span className="text-sm font-bold text-white tracking-wide">500 Generation Credits</span>
+                <span className="text-sm font-bold text-white tracking-wide">2,600 Generation Credits</span>
               </div>
               <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Monthly</span>
             </div>
@@ -253,7 +253,7 @@ export default function PaywallPage() {
             <ul className="space-y-5 mb-8">
               <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium pb-2 border-b border-neutral-800/60">
                 <Zap className="w-4 h-4 text-white shrink-0" />
-                6000 Generation Credits Included / mo
+                10,000 Generation Credits Included / mo
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <X className="w-4 h-4 text-[#800020] shrink-0 mt-0.5" />

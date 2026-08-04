@@ -7,6 +7,8 @@ import { withIdempotency } from "@/lib/idempotency";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import DOMPurify from 'isomorphic-dompurify';
+import { getAuthenticatedUser } from "@/lib/extension-auth";
+import { getSession } from "@/utils/supabase/server";
 
 // --- Validation Schema ---
 const MemoryVaultSchema = z.object({
@@ -17,12 +19,49 @@ const MemoryVaultSchema = z.object({
   suggestedAction: z.string().optional()
 });
 
-// --- No Static Fallback ---
-
 class ValidationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ValidationError";
+  }
+}
+
+
+
+
+
+export async function GET(req: Request) {
+  try {
+    const activeUser = await getAuthenticatedUser(req as any);
+    if (!activeUser) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid API Key" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const rawFanId = searchParams.get("fanId");
+
+    if (!rawFanId) {
+      return NextResponse.json({ error: "Missing fanId" }, { status: 400 });
+    }
+
+    const fanId = rawFanId.trim().toLowerCase();
+
+    try {
+      const vaultItems = await db.fanMemory.findMany({
+        where: { 
+          fanId,
+          fan: { creatorId: activeUser.id }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json({ vault: vaultItems }, { status: 200 });
+    } catch (dbErr: any) {
+      console.error('[VAULT_DB_ERROR_DETAILS]', dbErr);
+      return NextResponse.json({ error: "Database query failed", details: dbErr.message }, { status: 500 });
+    }
+  } catch (error: any) {
+    console.error("[VAULT_GET_ERROR]", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
@@ -47,25 +86,44 @@ async function coreHandler(req: Request) {
       );
     }
 
-    // --- 2. RBAC Authorization Check ---
-    const { requireAuth } = await import("@/utils/supabase/server");
-    const { db } = await import("@/lib/db");
+    // --- Dual-Auth: Web Session -> Extension API Key Fallback ---
+    let activeUser = null;
     
-    let activeUser;
-    try {
-      activeUser = await requireAuth();
-    } catch (e) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 1. Try Web Session
+    const session = await getSession().catch(() => null);
+    if (session?.user?.id) {
+      activeUser = await db.creator.findUnique({ where: { id: session.user.id } });
     }
 
-    const creatorRecord = await db.creator.findUnique({
-      where: { id: activeUser.id },
-      select: { role: true }
-    });
+    // 2. Try Extension API Key
+    if (!activeUser) {
+      activeUser = await getAuthenticatedUser(req as any);
+    }
 
-    if (!creatorRecord) {
-      Sentry.captureException(new Error(`RBAC Alert: Unregistered user ${activeUser.id} attempted Memory Vault.`));
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!activeUser) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid Session / API Key" }, { status: 401 });
+    }
+
+    // In dev mode, we bypass the creator role DB check if it's the mock user
+    if (process.env.NODE_ENV !== "development" || activeUser.id !== "mock_developer_id") {
+      try {
+        const creatorRecord = await db.creator.findUnique({
+          where: { id: activeUser.id },
+          select: { role: true }
+        });
+
+        if (!creatorRecord) {
+          Sentry.captureException(new Error(`RBAC Alert: Unregistered user ${activeUser.id} attempted Memory Vault.`));
+          return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
+      } catch (dbErr: any) {
+        console.error("[VAULT_POST_RBAC_ERROR]", dbErr.message);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[VAULT_POST] Creator lookup failed, bypassing in development.");
+        } else {
+          throw dbErr;
+        }
+      }
     }
 
     // --- 3. Request Parsing ---
@@ -76,35 +134,51 @@ async function coreHandler(req: Request) {
       return NextResponse.json({ error: "Invalid request body format." }, { status: 400 });
     }
 
-    let { creatorId, fanId, chatHistory } = body;
-
-    if (!creatorId || !fanId || !chatHistory) {
-      return NextResponse.json({ error: "Missing creatorId, fanId, or chatHistory" }, { status: 400 });
+    let { creatorId, fanId: rawFanId, chatHistory, snippet } = body;
+    // If they just passed a snippet from the sidepanel instead of chat history:
+    if (snippet && !chatHistory) {
+      chatHistory = snippet;
     }
+
+    if (!rawFanId || !chatHistory) {
+      return NextResponse.json({ error: "Missing fanId or chat context" }, { status: 400 });
+    }
+
+    // Normalize fanId
+    const fanId = rawFanId.trim().toLowerCase();
     
     // XSS Neutralization
     chatHistory = DOMPurify.sanitize(chatHistory);
 
     // --- IDOR / Resource Ownership Check ---
-    const fanCheck = await db.fan.findUnique({ where: { id: fanId }, select: { creatorId: true } });
-    if (!fanCheck || fanCheck.creatorId !== activeUser.id) {
-      // Return 404 to obscure existence of unauthorized resources
-      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    if (process.env.NODE_ENV !== "development" || activeUser.id !== "mock_developer_id") {
+      try {
+        const fanCheck = await db.fan.findUnique({ where: { id: fanId }, select: { creatorId: true } });
+        // If it exists but belongs to someone else, reject.
+        if (fanCheck && fanCheck.creatorId !== activeUser.id) {
+          return NextResponse.json({ error: "Not Found" }, { status: 404 });
+        }
+      } catch (dbErr: any) {
+        console.error("[VAULT_POST_IDOR_ERROR]", dbErr.message);
+        if (process.env.NODE_ENV === "development") {
+           console.warn("[VAULT_POST] Fan ownership lookup failed, bypassing in development.");
+        } else {
+           throw dbErr;
+        }
+      }
     }
 
-    // Attempt to consume credits
-    let creditResult;
+    let creditResult: any = { success: true, remainingCredits: 100, error: "", requiresUpgrade: false };
     try {
-      creditResult = await consumeCredits("MEMORY_VAULT");
+      creditResult = await consumeCredits(activeUser.id, "MEMORY_VAULT");
+      if (!creditResult.success) {
+        return NextResponse.json(
+          { error: creditResult.error || "Insufficient credits.", requiresUpgrade: creditResult.requiresUpgrade },
+          { status: 402 }
+        );
+      }
     } catch (creditError: any) {
       return NextResponse.json({ error: `Credit system error: ${creditError.message}` }, { status: 500 });
-    }
-    
-    if (!creditResult.success) {
-      return NextResponse.json(
-        { error: creditResult.error || "Insufficient credits.", requiresUpgrade: creditResult.requiresUpgrade },
-        { status: 402 }
-      );
     }
 
     // --- 3. AI Setup ---
@@ -114,7 +188,7 @@ async function coreHandler(req: Request) {
     }
     const groq = new Groq({ apiKey });
 
-    const prompt = `You are an elite OnlyFans CRM analyst. Analyze this chat history and extract memory vault data.
+    const prompt = `You are an elite OnlyFans CRM analyst. Analyze this chat history/snippet and extract memory vault data.
 Chat History: ${typeof chatHistory === 'string' ? chatHistory : JSON.stringify(chatHistory)}
 
 CRITICAL RULES:
@@ -159,46 +233,62 @@ Return ONLY valid JSON.`;
       console.warn("[MEMORY_VAULT_ERROR] Tier 1 failed, trying Tier 2:", tier1Error.message);
       
       try {
-        // --- TIER 2: Heavy Backup Model ---
         const completionTier2 = await groq.chat.completions.create({
           messages: [{ role: "user", content: prompt }],
-          model: "llama-3.3-70b-versatile", // More capable fallback model
-          temperature: 0.1, // Even stricter parsing
+          model: "llama-3.3-70b-versatile",
+          temperature: 0.1,
           max_tokens: 400,
           response_format: { type: "json_object" }
         });
         
         const responseTextTier2 = completionTier2.choices[0]?.message?.content || "{}";
         const parsedJsonTier2 = JSON.parse(responseTextTier2);
-        
         const validationResultTier2 = MemoryVaultSchema.safeParse(parsedJsonTier2);
         
         if (!validationResultTier2.success) {
           throw new ValidationError("Tier 2 Zod validation failed: " + validationResultTier2.error.message);
         }
-        
         validatedData = validationResultTier2.data;
-
       } catch (tier2Error: any) {
-        // EXPOSE REAL ERROR
         Sentry.captureException(tier2Error, { tags: { fallback: "failed" } });
         console.error("[Groq Memory Vault Error]: Tier 2 failed.", tier2Error.message);
         throw tier2Error;
       }
     }
 
-    // --- 4. Database Mutations (Stubbed for Best Practices) ---
+    // --- 4. Database Mutations (Wrapped securely) ---
     try {
-      // Update Fan Profile
-      await db.fan.update({
+      // Ensure the Creator record exists to satisfy Fan.creatorId foreign key
+      await db.creator.upsert({
+        where: { id: activeUser.id },
+        update: {},
+        create: {
+          id: activeUser.id,
+          email: `${activeUser.id}@dev.local`,
+          name: activeUser.id === "mock_developer_id" ? "Dev Creator" : activeUser.id,
+          role: "CREATOR",
+          status: "ACTIVE",
+          tier: "FREE"
+        }
+      });
+
+      // Upsert Fan to satisfy FanMemory.fanId foreign key
+      await db.fan.upsert({
         where: { id: fanId },
-        data: {
+        update: {
+          segment: validatedData.spendingSentiment,
+          aiRecommendation: validatedData.suggestedAction || "Continue normal engagement."
+        },
+        create: {
+          id: fanId,
+          creatorId: activeUser.id,
+          username: fanId,
+          displayName: fanId,
           segment: validatedData.spendingSentiment,
           aiRecommendation: validatedData.suggestedAction || "Continue normal engagement."
         }
       });
 
-      // Insert Extracted Memories (Interests & Facts)
       const memoriesToInsert = [
         ...validatedData.keyInterests.map(interest => ({
           fanId,
@@ -214,17 +304,26 @@ Return ONLY valid JSON.`;
         }))
       ];
 
+      // If no AI facts but we had a raw snippet, just store the snippet
+      if (memoriesToInsert.length === 0 && snippet) {
+         memoriesToInsert.push({ fanId, category: "Manual", keyFact: snippet, isPriority: true });
+      }
+
       if (memoriesToInsert.length > 0) {
         await db.fanMemory.createMany({
           data: memoriesToInsert,
           skipDuplicates: true
         });
+        console.log('[VAULT_SAVE] Saved memory for fan:', fanId, memoriesToInsert);
       }
 
     } catch (dbError: any) {
-      console.error("[MEMORY_VAULT_ERROR] Database mutation failed:", dbError.message);
-      // We don't crash, we just let the system know it failed to save
+      console.error('[VAULT_DB_ERROR_DETAILS]', dbError);
       Sentry.captureException(dbError);
+      return NextResponse.json(
+        { error: "Failed to save memory to database", details: dbError.message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ 
@@ -244,4 +343,9 @@ Return ONLY valid JSON.`;
 
 export async function POST(req: Request) {
   return withIdempotency(req, coreHandler);
+}
+
+export async function OPTIONS(req: Request) {
+  // Edge runtime CORS preflight fallback (though middleware typically handles this)
+  return NextResponse.json({}, { status: 200 });
 }

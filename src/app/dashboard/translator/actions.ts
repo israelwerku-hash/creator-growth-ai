@@ -4,6 +4,8 @@ import Groq from "groq-sdk";
 import { consumeCredits } from "@/utils/credits";
 import { revalidatePath } from "next/cache";
 
+import { getSession } from "@/utils/supabase/server";
+
 export async function translateTextAction(text: string, language: string) {
   try {
     const apiKey = process.env.GROQ_API_KEY;
@@ -11,8 +13,12 @@ export async function translateTextAction(text: string, language: string) {
       return { success: false, error: "GROQ_API_KEY is not set." };
     }
 
+    const session = await getSession().catch(() => null);
+    const userId = session?.user?.id;
+    if (!userId) return { success: false, error: "Unauthorized" };
+
     // 1. Consume 15 credits for Translation
-    const creditResult = await consumeCredits("LANGUAGE_TRANSLATOR");
+    const creditResult = await consumeCredits(userId, "TRANSLATOR");
     
     if (!creditResult.success) {
       return { success: false, error: creditResult.error || "Insufficient credits." };

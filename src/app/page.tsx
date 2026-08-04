@@ -141,6 +141,9 @@ export default function LandingPage() {
               </div>
               <ul className="space-y-5 mb-10">
                 <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-white" /> 50 Starter Credits
+                </li>
+                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
                   <CheckCircle2 className="w-5 h-5 text-white" /> Basic Analytics Dashboard
                 </li>
                 <li className="flex items-center gap-4 text-sm text-zinc-600 font-medium">
@@ -172,7 +175,7 @@ export default function LandingPage() {
                 <span className="text-5xl font-black tracking-tight">${isAnnual ? '49' : '59'}</span>
                 <span className="text-zinc-400 font-medium">/mo</span>
               </div>
-              <p className="text-sm text-zinc-400 mb-10 font-medium pb-6 border-b border-zinc-800">300 AI Engine Credits / mo</p>
+              <p className="text-sm text-zinc-400 mb-10 font-medium pb-6 border-b border-zinc-800">2,600 AI Engine Credits / mo</p>
               <ul className="space-y-5 mb-10">
                 <li className="flex items-center gap-4 text-sm text-white font-medium">
                   <CheckCircle2 className="w-5 h-5 text-white" /> Full Analytics Suite
@@ -202,7 +205,7 @@ export default function LandingPage() {
                 <span className="text-5xl font-black tracking-tight">${isAnnual ? '149' : '199'}</span>
                 <span className="text-zinc-500 font-medium">/mo</span>
               </div>
-              <p className="text-sm text-zinc-500 mb-10 font-medium pb-6 border-b border-zinc-800/50">1,000 AI Engine Credits / mo</p>
+              <p className="text-sm text-zinc-500 mb-10 font-medium pb-6 border-b border-zinc-800/50">10,000 AI Engine Credits / mo</p>
               <ul className="space-y-5 mb-10">
                 <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
                   <CheckCircle2 className="w-5 h-5 text-white" /> Everything in Pro
@@ -233,24 +236,68 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Let's talk scale.</h2>
             <p className="text-zinc-400 mb-12 text-lg">Questions about Enterprise or Agency implementation? Send us a message.</p>
             
-            <form className="space-y-6 text-left" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-6 text-left" onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const formData = new FormData(form);
+              const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+              const statusEl = document.getElementById('contact-status');
+              
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Sending...';
+              if (statusEl) { statusEl.textContent = ''; statusEl.className = ''; }
+
+              try {
+                const res = await fetch('/api/contact', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    message: formData.get('message'),
+                  }),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                  if (statusEl) {
+                    statusEl.textContent = 'Message Sent! We will get back to you shortly.';
+                    statusEl.className = 'text-sm text-emerald-400 font-semibold mt-4 text-center';
+                  }
+                  form.reset();
+                } else {
+                  if (statusEl) {
+                    statusEl.textContent = data.error || 'Something went wrong. Please try again.';
+                    statusEl.className = 'text-sm text-red-400 font-semibold mt-4 text-center';
+                  }
+                }
+              } catch (err) {
+                if (statusEl) {
+                  statusEl.textContent = 'Network error. Please check your connection.';
+                  statusEl.className = 'text-sm text-red-400 font-semibold mt-4 text-center';
+                }
+              } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg> Send Message';
+              }
+            }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Name</label>
-                  <input type="text" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="Jane Doe" />
+                  <input name="name" type="text" required className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="Jane Doe" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Email</label>
-                  <input type="email" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="jane@agency.com" />
+                  <input name="email" type="email" required className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="jane@agency.com" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Message</label>
-                <textarea rows={5} className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors resize-none" placeholder="How can we help you scale?"></textarea>
+                <textarea name="message" rows={5} required minLength={10} className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors resize-none" placeholder="How can we help you scale?"></textarea>
               </div>
-              <button type="submit" className="w-full bg-white text-black font-bold py-4.5 rounded-2xl hover:bg-zinc-200 transition-transform active:scale-95 flex items-center justify-center gap-2">
+              <button type="submit" className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-200 transition-transform active:scale-95 flex items-center justify-center gap-2">
                 <Mail className="w-5 h-5" /> Send Message
               </button>
+              <p id="contact-status"></p>
             </form>
           </div>
         </section>

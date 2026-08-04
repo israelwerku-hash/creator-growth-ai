@@ -21,43 +21,73 @@ export async function withIdempotency(
   }
 
   const cacheKey = `idempotency:${idempotencyKey}`;
+  const lockKey = `${cacheKey}:lock`;
 
   try {
-    // 1. Check Redis for an existing response
-    const cachedResponseStr = await redis.get<string>(cacheKey);
+    let acquired = false;
+    let attempts = 0;
 
-    if (cachedResponseStr) {
-      // Return the exact same cached JSON response
-      let cachedData;
-      try {
-        // Handle cases where redis.get automatically parses JSON or returns a string
-        cachedData = typeof cachedResponseStr === "string" ? JSON.parse(cachedResponseStr) : cachedResponseStr;
-        return NextResponse.json(cachedData, { status: 200, headers: { "X-Idempotency-Cache": "HIT" } });
-      } catch (e) {
-        console.warn("[Idempotency] Failed to parse cached response, proceeding with handler execution.");
+    // Concurrency / Race Condition Protection Loop
+    while (!acquired && attempts < 15) { // Try for up to 1.5 seconds (100ms * 15)
+      // 1. Check if a completed response is already cached
+      const cachedResponseStr = await redis.get<string>(cacheKey);
+      
+      if (cachedResponseStr) {
+        let cachedData;
+        try {
+          cachedData = typeof cachedResponseStr === "string" ? JSON.parse(cachedResponseStr) : cachedResponseStr;
+          return NextResponse.json(cachedData, { status: 200, headers: { "X-Idempotency-Cache": "HIT" } });
+        } catch (e) {
+          console.warn("[Idempotency] Failed to parse cached response.");
+        }
       }
+
+      // 2. Try to acquire an atomic lock to become the primary executor
+      // Set value to "locked" ONLY if it does not exist (nx), expire in 30s (ex)
+      const lockResult = await redis.set(lockKey, "locked", { nx: true, ex: 30 });
+      
+      if (lockResult === "OK") {
+        acquired = true;
+        break;
+      }
+
+      // 3. If we didn't get the lock and no response is cached yet, another thread is working on it.
+      // Wait 100ms and check the cache again.
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
     }
 
-    // 2. Execute the actual handler logic
-    const response = await handler(req);
+    if (!acquired) {
+      // If we timed out waiting for the lock, return a 409 Conflict instructing client to retry
+      return NextResponse.json({ error: "Concurrent request processing. Please try again." }, { status: 409 });
+    }
 
-    // 3. Only cache successful 2xx responses
+    // --- We have the lock, execute the actual handler logic ---
+    let response: NextResponse;
+    try {
+      response = await handler(req);
+    } catch (handlerError) {
+      // If the handler crashes, release the lock so it can be retried
+      await redis.del(lockKey);
+      throw handlerError;
+    }
+
+    // 4. Cache successful 2xx responses and release the lock
     if (response.status >= 200 && response.status < 300) {
-      // We must clone the response to read its JSON body without locking it for the client
       const responseClone = response.clone();
       try {
         const responseData = await responseClone.json();
-        
-        // Cache the successful response data for 24 hours (86400 seconds)
+        // Set the cache (expires in 24h)
         await redis.set(cacheKey, JSON.stringify(responseData), { ex: 86400 });
-        
-        // Return original response with a MISS header
-        response.headers.set("X-Idempotency-Cache", "MISS");
       } catch (parseError) {
         console.warn("[Idempotency] Handler did not return JSON, cannot cache.");
       }
     }
 
+    // Release the lock regardless of success or failure
+    await redis.del(lockKey);
+
+    response.headers.set("X-Idempotency-Cache", "MISS");
     return response;
 
   } catch (error) {

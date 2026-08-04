@@ -75,14 +75,42 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    const ALLOWED_ORIGIN = "http://localhost:3000";
+    const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const origin = request.headers.get("origin");
-    if (origin && origin !== ALLOWED_ORIGIN) {
+    const referer = request.headers.get("referer");
+    const method = request.method;
+    const isExtension = origin && origin.startsWith("chrome-extension://");
+
+    // Handle Preflight OPTIONS requests for CORS
+    if (method === "OPTIONS") {
+      const response = new NextResponse(null, { status: 200 });
+      response.headers.set("Access-Control-Allow-Origin", isExtension ? origin : ALLOWED_ORIGIN);
+      response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      return response;
+    }
+
+    // Strict CORS Origin Check
+    if (origin && !origin.startsWith(ALLOWED_ORIGIN) && !isExtension) {
       console.warn(`[SECURITY] Blocked cross-origin request from unauthorized origin: ${origin}`);
       return new NextResponse(
         JSON.stringify({ error: "Forbidden: Invalid Origin" }),
         { status: 403, headers: { "Content-Type": "application/json" } }
       );
+    }
+
+    // Anti-CSRF Check for Mutating Requests (POST, PUT, DELETE, PATCH)
+    if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
+      const source = origin || referer;
+      // Allow if it matches allowed origin OR is a Chrome Extension
+      const isValidSource = source && (source.startsWith(ALLOWED_ORIGIN) || source.startsWith("chrome-extension://"));
+      if (!isValidSource) {
+        console.warn(`[SECURITY] CSRF Blocked: Mutating request lacked valid origin/referer. Source: ${source}`);
+        return new NextResponse(
+          JSON.stringify({ error: "Forbidden: CSRF token missing or invalid source" }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        );
+      }
     }
   }
 
@@ -236,22 +264,28 @@ export async function middleware(request: NextRequest) {
     // ──────────────────────────────────────────────────────────
     // 6. CORS HEADERS INJECTION
     // ──────────────────────────────────────────────────────────
-    supabaseResponse.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+    const origin = request.headers.get("origin");
+    const isExtension = origin && origin.startsWith("chrome-extension://");
+    const safeOrigin = isExtension ? origin : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+    
+    supabaseResponse.headers.set("Access-Control-Allow-Origin", safeOrigin);
     supabaseResponse.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     supabaseResponse.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
     return supabaseResponse;
   } catch (err) {
     console.warn('[Proxy] Error:', (err as Error).message);
+    const safeOrigin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    
     // If it's already an auth route, let them see it instead of looping
     if (AUTH_ROUTES.includes(pathname) || PUBLIC_ROUTES.includes(pathname)) {
       const res = NextResponse.next({ request });
-      res.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+      res.headers.set("Access-Control-Allow-Origin", safeOrigin);
       return res;
     }
     // For any other error, let the request through rather than causing a redirect loop
     const res = NextResponse.next({ request });
-    res.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.headers.set("Access-Control-Allow-Origin", safeOrigin);
     return res;
   }
 }

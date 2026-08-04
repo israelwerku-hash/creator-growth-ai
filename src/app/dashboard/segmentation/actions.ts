@@ -4,9 +4,15 @@ import { revalidatePath } from "next/cache";
 import { executeFanSegmentationAI } from "@/services/aiSegmentation"; 
 import { consumeCredits } from "@/utils/credits";
 
+import { getSession } from "@/utils/supabase/server";
+
 export async function reanalyzeFanAction(fanId: string) {
   try {
-    const creditResult = await consumeCredits("AI_SEGMENTATION");
+    const session = await getSession().catch(() => null);
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Unauthorized");
+
+    const creditResult = await consumeCredits(userId, "SEGMENTATION");
     if (!creditResult.success) {
       return { success: false, error: creditResult.error || "Insufficient credits." };
     }

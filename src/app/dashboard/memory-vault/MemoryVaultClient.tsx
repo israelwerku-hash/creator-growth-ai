@@ -17,28 +17,27 @@ const memorySchema = z.object({
 });
 type MemoryFormValues = z.infer<typeof memorySchema>;
 
-const simulatorSchema = z.object({
-  simulatedMessage: z.string().min(1, "Message is required"),
-});
-type SimulatorFormValues = z.infer<typeof simulatorSchema>;
+import { getCreatorFansAction, addFanMemoryAction } from "@/app/dashboard/actions";
 
 export default function AIMemoryVaultPage() {
   const router = useRouter();
   
-  // 1. POPULATE MOCK FANS
-  const [fans] = useState([
-    { id: "mock_1", name: "Alex (Superfan)", totalSpend: 1450 },
-    { id: "mock_2", name: "Jessica (VIP)", totalSpend: 2300 },
-    { id: "mock_3", name: "David (New Subscriber)", totalSpend: 50 },
-  ]);
-  const [selectedFanId, setSelectedFanId] = useState<string>("mock_1");
+  // 1. POPULATE FANS
+  const [fans, setFans] = useState<any[]>([]);
+  const [selectedFanId, setSelectedFanId] = useState<string>("");
   
-  // 2. LOCAL MEMORY STORAGE
-  const [memories, setMemories] = useState<Record<string, Array<{id: string, text: string, type: string, priority: boolean, createdAt: number}>>>({});
+  React.useEffect(() => {
+    const fetchFans = async () => {
+      const res = await getCreatorFansAction();
+      if (res.success && res.fans && res.fans.length > 0) {
+        setFans(res.fans);
+        setSelectedFanId(res.fans[0].id);
+      }
+    };
+    fetchFans();
+  }, []);
   
-  const [isSimulating, setIsSimulating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
 
   // React Hook Form for Memory
   const {
@@ -54,34 +53,29 @@ export default function AIMemoryVaultPage() {
   });
   const isPriorityValue = watchMemory("isPriority");
 
-  // React Hook Form for Simulator
-  const {
-    register: registerSimulator,
-    handleSubmit: handleSimulatorSubmit,
-    formState: { errors: simulatorErrors },
-  } = useForm<SimulatorFormValues>({
-    resolver: zodResolver(simulatorSchema),
-    defaultValues: { simulatedMessage: "" },
-  });
-
   // AI Analysis Results State
   const [vaultResults, setVaultResults] = useState<Record<string, any>>({});
 
   const handleAddFact = async (data: MemoryFormValues) => {
     if (!selectedFanId) return;
 
-    const newMemory = {
-      id: Math.random().toString(),
+    const result = await addFanMemoryAction(selectedFanId, {
       text: data.newFact,
-      type: data.category,
-      priority: data.isPriority,
-      createdAt: Date.now()
-    };
+      category: data.category,
+      isPriority: data.isPriority
+    });
 
-    setMemories(prev => ({
-      ...prev,
-      [selectedFanId]: [newMemory, ...(prev[selectedFanId] || [])]
-    }));
+    if (result.success && result.memory) {
+      setFans(prevFans => prevFans.map(fan => {
+        if (fan.id === selectedFanId) {
+          return {
+            ...fan,
+            memories: [result.memory, ...(fan.memories || [])]
+          };
+        }
+        return fan;
+      }));
+    }
     
     resetMemory({ newFact: "", category: "Preference", isPriority: false });
   };
@@ -91,8 +85,9 @@ export default function AIMemoryVaultPage() {
     setIsAnalyzing(true);
     
     try {
-      const fanMemories = memories[selectedFanId] || [];
-      const memoryContext = fanMemories.map(m => `[${m.type}] ${m.text}`).join('\n');
+      const selectedFan = fans.find(f => f.id === selectedFanId);
+      const fanMemories = selectedFan?.memories || [];
+      const memoryContext = fanMemories.map((m: any) => `[${m.category}] ${m.keyFact}`).join('\n');
       
       const response = await fetch("/api/memory-vault", {
         method: "POST",
@@ -126,45 +121,7 @@ export default function AIMemoryVaultPage() {
     }
   };
 
-  const handleSimulateReplies = async (data: SimulatorFormValues) => {
-    if (!selectedFanId) return;
-    setIsSimulating(true);
-    
-    try {
-      const fanMemories = memories[selectedFanId] || [];
-      const memoryContext = fanMemories.map(m => `[${m.type}] ${m.text}`).join('\n');
-      
-      const response = await fetch("/api/generate-dm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          targetAccount: fans.find(f => f.id === selectedFanId)?.name || "Fan",
-          campaignGoal: "Reply to Fan Message",
-          tone: "Engaging and Context-Aware",
-          context: `Fan sent: "${data.simulatedMessage}".\n\nKnown Facts about this fan:\n${memoryContext || "None"}`,
-        }),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.error || "Simulation failed.");
-      }
-
-      setAiSuggestions([responseData.messageBody]);
-      
-      // Update global credit UI
-      router.refresh();
-
-    } catch (err: any) {
-      console.error(err);
-      setAiSuggestions([`Error: ${err.message}`]);
-    } finally {
-      setIsSimulating(false);
-    }
-  };
-
-  const currentMemories = memories[selectedFanId] || [];
+  const currentMemories = fans.find(f => f.id === selectedFanId)?.memories || [];
   const currentResult = vaultResults[selectedFanId];
 
   return (
@@ -327,62 +284,41 @@ export default function AIMemoryVaultPage() {
                 </div>
               ) : (
                 <div className="space-y-3 overflow-y-auto pr-2 max-h-[400px]">
-                  {currentMemories.map((mem) => (
-                    <div key={mem.id} className={`p-4 rounded-xl border ${mem.priority ? 'bg-amber-950/20 border-amber-500/30' : 'bg-[#140e1f] border-zinc-800/50'} relative group`}>
-                      {mem.priority && <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 rounded-l-xl" />}
+                  {currentMemories.map((mem: any) => (
+                    <div key={mem.id} className={`p-4 rounded-xl border ${mem.isPriority ? 'bg-amber-950/20 border-amber-500/30' : 'bg-[#140e1f] border-zinc-800/50'} relative group`}>
+                      {mem.isPriority && <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 rounded-l-xl" />}
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${mem.priority ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
-                          {mem.type}
+                        <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${mem.isPriority ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
+                          {mem.category}
                         </span>
                         <span className="text-[10px] text-zinc-600 font-mono">
                           {new Date(mem.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-sm text-zinc-200 leading-relaxed">{mem.text}</p>
+                      <p className="text-sm text-zinc-200 leading-relaxed">{mem.keyFact}</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="bg-surface-dark border border-neutral-800/60 transition-all duration-200 ease-out hover:border-burgundy-primary/50 hover:shadow-glow-subtle p-6 rounded-2xl relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-burgundy-primary/5 blur-[80px] pointer-events-none rounded-full" />
-              <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 relative z-10">
-                <Sparkles className="w-4 h-4 text-burgundy-primary" /> AI Response Simulator
-              </h3>
-              <form onSubmit={handleSimulatorSubmit(handleSimulateReplies)} className="space-y-4 relative z-10">
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <input 
-                      type="text"
-                      {...registerSimulator("simulatedMessage")}
-                      placeholder="Type a hypothetical message from this fan..."
-                      className="w-full bg-black/50 border border-zinc-800 focus:border-burgundy-primary/50 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 outline-none transition"
-                      disabled={!selectedFanId || isSimulating}
-                    />
-                    {simulatorErrors.simulatedMessage && <p className="text-red-400 text-xs mt-1 ml-1">{simulatorErrors.simulatedMessage.message}</p>}
-                  </div>
-                  <button 
-                    type="submit"
-                    disabled={!selectedFanId || isSimulating}
-                    className="px-6 h-[46px] bg-burgundy-primary hover:brightness-110 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-glow-burgundy"
-                  >
-                    {isSimulating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simulate"}
-                  </button>
-                </div>
-                
-                {aiSuggestions.length > 0 && (
-                  <div className="pt-4 border-t border-zinc-800/50 space-y-3">
-                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-2">Generated Context-Aware Replies:</p>
-                    {aiSuggestions.map((sug, idx) => (
-                      <div key={idx} className="bg-black/40 border border-burgundy-primary/20 p-4 rounded-xl text-sm text-zinc-300 whitespace-pre-wrap">
-                        {sug}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </form>
-            </div>
+            {/* CTA for Unified Ecosystem */}
+            {selectedFanId && currentMemories.length > 0 && (
+              <div className="bg-[#0b0714]/80 border border-burgundy-primary/40 p-8 rounded-2xl relative overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.15)] flex flex-col items-center text-center">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-burgundy-primary/10 blur-[60px] pointer-events-none" />
+                <h3 className="text-lg font-bold text-white mb-2 relative z-10">Ready to engage?</h3>
+                <p className="text-zinc-400 text-sm mb-6 max-w-md relative z-10">
+                  Leverage these active memory vectors to generate a hyper-personalized outreach message.
+                </p>
+                <Link 
+                  href={`/dashboard/dm-generation?fanId=${selectedFanId}`}
+                  className="relative z-10 px-8 py-3.5 bg-burgundy-primary hover:brightness-110 text-white font-bold text-sm uppercase tracking-wider rounded-xl transition-all shadow-glow-burgundy flex items-center gap-2 hover:scale-[1.02] active:scale-95"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generate DM for this Fan
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

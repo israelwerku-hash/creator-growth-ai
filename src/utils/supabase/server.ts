@@ -6,7 +6,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)!,
     {
       cookies: {
         getAll() {
@@ -36,7 +36,7 @@ export async function createClient() {
 
 // A helper for ensuring authorization similar to the old requireAuth in session.ts
 export async function requireAuth() {
-  if (process.env.TEST_MODE === 'true') {
+  if (process.env.TEST_MODE === 'true' && process.env.NODE_ENV !== 'production') {
     return { id: process.env.TEST_MODE_USER_ID || '00000000-0000-0000-0000-000000000000', email: 'test@example.com' };
   }
 

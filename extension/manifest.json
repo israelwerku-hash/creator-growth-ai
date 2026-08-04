@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Creator Growth AI - Auto Sync",
+  "version": "1.0.0",
+  "description": "Automatically scrapes fan data from active chat windows and securely syncs to the AI dashboard.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*.onlyfans.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.onlyfans.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

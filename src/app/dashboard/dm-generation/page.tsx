@@ -16,9 +16,19 @@ import {
   Activity
 } from "lucide-react";
 
-import { getUserTierAction } from "@/app/dashboard/actions";
+import { getCreatorFansAction, getUserTierAction } from "@/app/dashboard/actions";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function DmGenerationPage() {
+export default function DmGenerationPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-[60vh]"><Loader2 className="w-8 h-8 text-burgundy-primary animate-spin" /></div>}>
+      <DmGenerationPage />
+    </Suspense>
+  );
+}
+
+function DmGenerationPage() {
   const router = useRouter();
   const [userTier, setUserTier] = useState<string>("FREE");
   const [isChecking, setIsChecking] = useState(true);
@@ -28,10 +38,22 @@ export default function DmGenerationPage() {
   const isLocked = featureRequiresPro && userTier === "FREE";
 
   // Form state
+  const searchParams = useSearchParams();
+  const urlFanId = searchParams.get("fanId") || "";
+  const [targetFanId, setTargetFanId] = useState<string>(urlFanId);
+  const [fans, setFans] = useState<any[]>([]);
+  
   const [targetAccount, setTargetAccount] = useState("OnlyFans");
   const [campaignGoal, setCampaignGoal] = useState("Fan Welcome / New Subscriber Greeting");
   const [tone, setTone] = useState("Flirty & Playful");
   const [context, setContext] = useState("");
+
+  // Sync URL fanId to state if it changes
+  useEffect(() => {
+    if (urlFanId && urlFanId !== targetFanId) {
+      setTargetFanId(urlFanId);
+    }
+  }, [urlFanId, targetFanId]);
 
   // Output state
   const [isGenerating, setIsGenerating] = useState(false);
@@ -48,8 +70,21 @@ export default function DmGenerationPage() {
       }
       setIsChecking(false);
     };
+    const fetchFans = async () => {
+      const res = await getCreatorFansAction();
+      if (res.success && res.fans) {
+        setFans(res.fans);
+        // If the URL has a fanId that doesn't exist in the fetched fans, 
+        // we should either clear it or keep it (it will fallback to General Broadcast visually).
+        // Since we want it to match, let's reset it to "" if it's not found in real fans to be safe.
+        if (urlFanId && !res.fans.some((f: any) => f.id === urlFanId)) {
+          setTargetFanId("");
+        }
+      }
+    };
     fetchTier();
-  }, []);
+    fetchFans();
+  }, [urlFanId]);
 
   const handleGenerate = async () => {
     if (isLocked) return;
@@ -68,6 +103,7 @@ export default function DmGenerationPage() {
           campaignGoal,
           tone,
           context,
+          fanId: targetFanId || undefined,
         }),
       });
 
@@ -128,6 +164,32 @@ export default function DmGenerationPage() {
           </h2>
 
           <div className="space-y-5">
+            {/* Target Audience */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-300 ml-1">
+                Target Audience
+              </label>
+              <div className="relative">
+                <select
+                  value={targetFanId}
+                  onChange={(e) => setTargetFanId(e.target.value)}
+                  disabled={isLocked || fans.length === 0}
+                  className="w-full bg-white/5 border border-burgundy-dark/40 rounded-xl py-3 px-4 pr-10 text-sm text-white appearance-none focus:outline-none focus:ring-2 focus:ring-burgundy-primary/50 focus:border-burgundy-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <option className="bg-[#0A0A0A] text-zinc-500" value="">General Broadcast (No Specific Fan)</option>
+                  {fans.map(f => (
+                    <option key={f.id} className="bg-[#0A0A0A] text-white" value={f.id}>{f.name || f.username || 'Anonymous Fan'}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+              </div>
+              {targetFanId && fans.some(f => f.id === targetFanId) && (
+                <div className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-burgundy-primary/10 border border-burgundy-primary/30 rounded-lg w-fit">
+                  <Activity className="w-3.5 h-3.5 text-burgundy-primary" />
+                  <span className="text-[10px] font-bold text-burgundy-primary uppercase tracking-wider">Active Memory Vectors Linked</span>
+                </div>
+              )}
+            </div>
             {/* Target Account / Industry */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-zinc-300 ml-1">

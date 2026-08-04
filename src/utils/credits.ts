@@ -1,34 +1,22 @@
-import { requireAuth } from "@/utils/supabase/server";
 import { db } from "@/lib/db";
-
-export const CREDIT_MATRIX = {
-  "AI_DM_GENERATION": { cost: 30, label: "AI DM Generation (Premium Copy Engine)" },
-  "AI_SEGMENTATION": { cost: 25, label: "AI Segmentation Feature" },
-  "DATA_METRIC_LOGGER": { cost: 5, label: "Data Metric Logger" },
-  "MEMORY_VAULT": { cost: 20, label: "Memory Vault" },
-  "LANGUAGE_TRANSLATOR": { cost: 15, label: "Language Translator Hub" },
-} as const;
-
-export type CreditOperation = keyof typeof CREDIT_MATRIX;
+import { CREDIT_COSTS, CreditOperation } from "@/lib/constants/credits";
 
 /**
- * A bulletproof Credit Gatekeeper validation utility for Next.js Server Actions.
- * Validates the session using Supabase SSR, checks the Prisma 'creator' table for
+ * A bulletproof Credit Gatekeeper validation utility for Next.js Server Actions and API Routes.
+ * Validates the session using the provided userId, checks the Prisma 'creator' table for
  * sufficient allocation, and atomically decrements the correct amount.
  */
-export async function consumeCredits(operation: CreditOperation) {
+export async function consumeCredits(userId: string, operation: CreditOperation) {
   try {
-    // 1. Authenticate user via our new Supabase SSR utility
-    const user = await requireAuth();
-    if (!user || !user.id) {
+    if (!userId) {
       return { success: false, error: "Unauthorized session" };
     }
 
-    const { cost } = CREDIT_MATRIX[operation];
+    const cost = CREDIT_COSTS[operation];
 
-    // 2. Fetch current balance to check if they have enough (fast read)
+    // 1. Fetch current balance to check if they have enough (fast read)
     const creator = await db.creator.findUnique({
-      where: { id: user.id },
+      where: { id: userId },
       select: { aiCredits: true },
     });
 
@@ -37,19 +25,34 @@ export async function consumeCredits(operation: CreditOperation) {
     }
 
     if (creator.aiCredits <= 0 || creator.aiCredits < cost) {
-      return { success: false, error: "Insufficient credits", requiresUpgrade: true };
+      return { success: false, error: `Insufficient credits. Required: ${cost} credits.`, requiresUpgrade: true };
     }
 
-    // 3. Atomically decrement credits
+    // 2. Atomically decrement credits
     const updatedCreator = await db.creator.update({
       where: { 
-        id: user.id,
+        id: userId,
         aiCredits: { gte: cost } 
       },
       data: { 
         aiCredits: { decrement: cost } 
       },
     });
+
+    // 3. Log the usage to the AuditLog table
+    await db.auditLog.create({
+      data: {
+        actor: userId,
+        action: `CREDIT_CONSUMPTION_${operation}`,
+        metadata: {
+          cost: cost,
+          operation: operation,
+          remaining: updatedCreator.aiCredits
+        }
+      }
+    });
+
+    console.log(`[CREDITS] Deducted ${cost} credits for ${operation}. Remaining: ${updatedCreator.aiCredits}`);
 
     return { 
       success: true, 

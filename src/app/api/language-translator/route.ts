@@ -5,6 +5,8 @@ import { aiRateLimiter, getRequestIdentifier } from "@/lib/ratelimit";
 import { withIdempotency } from "@/lib/idempotency";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
+import { getAuthenticatedUser } from "@/lib/extension-auth";
+import { getSession } from "@/utils/supabase/server";
 
 // --- Validation Schema ---
 const LanguageTranslatorSchema = z.object({
@@ -44,15 +46,23 @@ async function coreHandler(req: Request) {
       );
     }
 
-    // --- 2. RBAC Authorization Check ---
-    const { requireAuth } = await import("@/utils/supabase/server");
+    // --- Dual-Auth: Web Session -> Extension API Key Fallback ---
     const { db } = await import("@/lib/db");
+    let activeUser = null;
     
-    let activeUser;
-    try {
-      activeUser = await requireAuth();
-    } catch (e) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 1. Try Web Session
+    const session = await getSession().catch(() => null);
+    if (session?.user?.id) {
+      activeUser = await db.creator.findUnique({ where: { id: session.user.id } });
+    }
+
+    // 2. Try Extension API Key
+    if (!activeUser) {
+      activeUser = await getAuthenticatedUser(req as any);
+    }
+
+    if (!activeUser) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid Session / API Key" }, { status: 401 });
     }
 
     const creatorRecord = await db.creator.findUnique({
@@ -82,7 +92,7 @@ async function coreHandler(req: Request) {
     // Attempt to consume credits
     let creditResult;
     try {
-      creditResult = await consumeCredits("LANGUAGE_TRANSLATOR");
+      creditResult = await consumeCredits(activeUser.id, "TRANSLATOR");
     } catch (creditError: any) {
       return NextResponse.json({ error: `Credit system error: ${creditError.message}` }, { status: 500 });
     }

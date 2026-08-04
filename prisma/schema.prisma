@@ -1,23 +1,25 @@
 generator client {
-  provider = "prisma-client-js"
-}
+  provider        = "prisma-client-js"
+  }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // Used for the Next.js app runtime
   directUrl = env("DIRECT_URL") // Used to bypass the pooler during db push
-}
+  }
 
 enum UserRole {
   CREATOR
   MANAGER
   ADMIN
-}
+
+  }
 
 enum AccountStatus {
   ACTIVE
   SUSPENDED
-}
+
+  }
 
 model Creator {
   id                       String        @id
@@ -30,6 +32,7 @@ model Creator {
   has_completed_onboarding Boolean       @default(false)
   has_completed_pricing    Boolean       @default(false)
   paddleSubscriptionId     String?
+  apiKey                   String?       @unique @default(uuid())
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
 
@@ -38,7 +41,8 @@ model Creator {
   goals         Goal[]
   fans          Fan[]
   revenueEvents RevenueEvent[]
-}
+
+  }
 
 model Metric {
   id        String   @id @default(uuid())
@@ -52,7 +56,7 @@ model Metric {
   creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([creatorId])
-}
+  }
 
 model Goal {
   id        String   @id @default(uuid())
@@ -66,7 +70,7 @@ model Goal {
   creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([creatorId])
-}
+  }
 
 model Fan {
   id                  String         @id @default(uuid())
@@ -104,7 +108,7 @@ model Fan {
 
   @@index([creatorId])
   @@index([email])
-}
+  }
 
 model Message {
   id        String   @id @default(uuid())
@@ -114,7 +118,7 @@ model Message {
   fan       Fan      @relation(fields: [fanId], references: [id], onDelete: Cascade)
 
   @@index([fanId])
-}
+  }
 
 model FanMemory {
   id         String   @id @default(uuid())
@@ -127,7 +131,7 @@ model FanMemory {
   fan        Fan      @relation(fields: [fanId], references: [id], onDelete: Cascade)
 
   @@index([fanId])
-}
+  }
 
 model RevenueEvent {
   id        String   @id @default(uuid())
@@ -141,21 +145,23 @@ model RevenueEvent {
 
   @@index([fanId])
   @@index([creatorId])
-}
+  }
 
 model FeatureFlag {
   id        String   @id
   name      String
   isEnabled Boolean  @default(false)
   updatedAt DateTime @updatedAt
-}
+
+  }
 
 enum WebhookStatus {
   PENDING
   PROCESSING
   PROCESSED
   FAILED
-}
+
+  }
 
 model WebhookEvent {
   id           String        @id @default(uuid())
@@ -165,7 +171,8 @@ model WebhookEvent {
   errorMessage String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-}
+
+  }
 
 model AuditLog {
   id        String   @id @default(uuid())
@@ -173,4 +180,5 @@ model AuditLog {
   actor     String
   action    String
   metadata  Json
-}
+
+  }

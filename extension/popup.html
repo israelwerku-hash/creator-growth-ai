@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Creator Growth AI</title>
+  <style>
+    body {
+      background-color: #0A0A0A;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      width: 320px;
+      padding: 24px;
+      margin: 0;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #F4F4F5;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    .input-group {
+      margin-bottom: 16px;
+    }
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #A1A1AA;
+      display: block;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(159, 18, 57, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      color: #FFFFFF;
+      font-size: 13px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: #be123c;
+      box-shadow: 0 0 0 2px rgba(159, 18, 57, 0.2);
+    }
+    input::placeholder {
+      color: #52525B;
+    }
+    button {
+      width: 100%;
+      background-color: #9f1239;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    button:hover {
+      background-color: #be123c;
+      transform: translateY(-1px);
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+    #status {
+      margin-top: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #10B981;
+      text-align: center;
+      display: none;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .footer {
+      margin-top: 24px;
+    .memory-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    select {
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(159, 18, 57, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      color: #FFFFFF;
+      font-size: 13px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      appearance: none;
+    }
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 10px;
+      color: #52525B;
+    }
+  </style>
+</head>
+<body>
+  <h2>Creator Growth AI</h2>
+  
+  <div class="input-group">
+    <label for="apiKey">Extension API Key</label>
+    <input type="password" id="apiKey" placeholder="sk_test_..." />
+  </div>
+
+  <button id="saveBtn">Save Configuration</button>
+  <div id="status">API Key saved successfully!</div>
+
+  <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;" />
+
+  <div class="input-group">
+    <label for="fanSelect">Target Fan ID / Username</label>
+    <select id="fanSelect">
+      <option value="">Loading fans...</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label>Memory Vault</label>
+    <div id="memoryList" style="max-height: 150px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px;">
+      <div style="color: #52525B; font-size: 11px; text-align: center;">No fan selected</div>
+    </div>
+    
+    <input type="text" id="newMemoryText" placeholder="Log new context..." style="margin-bottom: 8px;" />
+    <button id="saveMemoryBtn">Save to Vault</button>
+  </div>
+
+  <div class="footer">
+    Auto-sync is running in the background.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

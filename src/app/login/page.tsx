@@ -60,34 +60,54 @@ export default function LoginPage() {
     setSuccess(null);
 
     if (isSignUp) {
-      // ── SIGN UP PATH ──
-      console.log("[Auth] Attempting signUp...");
-      const { data: authData, error: authError } = await supabase.auth.signUp({ 
-        email: data.email, 
-        password: data.password 
-      });
-      console.log("[Auth] signUp response:", { userId: authData?.user?.id, error: authError?.message });
-      
-      if (authError) {
-        if (authError.message.toLowerCase().includes("already registered")) {
-          console.warn("[Auth] signUp notice:", authError.message);
-          setError("This email is already registered. Please sign in instead.");
-          setIsSignUp(false); // Auto-switch to login mode
-        } else {
-          console.warn("[Auth] signUp error:", authError.message);
-          setError(authError.message || "Sign up failed. Please try again.");
+      // ── SIGN UP PATH (via server route for auto-confirm) ──
+      console.log("[Auth] Attempting signUp via API route...");
+      try {
+        const signupRes = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email, password: data.password }),
+        });
+
+        const signupResult = await signupRes.json();
+        console.log("[Auth] signUp API response:", { status: signupRes.status, ok: signupResult.ok, error: signupResult.error });
+
+        if (!signupRes.ok || signupResult.error) {
+          const errMsg = typeof signupResult.error === 'string'
+            ? signupResult.error
+            : "Sign up failed. Please try again.";
+
+          if (errMsg.toLowerCase().includes("already registered") || signupRes.status === 409) {
+            setError("This email is already registered. Please sign in instead.");
+            setIsSignUp(false);
+          } else {
+            setError(errMsg);
+          }
+          return;
         }
-        return;
-      }
-      
-      // If email confirmation is off, data.session might exist, meaning they are logged in.
-      if (authData?.session) {
-        console.log("[Auth] Session obtained during signup. Calling router.refresh() then router.push('/dashboard')");
+
+        // Account created and auto-confirmed. Now sign them in immediately.
+        console.log("[Auth] Account created. Signing in...");
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (signInError) {
+          console.error("[Auth] Post-signup signIn error:", signInError.message);
+          setError("Account created but auto-login failed. Please sign in manually.");
+          setIsSignUp(false);
+          return;
+        }
+
+        console.log("[Auth] Post-signup session obtained. Routing to onboarding...");
         router.refresh();
-        router.push("/dashboard"); // Middleware will redirect to onboarding if needed
+        router.push("/onboarding");
         return;
-      } else {
-        setSuccess("Account created successfully! Check your email to verify.");
+      } catch (fetchErr: any) {
+        console.error("[Auth] signUp fetch error:", fetchErr);
+        setError(fetchErr.message || "Network error during sign up. Please check your connection.");
+        return;
       }
 
     } else {

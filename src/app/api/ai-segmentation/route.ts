@@ -7,7 +7,8 @@ import { withIdempotency } from "@/lib/idempotency";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import DOMPurify from 'isomorphic-dompurify';
-
+import { getAuthenticatedUser } from "@/lib/extension-auth";
+import { getSession } from "@/utils/supabase/server";
 // --- Validation Schema ---
 const AiSegmentationSchema = z.object({
   segments: z.array(z.enum([
@@ -53,14 +54,22 @@ async function coreHandler(req: Request) {
     }
 
     // --- 2. RBAC Authorization Check ---
-    const { requireAuth } = await import("@/utils/supabase/server");
-    const { db } = await import("@/lib/db");
+    // --- Dual-Auth: Web Session -> Extension API Key Fallback ---
+    let activeUser = null;
     
-    let activeUser;
-    try {
-      activeUser = await requireAuth();
-    } catch (e) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 1. Try Web Session
+    const session = await getSession().catch(() => null);
+    if (session?.user?.id) {
+      activeUser = await db.creator.findUnique({ where: { id: session.user.id } });
+    }
+
+    // 2. Try Extension API Key
+    if (!activeUser) {
+      activeUser = await getAuthenticatedUser(req as any);
+    }
+
+    if (!activeUser) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid Session / API Key" }, { status: 401 });
     }
 
     const creatorRecord = await db.creator.findUnique({
@@ -100,7 +109,7 @@ async function coreHandler(req: Request) {
     // Attempt to consume credits
     let creditResult;
     try {
-      creditResult = await consumeCredits("AI_SEGMENTATION");
+      creditResult = await consumeCredits(activeUser.id, "SEGMENTATION");
     } catch (creditError: any) {
       return NextResponse.json({ error: `Credit system error: ${creditError.message}` }, { status: 500 });
     }
@@ -197,8 +206,8 @@ Return ONLY valid JSON.`;
       // Update Fan Profile with the primary segment and scores
       const primarySegment = validatedData.segments[0] || "lurker";
       
-      await db.fan.update({
-        where: { id: fanId },
+      await db.fan.updateMany({
+        where: { id: fanId, creatorId: activeUser.id },
         data: {
           segment: primarySegment,
           engagementScore: validatedData.engagementScore,

@@ -1,12 +1,14 @@
 :root {
-  --bg-dark: #050505;
-  --panel-bg: rgba(0, 0, 0, 0.4);
-  --border-subtle: rgba(255, 255, 255, 0.1);
+  --bg-dark: #09090b;
+  --panel-bg: rgba(9, 9, 11, 0.85);
+  --border-subtle: rgba(136, 19, 55, 0.2);
+  --border-muted: rgba(255, 255, 255, 0.06);
   --text-primary: #ffffff;
   --text-muted: #a1a1aa;
-  --purple-accent: #a855f7;
+  --burgundy-primary: #800020;
+  --burgundy-accent: #9f1239;
+  --burgundy-glow: rgba(128, 0, 32, 0.15);
   --emerald-accent: #34d399;
-  --blue-accent: #3b82f6;
   --blur: blur(24px);
 }
 
@@ -37,13 +39,13 @@ body {
 }
 
 .purple-glow {
-  background: rgba(168, 85, 247, 0.15);
+  background: var(--burgundy-glow);
   top: -100px;
   left: -100px;
 }
 
 .blue-glow {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(128, 0, 32, 0.08);
   bottom: -50px;
   right: -100px;
 }
@@ -92,10 +94,11 @@ body {
 .tabs {
   display: flex;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 0, 32, 0.06);
   padding: 6px;
   border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid var(--border-muted);
 }
 
 .tab {
@@ -116,9 +119,10 @@ body {
 }
 
 .tab.active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(128, 0, 32, 0.2);
   color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(128, 0, 32, 0.15);
+  border: 1px solid rgba(128, 0, 32, 0.3);
 }
 
 /* Cards */
@@ -149,9 +153,9 @@ body {
   stroke: var(--text-muted);
 }
 
-.text-purple { stroke: var(--purple-accent); }
+.text-purple { stroke: var(--burgundy-accent); }
 .text-emerald { stroke: var(--emerald-accent); }
-.neon-text { color: var(--purple-accent); text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+.neon-text { color: var(--burgundy-accent); text-shadow: 0 0 10px rgba(159, 18, 57, 0.4); }
 
 .tab-pane {
   display: none;
@@ -180,20 +184,20 @@ body {
 
 .input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 0, 32, 0.06);
   border: 1px solid var(--border-subtle);
   color: #fff;
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 13px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
 }
 
 .input:focus {
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+  border-color: rgba(159, 18, 57, 0.5);
+  box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.2);
 }
 
 select.input {
@@ -216,13 +220,15 @@ select.input {
 }
 
 .primary-btn {
-  background: #fff;
-  color: #000;
+  background: var(--burgundy-primary);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(128, 0, 32, 0.3);
 }
 
 .primary-btn:hover {
-  background: #e4e4e7;
+  background: var(--burgundy-accent);
   transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(128, 0, 32, 0.4);
 }
 
 .primary-btn:active { transform: scale(0.98); }
@@ -234,18 +240,19 @@ select.input {
 }
 
 .secondary-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(128, 0, 32, 0.1);
   color: #fff;
   border: 1px solid var(--border-subtle);
 }
 
 .secondary-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(128, 0, 32, 0.2);
 }
 
 .small-btn { padding: 8px 12px; font-size: 12px; }
 .w-full { width: 100%; }
 .mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
 
 /* Empty States & Specifics */
 .empty-state {
@@ -256,7 +263,7 @@ select.input {
   padding: 30px 10px;
   border: 1px dashed var(--border-subtle);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(128, 0, 32, 0.03);
   margin-top: 16px;
 }
 
@@ -268,7 +275,7 @@ select.input {
   font-size: 13px;
   font-weight: 600;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 0, 32, 0.06);
   border-radius: 8px;
   margin-bottom: 16px;
 }
@@ -283,7 +290,7 @@ select.input {
 .output-container.hidden { display: none; }
 
 .output-text {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(128, 0, 32, 0.04);
   padding: 12px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
@@ -298,7 +305,7 @@ select.input {
 /* Stats */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .stat-box {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 0, 32, 0.06);
   padding: 16px;
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
@@ -308,3 +315,18 @@ select.input {
 
 .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
 .stat-value { font-size: 18px; font-weight: 800; }
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.shake-animation {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}

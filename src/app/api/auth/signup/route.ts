@@ -5,10 +5,12 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { isDisposableEmail } from "@/lib/security/validate-email";
 
-// Initialize Supabase admin safely using your environment keys
+// Use Service Role Key for admin operations (auto-confirm, bypass email verification)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 const signUpSchema = z.object({
   email: z.string().email(),
@@ -18,7 +20,16 @@ const signUpSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body format." },
+        { status: 400 }
+      );
+    }
+
     const parsed = signUpSchema.safeParse(body);
     
     if (!parsed.success) {
@@ -38,44 +49,71 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Securely register the user inside the primary Supabase Auth backend
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // 1. Use admin.createUser to auto-confirm the user (no email verification needed in dev)
+    let userId: string;
+
+    const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: sanitizedEmail,
       password: password,
+      email_confirm: true,
+      user_metadata: { name: name || null },
     });
 
-    if (authError) {
-      // If user already exists in Supabase Auth, they might just be re-authenticating
-      // or trying to sign up again. We handle the local DB sync below anyway.
-      if (authError.message !== "User already registered") {
+    if (createError) {
+      // If user already exists, try to look them up
+      if (createError.message.includes("already been registered") || createError.message.includes("already exists")) {
+        // Look up existing user by email
+        const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+        const existingUser = listData?.users?.find(
+          (u: any) => u.email?.toLowerCase() === sanitizedEmail
+        );
+        if (existingUser) {
+          userId = existingUser.id;
+        } else {
+          return NextResponse.json(
+            { error: "This email is already registered. Please sign in instead." },
+            { status: 409 }
+          );
+        }
+      } else {
+        console.error("Supabase admin.createUser error:", createError.message);
         return NextResponse.json(
-          { error: authError.message },
+          { error: createError.message },
           { status: 400 }
         );
       }
+    } else {
+      userId = createData.user.id;
     }
 
-    // 2. Persist ONLY valid columns to your Prisma Creator table (No password field!)
-    // Using upsert instead of create to prevent duplicate row insertion on re-login
-    const userId = authData?.user?.id || crypto.randomUUID();
-    await prisma.creator.upsert({
-      where: { email: sanitizedEmail },
-      update: {
-        id: userId, // Ensure ID stays synced if it changed
-        name: name ?? null,
-      },
-      create: {
-        id: userId,
-        email: sanitizedEmail,
-        name: name ?? null,
-      },
-    });
+    // 2. Persist to Prisma Creator table with credit seeding
+    try {
+      await prisma.creator.upsert({
+        where: { email: sanitizedEmail },
+        update: {
+          id: userId,
+          name: name ?? null,
+        },
+        create: {
+          id: userId,
+          email: sanitizedEmail,
+          name: name ?? null,
+          aiCredits: 100,
+        },
+      });
+    } catch (dbError: any) {
+      console.error("DB seeding failure during signup:", dbError);
+      return NextResponse.json(
+        { error: "Account was created but profile setup failed. Please try signing in." },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("Synchronized signup failure:", e);
+    return NextResponse.json({ ok: true, userId }, { status: 200 });
+  } catch (e: any) {
+    console.error("Unexpected signup failure:", e);
     return NextResponse.json(
-      { error: "Something went wrong during account creation." },
+      { error: e.message || "Something went wrong during account creation." },
       { status: 500 }
     );
   }

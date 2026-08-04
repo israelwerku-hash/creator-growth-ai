@@ -106,3 +106,47 @@ export async function activateAgencyPlanAction() {
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function getCreatorFansAction() {
+  try {
+    const user = await requireAuth();
+    const fans = await db.fan.findMany({
+      where: { creatorId: user.id },
+      include: { memories: { orderBy: { createdAt: 'desc' } } },
+      orderBy: { lastActivityDate: 'desc' }
+    });
+    return { success: true, fans };
+  } catch (error) {
+    console.error("Failed to fetch creator fans:", error);
+    return { success: false, error: "Internal Server Error", fans: [] };
+  }
+}
+
+export async function addFanMemoryAction(fanId: string, memory: { text: string; category: string; isPriority: boolean }) {
+  try {
+    const user = await requireAuth();
+
+    // Verify ownership
+    const fan = await db.fan.findFirst({
+      where: { id: fanId, creatorId: user.id }
+    });
+
+    if (!fan) {
+      return { success: false, error: "Fan not found or unauthorized" };
+    }
+
+    const newMemory = await db.fanMemory.create({
+      data: {
+        fanId,
+        keyFact: memory.text,
+        category: memory.category,
+        isPriority: memory.isPriority,
+      }
+    });
+
+    return { success: true, memory: newMemory };
+  } catch (error) {
+    console.error("Failed to add fan memory:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}

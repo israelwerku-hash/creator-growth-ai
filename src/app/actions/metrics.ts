@@ -31,7 +31,7 @@ export async function saveMetricAction(formData: FormData) {
 
     // 🛡️ 3. CREDIT GATEKEEPER CHECK
     const { consumeCredits } = await import("@/utils/credits");
-    const creditCheck = await consumeCredits("DATA_METRIC_LOGGER");
+    const creditCheck = await consumeCredits(userId, "DATA_METRIC_LOGGER");
     
     if (!creditCheck.success) {
       // ⚠️ Return clean error object to trigger client-side paywall UI

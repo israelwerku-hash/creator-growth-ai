@@ -60,7 +60,11 @@ export async function generateAISuggestionsAction(fanId: string, fanMessage: str
   try {
     if (!fanId || !fanMessage) throw new Error("Missing context fields for generation.");
 
-    const creditResult = await consumeCredits("MEMORY_VAULT");
+    const session = await getSession().catch(() => null);
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Unauthorized");
+
+    const creditResult = await consumeCredits(userId, "MEMORY_VAULT");
     if (!creditResult.success) {
       throw new Error(creditResult.error || "Insufficient credits.");
     }

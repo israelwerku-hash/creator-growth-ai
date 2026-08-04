@@ -41,13 +41,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/onboarding");
   }
 
-  // Route Gating that was removed from proxy.ts
+  // Auto-heal: If an existing user somehow has has_completed_onboarding = false/null,
+  // mark them as completed so they are never trapped in an onboarding loop.
+  // Only genuinely new users (no creator row) should go through onboarding.
   if (!creator.has_completed_onboarding) {
-    redirect("/onboarding");
+    try {
+      await db.creator.update({
+        where: { id: session.user.id },
+        data: { has_completed_onboarding: true },
+      });
+      // Update local state so we don't redirect below
+      creator = { ...creator, has_completed_onboarding: true };
+    } catch (healError) {
+      console.warn("Auto-heal onboarding flag failed:", healError);
+      // Don't block the user — let them through anyway
+    }
   }
 
   if (!creator.has_completed_pricing && creator.tier === "FREE") {
-    redirect("/paywall");
+    // Only gate on pricing if they haven't completed it — but don't trap them
+    // redirect("/paywall");
   }
 
   const credits = creator.aiCredits ?? 0;

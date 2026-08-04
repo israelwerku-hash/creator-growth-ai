@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
 import Groq from "groq-sdk";
 import { consumeCredits } from "@/utils/credits";
 import { revalidatePath } from "next/cache";
@@ -6,6 +7,9 @@ import { aiRateLimiter, getRequestIdentifier } from "@/lib/ratelimit";
 import { withIdempotency } from "@/lib/idempotency";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
+import DOMPurify from 'isomorphic-dompurify';
+import { getAuthenticatedUser } from "@/lib/extension-auth";
+import { getSession } from "@/utils/supabase/server";
 
 // --- Validation Schema ---
 const DmGenerationSchema = z.object({
@@ -46,26 +50,43 @@ async function coreHandler(req: Request) {
       );
     }
 
-    // --- RBAC Authorization Check ---
-    const { requireAuth } = await import("@/utils/supabase/server");
-    const { db } = await import("@/lib/db");
+    // --- Dual-Auth: Web Session -> Extension API Key Fallback ---
+    let activeUser = null;
     
-    let activeUser;
-    try {
-      activeUser = await requireAuth();
-    } catch (e) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 1. Try Web Session
+    const session = await getSession().catch(() => null);
+    if (session?.user?.id) {
+      activeUser = await db.creator.findUnique({ where: { id: session.user.id } });
     }
 
-    const creatorRecord = await db.creator.findUnique({
-      where: { id: activeUser.id },
-      select: { role: true }
-    });
+    // 2. Try Extension API Key
+    if (!activeUser) {
+      activeUser = await getAuthenticatedUser(req as any);
+    }
 
-    if (!creatorRecord) {
-      const error = new Error(`RBAC Alert: Unregistered user ${activeUser.id} attempted DM generation.`);
-      Sentry.captureException(error);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!activeUser) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid Session / API Key" }, { status: 401 });
+    }
+
+    if (process.env.NODE_ENV !== "development" || activeUser.id !== "mock_developer_id") {
+      try {
+        const creatorRecord = await db.creator.findUnique({
+          where: { id: activeUser.id },
+          select: { role: true }
+        });
+
+        if (!creatorRecord) {
+          Sentry.captureException(new Error(`RBAC Alert: Unregistered user ${activeUser.id} attempted DM generation.`));
+          return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
+      } catch (dbErr: any) {
+        console.error("[DM_GEN_RBAC_ERROR]", dbErr.message);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[DM_GEN] Creator lookup failed, bypassing in development.");
+        } else {
+          throw dbErr;
+        }
+      }
     }
 
     const apiKey = process.env.GROQ_API_KEY;
@@ -91,7 +112,8 @@ async function coreHandler(req: Request) {
       );
     }
 
-    const { targetAccount, campaignGoal, tone, context } = body;
+    const { targetAccount, campaignGoal, tone, context, fanId: rawFanId } = body;
+    const fanId = rawFanId ? rawFanId.trim().toLowerCase() : null;
 
     if (!targetAccount || !campaignGoal || !tone) {
       console.error("[DM_GENERATION_ERROR] Missing required fields:", { targetAccount, campaignGoal, tone });
@@ -101,10 +123,18 @@ async function coreHandler(req: Request) {
       );
     }
 
-    // Attempt to consume credits
-    let creditResult;
+    // Attempt to consume credits — STRICT enforcement, no defaults
+    let creditResult: { success: boolean; remainingCredits?: number; error?: string; requiresUpgrade?: boolean } | null = null;
     try {
-      creditResult = await consumeCredits("AI_DM_GENERATION");
+      // Consume credits passing the authenticated userId
+      creditResult = await consumeCredits(activeUser.id, "DM_GENERATION");
+      if (!creditResult || !creditResult.success) {
+        console.error("[DM_GENERATION_ERROR] Credit check failed:", creditResult?.error);
+        return NextResponse.json(
+          { error: creditResult?.error || "Insufficient credits.", requiresUpgrade: creditResult?.requiresUpgrade },
+          { status: 402 }
+        );
+      }
     } catch (creditError: any) {
       console.error("[DM_GENERATION_ERROR] Credit system threw an exception:", creditError.message, creditError.stack);
       return NextResponse.json(
@@ -112,19 +142,37 @@ async function coreHandler(req: Request) {
         { status: 500 }
       );
     }
-    
-    if (!creditResult.success) {
-      console.error("[DM_GENERATION_ERROR] Credit check failed:", creditResult.error);
-      return NextResponse.json(
-        { error: creditResult.error || "Insufficient credits.", requiresUpgrade: creditResult.requiresUpgrade },
-        { status: 402 }
-      );
-    }
 
-    try {
-      revalidatePath("/", "layout");
-    } catch {
-      // revalidatePath can throw in certain API route contexts — safe to ignore
+    // --- Fetch Fan Memories from Vault (identical query to GET /api/memory-vault) ---
+    let fanMemoriesSection = "";
+    if (fanId) {
+      try {
+        const fan = await db.fan.findFirst({
+          where: { 
+            OR: [{ id: fanId }, { username: fanId }],
+            creatorId: activeUser.id
+          }
+        });
+
+        const resolvedFanId = fan ? fan.id : fanId;
+
+        const memories = await db.fanMemory.findMany({
+          where: { fanId: resolvedFanId },
+          orderBy: { createdAt: 'desc' }
+        });
+
+        console.log('[DM_GEN_RESOLVED_FAN]', { inputFanId: fanId, resolvedFan: fan, memoryCount: memories.length });
+
+        if (memories.length > 0) {
+          const facts = memories.map((m: any) => `- ${m.keyFact}`).join("\n");
+          fanMemoriesSection = `\n\nFAN MEMORIES & PREFERENCES (CRITICAL — you MUST incorporate these into your message):\n${facts}`;
+        }
+      } catch (memErr: any) {
+        console.error("[DM_GEN_VAULT_ERROR] Prisma fanMemory query failed:", memErr.message, memErr.stack);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[DM_GEN] Fan memory DB lookup failed. Continuing without vault context.");
+        }
+      }
     }
 
     const prompt = `You are an elite, high-end creator agency outreach strategist.
@@ -134,13 +182,14 @@ Write it as if you are sending it directly to the target. If you don't know thei
 TARGET INDUSTRY / ACCOUNT: ${targetAccount}
 CAMPAIGN GOAL: ${campaignGoal}
 TONE & VIBE: ${tone}
-CONTEXT / HOOK: ${context || "Rely strictly on the industry and goal."}
+CONTEXT / HOOK: ${context || "Rely strictly on the industry and goal."}${fanMemoriesSection}
 
 CRITICAL RULES:
 1. The message must perfectly match the requested tone and vibe.
-2. Keep it concise, punchy, and highly readable (maximum 150 words).
-3. Do not include any meta-commentary, introductory text, or quotation marks.
-4. You MUST return your entire response as a valid JSON object matching the following structure:
+2. CRITICAL: You MUST incorporate the fan's specific vault preferences/memories into the outreach message to make it personalized, rather than sending a generic message. Reference their interests, facts, or preferences directly.
+3. Keep it concise, punchy, and highly readable (maximum 150 words).
+4. Do not include any meta-commentary, introductory text, or quotation marks.
+5. You MUST return your entire response as a valid JSON object matching the following structure:
 {
   "messageBody": "The actual DM message",
   "toneDetected": "Must be ONE of: flirty, casual, urgent, promotional, appreciative",
@@ -207,8 +256,14 @@ Return ONLY valid JSON.`;
     }
 
     return NextResponse.json({ 
-      ...validatedData,
-      remainingCredits: creditResult.remainingCredits 
+      success: true,
+      output: validatedData.messageBody,
+      messageBody: validatedData.messageBody,
+      toneDetected: validatedData.toneDetected,
+      includesCallToAction: validatedData.includesCallToAction,
+      campaignTags: validatedData.campaignTags,
+      remainingCredits: creditResult!.remainingCredits,
+      creditsRemaining: creditResult!.remainingCredits,
     }, { status: 200 });
 
   } catch (error: any) {
@@ -222,4 +277,8 @@ Return ONLY valid JSON.`;
 
 export async function POST(req: Request) {
   return withIdempotency(req, coreHandler);
+}
+
+export async function OPTIONS(req: Request) {
+  return NextResponse.json({}, { status: 200 });
 }

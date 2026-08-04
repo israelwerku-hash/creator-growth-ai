@@ -81,19 +81,12 @@ export async function getLoginRedirectAction(email: string) {
     });
 
     if (!creator) {
+      // Genuinely new user with no DB record
       return { redirectPath: "/onboarding" };
     }
 
-    if (!creator.has_completed_onboarding) {
-      return { redirectPath: "/onboarding" };
-    }
-
-    // If they haven't finished pricing and are still on the FREE tier, send to paywall/billing
-    if (!creator.has_completed_pricing && creator.tier === "FREE") {
-      return { redirectPath: "/paywall" };
-    }
-
-    // Existing, paid (or fully onboarded free) user
+    // Existing users always go to dashboard — the dashboard layout auto-heals
+    // the onboarding flag if needed
     return { redirectPath: "/dashboard" };
   } catch (error) {
     console.error("Failed to determine redirect path:", error);

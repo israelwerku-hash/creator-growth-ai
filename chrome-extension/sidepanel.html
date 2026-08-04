@@ -26,6 +26,7 @@
       <button class="tab active" data-target="memory-vault">Vault</button>
       <button class="tab" data-target="dm-gen">DM Gen</button>
       <button class="tab" data-target="segmentation">Stats</button>
+      <button class="tab" data-target="settings">Settings</button>
     </nav>
 
     <!-- Content Area -->
@@ -38,10 +39,22 @@
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             <h2>Memory Vault</h2>
           </div>
-          <div class="fan-id-display">
-            Target: <span id="current-fan-id" class="neon-text">Loading...</span>
+          <div class="input-group mb-4">
+            <label>Target Fan ID / Username</label>
+            <select id="fanSelect" class="input neon-text" style="font-weight: bold;">
+              <option value="">Loading fans...</option>
+            </select>
           </div>
-          <div class="empty-state">
+
+          <form id="vault-form" class="form mb-4">
+            <div class="input-group">
+              <label>Add Memory / Context</label>
+              <textarea id="vault-input" class="input" rows="2" placeholder="e.g. Loves dogs, prefers video messages..."></textarea>
+            </div>
+            <button type="submit" id="save-vault-btn" class="btn primary-btn small-btn w-full">Save to Vault</button>
+          </form>
+
+          <div id="vault-list" class="empty-state">
             <svg class="icon empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
             <p>No memory records found.</p>
             <span>Log intimacy contexts and spend history to build AI memory.</span>
@@ -58,6 +71,12 @@
           </div>
           
           <form id="dm-form" class="form">
+            <div class="input-group">
+              <label>Target Fan ID</label>
+              <select id="dm-fan-id" class="input neon-text" style="font-weight: bold;">
+                <option value="">Loading fans...</option>
+              </select>
+            </div>
             <div class="input-group">
               <label>Campaign Goal</label>
               <select id="goal-input" class="input">
@@ -91,7 +110,10 @@
 
           <div id="output-container" class="output-container hidden">
             <pre id="dm-output" class="output-text"></pre>
-            <button id="copy-btn" class="btn secondary-btn small-btn">Copy to Clipboard</button>
+            <div class="flex gap-2">
+              <button id="copy-btn" class="btn secondary-btn small-btn flex-1">Copy</button>
+              <button id="insert-btn" class="btn primary-btn small-btn flex-1">Insert into Chat</button>
+            </div>
           </div>
         </div>
       </section>
@@ -104,18 +126,50 @@
             <h2>Segmentation</h2>
           </div>
           
-          <div class="stats-grid">
+          <div id="stats-grid" class="stats-grid">
             <div class="stat-box">
               <span class="stat-label">Spend Tier</span>
-              <span class="stat-value text-emerald">Whale 🐋</span>
+              <span id="stat-tier" class="stat-value text-emerald">Loading...</span>
             </div>
             <div class="stat-box">
               <span class="stat-label">LTV</span>
-              <span class="stat-value">$1,250</span>
+              <span id="stat-ltv" class="stat-value">...</span>
             </div>
           </div>
 
-          <button class="btn secondary-btn w-full mt-4">Refresh Stats</button>
+          <button id="refresh-stats-btn" class="btn secondary-btn w-full mt-4">Refresh Stats</button>
+        </div>
+      </section>
+
+      <!-- Tab 4: Settings -->
+      <section id="settings" class="tab-pane">
+        <div class="card">
+          <div class="card-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg class="icon text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <h2>Settings</h2>
+            </div>
+            <span id="connection-pill" style="
+              display: inline-flex; align-items: center; gap: 5px;
+              font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+              padding: 3px 10px; border-radius: 100px;
+              background: rgba(161, 161, 170, 0.12); color: #a1a1aa;
+              transition: all 0.3s ease;
+            ">
+              <span id="pill-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #a1a1aa; transition: background 0.3s ease;"></span>
+              <span id="pill-text">Not Configured</span>
+            </span>
+          </div>
+
+          <div class="input-group mb-4" style="position: relative;">
+            <label>API Key</label>
+            <input type="password" id="api-key-input" class="input" placeholder="Paste your API key from the dashboard" autocomplete="off" />
+            <p id="api-key-hint" style="font-size: 11px; color: #a1a1aa; margin-top: 6px; transition: color 0.2s ease;">Found in your web dashboard settings.</p>
+          </div>
+
+          <button id="save-settings-btn" class="btn primary-btn w-full" style="transition: all 0.25s ease; position: relative; overflow: hidden;">
+            Save Settings
+          </button>
         </div>
       </section>
 

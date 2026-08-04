@@ -1,5 +1,6 @@
 import React from "react";
 import { Settings } from "lucide-react";
+import ApiKeyManager from "./ApiKeyManager";
 
 export const metadata = {
   title: "Settings | Creator Growth AI",
@@ -18,13 +19,7 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <section className="bg-surface-dark border border-neutral-800/60 transition-all duration-200 ease-out hover:border-burgundy-primary/50 hover:shadow-glow-subtle rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center py-20">
-        <Settings className="w-12 h-12 text-zinc-600 mb-4 animate-[spin_10s_linear_infinite]" />
-        <h2 className="text-xl font-bold mb-2">Settings Hub Coming Soon</h2>
-        <p className="text-zinc-400 max-w-md">
-          We are currently building out the full settings panel. Soon you will be able to manage your API keys, notification preferences, and team members here.
-        </p>
-      </section>
+      <ApiKeyManager />
     </div>
   );
 }

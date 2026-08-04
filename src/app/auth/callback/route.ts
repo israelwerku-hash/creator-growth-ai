@@ -55,16 +55,25 @@ export async function GET(request: NextRequest) {
           try {
             const creator = await db.creator.findUnique({
               where: { email: data.user.email.toLowerCase().trim() },
-              select: { has_completed_onboarding: true, has_completed_pricing: true, tier: true }
+              select: { id: true, has_completed_onboarding: true, has_completed_pricing: true, tier: true }
             });
             
             if (creator) {
+              // Existing user — auto-heal the onboarding flag if needed
               if (!creator.has_completed_onboarding) {
-                redirectPath = "/onboarding";
-              } else if (!creator.has_completed_pricing && creator.tier === "FREE") {
-                redirectPath = "/paywall";
+                try {
+                  await db.creator.update({
+                    where: { id: creator.id },
+                    data: { has_completed_onboarding: true },
+                  });
+                } catch (healErr) {
+                  console.warn("OAuth callback: auto-heal onboarding failed:", healErr);
+                }
               }
+              // Existing users always go to dashboard
+              redirectPath = "/dashboard";
             } else {
+               // Genuinely new user (e.g. first Google sign-in) — send to onboarding
                redirectPath = "/onboarding";
             }
           } catch (dbErr) {

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, MessageSquare, PieChart, CreditCard, 
-  UserCircle, Settings, HelpCircle, Languages, Users, BarChart3
+  UserCircle, Settings, HelpCircle, Languages, Users, BarChart3, Compass
 } from "lucide-react";
 
 export function SidebarNav({ isAgency }: { isAgency: boolean }) {
@@ -11,6 +11,7 @@ export function SidebarNav({ isAgency }: { isAgency: boolean }) {
 
   const links = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
+    { href: "/dashboard/guide", icon: Compass, label: "How to Use" },
     { href: "/dashboard/dm-generation", icon: MessageSquare, label: "DM Generation" },
     { href: "/dashboard/segmentation", icon: Users, label: "Segmentation" },
     { href: "/dashboard/memory-vault", icon: PieChart, label: "Memory Vault" },
