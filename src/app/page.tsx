@@ -8,10 +8,17 @@ import { Footer } from "@/components/Footer";
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  React.useEffect(() => {
+    if (isMounted && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isMounted]);
 
   return (
     <div suppressHydrationWarning className="min-h-screen bg-[#050505] text-white selection:bg-white/20 font-sans">
@@ -44,7 +51,7 @@ export default function LandingPage() {
         {/* 2. Immersive Hero Section */}
         <section className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center z-0">
           {isMounted && (
-            <video autoPlay loop muted playsInline preload="auto" suppressHydrationWarning className="absolute top-0 left-0 w-full h-full object-cover">
+            <video ref={videoRef} autoPlay loop muted playsInline preload="auto" suppressHydrationWarning className="absolute top-0 left-0 w-full h-full object-cover">
               <source src="/premium-hero.mp4" type="video/mp4" />
             </video>
           )}
