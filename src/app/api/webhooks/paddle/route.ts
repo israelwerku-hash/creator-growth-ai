@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       // ⚠️ DEVELOPMENT BYPASS ⚠️
       // When using local proxies (ngrok, localtunnel, etc), they often invisibly reformat 
       // the JSON body spacing/newlines, which permanently breaks cryptographic signatures.
-      if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PADDLE_ENV !== "production") {
+      if (process.env.NODE_ENV === "development") {
         console.warn("⚠️ [DEV MODE] Bypassing strict signature check so local development can continue.");
         console.warn("⚠️ Make sure your production environment receives direct, un-proxied webhook payloads.");
         
@@ -201,6 +201,84 @@ export async function POST(req: Request) {
         
       } else {
         console.error("❌ [Webhook Error] Webhook parsed successfully, but NO userId was found! Payload customData:", customData);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SUBSCRIPTION LIFECYCLE: Cancellation & Failed Payments
+    // ═══════════════════════════════════════════════════════════
+    if (eventType === "subscription.canceled") {
+      const subscriptionId = payload.data?.id || payload.data?.subscription_id || null;
+      const customData = payload.data?.custom_data || payload.custom_data;
+      const userId = customData?.userId;
+
+      console.log(`[Paddle Webhook] Subscription canceled: ${subscriptionId} for user: ${userId || "UNKNOWN"}`);
+
+      if (userId) {
+        try {
+          await db.creator.update({
+            where: { id: userId },
+            data: {
+              tier: "FREE",
+              paddleSubscriptionId: null,
+            },
+          });
+          console.log(`[Paddle Webhook] User ${userId} downgraded to FREE tier after subscription cancellation.`);
+        } catch (prismaError) {
+          console.error("[Paddle Webhook] Failed to downgrade user after cancellation:", prismaError);
+        }
+      } else if (subscriptionId) {
+        // Fallback: find creator by paddleSubscriptionId if customData is missing
+        try {
+          const creator = await db.creator.findFirst({
+            where: { paddleSubscriptionId: subscriptionId },
+            select: { id: true },
+          });
+          if (creator) {
+            await db.creator.update({
+              where: { id: creator.id },
+              data: {
+                tier: "FREE",
+                paddleSubscriptionId: null,
+              },
+            });
+            console.log(`[Paddle Webhook] Creator ${creator.id} downgraded to FREE via subscription ID lookup.`);
+          }
+        } catch (lookupError) {
+          console.error("[Paddle Webhook] Subscription ID lookup fallback failed:", lookupError);
+        }
+      }
+    }
+
+    if (eventType === "subscription.past_due" || eventType === "subscription.payment_method_change") {
+      const subscriptionId = payload.data?.id || payload.data?.subscription_id || null;
+      const customData = payload.data?.custom_data || payload.custom_data;
+      const userId = customData?.userId;
+
+      console.warn(`[Paddle Webhook] Subscription payment issue (${eventType}): ${subscriptionId} for user: ${userId || "UNKNOWN"}`);
+
+      // For past_due, we downgrade to FREE to prevent unpaid access
+      if (eventType === "subscription.past_due" && (userId || subscriptionId)) {
+        try {
+          const whereClause = userId
+            ? { id: userId }
+            : { paddleSubscriptionId: subscriptionId };
+
+          const targetCreator = await db.creator.findFirst({
+            where: whereClause,
+            select: { id: true },
+          });
+
+          if (targetCreator) {
+            await db.creator.update({
+              where: { id: targetCreator.id },
+              data: { tier: "FREE" },
+            });
+            console.log(`[Paddle Webhook] Creator ${targetCreator.id} downgraded to FREE due to past_due payment.`);
+          }
+        } catch (pastDueError) {
+          console.error("[Paddle Webhook] Failed to handle past_due downgrade:", pastDueError);
+        }
       }
     }
 

@@ -57,7 +57,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ vault: vaultItems }, { status: 200 });
     } catch (dbErr: any) {
       console.error('[VAULT_DB_ERROR_DETAILS]', dbErr);
-      return NextResponse.json({ error: "Database query failed", details: dbErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Database query failed" }, { status: 500 });
     }
   } catch (error: any) {
     console.error("[VAULT_GET_ERROR]", error);
@@ -178,7 +178,7 @@ async function coreHandler(req: Request) {
         );
       }
     } catch (creditError: any) {
-      return NextResponse.json({ error: `Credit system error: ${creditError.message}` }, { status: 500 });
+      return NextResponse.json({ error: "Credit system error." }, { status: 500 });
     }
 
     // --- 3. AI Setup ---
@@ -321,7 +321,7 @@ Return ONLY valid JSON.`;
       console.error('[VAULT_DB_ERROR_DETAILS]', dbError);
       Sentry.captureException(dbError);
       return NextResponse.json(
-        { error: "Failed to save memory to database", details: dbError.message },
+        { error: "Failed to save memory to database" },
         { status: 500 }
       );
     }
@@ -335,7 +335,7 @@ Return ONLY valid JSON.`;
   } catch (error: any) {
     console.error("[MEMORY_VAULT_ERROR] Unhandled exception:", error.message, error.stack);
     return NextResponse.json(
-      { error: `Server error: ${error.message}` },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

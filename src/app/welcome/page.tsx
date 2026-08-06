@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { activatePremiumPlanAction, activateAgencyPlanAction } from "@/app/dashboard/actions";
 import { useSearchParams } from "next/navigation";
 
-export default function WelcomePage() {
+function WelcomeContent() {
   const [isUpdating, setIsUpdating] = useState(true);
   const searchParams = useSearchParams();
   const tier = searchParams.get("tier");
@@ -81,5 +81,17 @@ export default function WelcomePage() {
         </a>
       </div>
     </div>
+  );
+}
+
+export default function WelcomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-purple-400 animate-pulse shadow-[0_0_20px_#c084fc]" />
+      </div>
+    }>
+      <WelcomeContent />
+    </Suspense>
   );
 }

@@ -94,7 +94,7 @@ async function coreHandler(req: Request) {
     try {
       creditResult = await consumeCredits(activeUser.id, "TRANSLATOR");
     } catch (creditError: any) {
-      return NextResponse.json({ error: `Credit system error: ${creditError.message}` }, { status: 500 });
+      return NextResponse.json({ error: "Credit system error." }, { status: 500 });
     }
     
     if (!creditResult.success) {
@@ -197,7 +197,7 @@ Return ONLY valid JSON.`;
   } catch (error: any) {
     console.error("[TRANSLATOR_ERROR] Unhandled exception:", error.message, error.stack);
     return NextResponse.json(
-      { error: `Server error: ${error.message}` },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

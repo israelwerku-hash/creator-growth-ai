@@ -100,7 +100,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ apiKey: "dev_key_local_fallback" }, { status: 200 });
     }
     
-    return NextResponse.json({ error: error.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
@@ -153,6 +153,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ apiKey: "dev_key_local_fallback" }, { status: 200 });
     }
     
-    return NextResponse.json({ error: error.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

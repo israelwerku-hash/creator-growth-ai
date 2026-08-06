@@ -110,15 +110,25 @@ document.addEventListener("DOMContentLoaded", () => {
     fanSelect.value = e.target.value;
   });
 
+  function escapeHTML(str) {
+    if (!str) return "";
+    return str.toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   function renderMemories(memories) {
     vaultList.className = "";
     vaultList.innerHTML = memories.map(mem => `
       <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; color: #e5e5e5; border: 1px solid ${mem.isPriority ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.08)'};">
         <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-          <span style="color: #a1a1aa; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">${mem.category || 'General'}</span>
+          <span style="color: #a1a1aa; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">${escapeHTML(mem.category || 'General')}</span>
           <span style="color: #a1a1aa; font-size: 10px;">${new Date(mem.createdAt).toLocaleDateString()}</span>
         </div>
-        <div>${mem.keyFact}</div>
+        <div>${escapeHTML(mem.keyFact)}</div>
       </div>
     `).join("");
   }
@@ -351,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
         <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
       </svg>
-      Generating...
+      Initializing...
     `;
     outputContainer.classList.add("hidden");
 
@@ -361,6 +371,21 @@ document.addEventListener("DOMContentLoaded", () => {
       style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
       document.head.appendChild(style);
     }
+
+    const finishLoading = () => {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = `
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        Generate AI Outreach
+      `;
+    };
+
+    const handleError = (error) => {
+      console.error(error);
+      dmOutput.textContent = `Error: ${error.message}`;
+      outputContainer.classList.remove("hidden");
+      finishLoading();
+    };
 
     try {
       const apiKey = await getApiKey();
@@ -394,25 +419,57 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(data.error || "Insufficient credits. Please upgrade your plan.");
       }
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 202) {
         throw new Error(data.error || "Failed to generate outreach via API.");
       }
 
-      const resultText = data.output || data.messageBody || data.generatedDm || data.text || data.message || "";
-      const creditsInfo = data.creditsRemaining !== undefined ? `\n\n[Credits remaining: ${data.creditsRemaining}]` : "";
-      dmOutput.textContent = resultText + creditsInfo;
-      outputContainer.classList.remove("hidden");
+      // QStash async flow
+      if (response.status === 202 && data.jobId) {
+        generateBtn.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+          </svg>
+          Queued...
+        `;
+
+        const pollJob = async () => {
+          try {
+            const pollRes = await fetch(`${BACKEND_URL}/api/jobs/${data.jobId}`, {
+              headers: { "x-api-key": apiKey, "Authorization": apiKey ? `Bearer ${apiKey}` : "" }
+            });
+            if (!pollRes.ok) throw new Error("Polling failed");
+            
+            const jobData = await pollRes.json();
+            if (jobData.status === "COMPLETED") {
+              const resObj = jobData.result || {};
+              const resultText = resObj.output || resObj.messageBody || "";
+              const creditsInfo = resObj.creditsRemaining !== undefined ? `\n\n[Credits remaining: ${resObj.creditsRemaining}]` : "";
+              dmOutput.textContent = resultText + creditsInfo;
+              outputContainer.classList.remove("hidden");
+              finishLoading();
+            } else if (jobData.status === "FAILED") {
+              throw new Error(jobData.error || "Job failed during generation.");
+            } else {
+              // PENDING / PROCESSING
+              setTimeout(pollJob, 2000);
+            }
+          } catch (e) {
+            handleError(e);
+          }
+        };
+
+        setTimeout(pollJob, 2000);
+      } else {
+        // Synchronous fallback (just in case)
+        const resultText = data.output || data.messageBody || data.generatedDm || data.text || data.message || "";
+        const creditsInfo = data.creditsRemaining !== undefined ? `\n\n[Credits remaining: ${data.creditsRemaining}]` : "";
+        dmOutput.textContent = resultText + creditsInfo;
+        outputContainer.classList.remove("hidden");
+        finishLoading();
+      }
 
     } catch (error) {
-      console.error(error);
-      dmOutput.textContent = `Error: ${error.message}`;
-      outputContainer.classList.remove("hidden");
-    } finally {
-      generateBtn.disabled = false;
-      generateBtn.innerHTML = `
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        Generate AI Outreach
-      `;
+      handleError(error);
     }
   });
 

@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Vector Search API Error]:", error.message);
     return NextResponse.json(
-      { error: `Internal server error: ${error.message}` }, 
+      { error: "Internal server error" }, 
       { status: 500 }
     );
   }

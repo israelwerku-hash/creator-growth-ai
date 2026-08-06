@@ -3,6 +3,15 @@ import { db } from "@/lib/db";
 import { getSession } from "@/utils/supabase/server";
 import { getAuthenticatedUser } from "@/lib/extension-auth";
 import * as Sentry from "@sentry/nextjs";
+import { z } from "zod";
+import DOMPurify from 'isomorphic-dompurify';
+
+const FanPostSchema = z.object({
+  username: z.string().min(1, "Username is required").max(255),
+  displayName: z.string().max(255).optional(),
+  totalSpent: z.number().nonnegative().optional(),
+  latestContext: z.string().max(2000).optional()
+});
 
 async function getAuthUser(req: Request) {
   let activeUser = null;
@@ -74,13 +83,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized: Missing or invalid Session / API Key" }, { status: 401 });
     }
 
-    // --- Parse Request Body ---
-    const body = await req.json();
-    const { username, displayName, totalSpent, latestContext } = body;
-
-    if (!username) {
-      return NextResponse.json({ error: "Username is required." }, { status: 400 });
+    // --- Parse and Validate Request Body ---
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid JSON format." }, { status: 400 });
     }
+
+    const validation = FanPostSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: "Validation failed", details: validation.error.flatten() }, { status: 400 });
+    }
+
+    const { username, displayName, totalSpent, latestContext } = validation.data;
 
     // --- IDOR Protected Upsert ---
     let fan = await db.fan.findFirst({
@@ -115,14 +131,18 @@ export async function POST(req: Request) {
 
     // --- Create Fan Memory if Context Provided ---
     if (latestContext) {
-      await db.fanMemory.create({
-        data: {
-          fanId: fan.id,
-          keyFact: latestContext,
-          category: "General Context",
-          isPriority: false,
-        }
-      });
+      const sanitizedContext = DOMPurify.sanitize(latestContext);
+      
+      if (sanitizedContext.trim()) {
+        await db.fanMemory.create({
+          data: {
+            fanId: fan.id,
+            keyFact: sanitizedContext,
+            category: "General Context",
+            isPriority: false,
+          }
+        });
+      }
     }
 
     return NextResponse.json({ success: true, fanId: fan.id });

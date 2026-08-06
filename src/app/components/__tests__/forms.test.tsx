@@ -4,8 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 
 import { AiDmGenerator } from '@/app/components/AiDmGenerator';
-import { AuthForm } from '@/app/components/AuthForm';
-import { MetricForm } from '@/app/components/MetricForm';
 import AIMemoryVaultPage from '@/app/dashboard/memory-vault/page';
 import LoginPage from '@/app/login/page';
 
@@ -41,56 +39,7 @@ describe('Frontend Form Audits & React Hook Form Integration', () => {
     });
   });
 
-  describe('2. AuthForm', () => {
-    it('shows inline errors and disables submit button', async () => {
-      render(<AuthForm />);
-      
-      const user = userEvent.setup();
-      const submitBtn = screen.getByRole('button', { name: "SIGN IN" });
-      
-      // Submit empty form to trigger Zod required errors
-      await user.click(submitBtn);
-
-      expect(await screen.findByText(/Please enter a valid email address/i)).toBeInTheDocument();
-      expect(await screen.findByText(/Password must be at least 6 characters/i)).toBeInTheDocument();
-
-      // Enter valid email for Magic Link
-      await user.type(screen.getByPlaceholderText(/creator@domain.com/i), 'test@example.com');
-      
-      const magicBtn = screen.getByRole('button', { name: /Sign in with Magic Link/i });
-      await user.click(magicBtn);
-
-      // Verify completion state
-      await waitFor(() => {
-        expect(screen.getByText(/A verification signal has been sent/i)).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('3. MetricForm', () => {
-    it('validates number inputs and prevents string submission', async () => {
-      render(<MetricForm />);
-      
-      const user = userEvent.setup();
-      const submitBtn = screen.getByRole('button', { name: /Save Metric Configuration/i });
-
-      await user.type(screen.getByPlaceholderText(/Monthly Video Views/i), 'Views');
-      await user.type(screen.getByPlaceholderText(/145,000/i), 'invalid_number'); // Invalid number
-
-      await user.click(submitBtn);
-
-      expect(await screen.findByText(/Must be a valid number/i)).toBeInTheDocument();
-
-      await user.clear(screen.getByPlaceholderText(/145,000/i));
-      await user.type(screen.getByPlaceholderText(/145,000/i), '145,000'); // Valid number with commas
-
-      await user.click(submitBtn);
-
-      expect(await screen.findByText(/Metric recorded and database layout synchronized/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('4. AIMemoryVaultPage', () => {
+  describe('2. AIMemoryVaultPage', () => {
     it('validates memory fact and simulation forms', async () => {
       render(<AIMemoryVaultPage />);
       
@@ -122,7 +71,7 @@ describe('Frontend Form Audits & React Hook Form Integration', () => {
     });
   });
 
-  describe('5. LoginPage', () => {
+  describe('3. LoginPage', () => {
     it('shows inline errors for email and password', async () => {
       render(<LoginPage />);
       

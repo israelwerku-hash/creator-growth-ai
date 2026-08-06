@@ -85,7 +85,7 @@ export async function POST(req: Request) {
 
     if (authError) {
       console.error(`[Account Deletion] Supabase Auth deletion failed:`, authError);
-      return NextResponse.json({ error: authError.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to delete Auth user" }, { status: 500 });
     }
 
     console.log(`✅ [Account Deletion] Supabase Auth user deleted successfully. End-to-end flow complete.`);
@@ -93,6 +93,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, deletedUserId: userId });
   } catch (error: any) {
     console.error("[Account Deletion] Unexpected endpoint error:", error);
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
