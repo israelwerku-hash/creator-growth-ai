@@ -34,7 +34,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.paddle.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.stripe.com https://api.paddle.com wss:;",
+            value: "default-src 'self'; frame-src 'self' https://sandbox-buy.paddle.com https://buy.paddle.com https://*.paddle.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com; style-src 'self' 'unsafe-inline' https://sandbox-cdn.paddle.com https://cdn.paddle.com https://fonts.googleapis.com https://*.paddle.com; connect-src 'self' https://sandbox-api.paddle.com https://api.paddle.com https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com https://*.sentry.io wss:; img-src 'self' data: blob: https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com; font-src 'self' https://fonts.gstatic.com;",
           },
         ],
       },
