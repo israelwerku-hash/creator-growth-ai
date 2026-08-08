@@ -100,8 +100,8 @@ export async function POST(req: Request) {
     console.log(`✉️ Received legitimate Paddle Webhook Event: ${eventType}`);
 
     if (eventType === "transaction.completed" || eventType === "transaction.paid" || eventType === "subscription.created") {
-      const customData = payload.custom_data || payload.data?.custom_data;
-      const userId = customData?.userId;
+      const customData = payload.custom_data || payload.data?.custom_data || {};
+      const userId = customData.userId || customData.user_id || payload.data?.passthrough || payload.data?.customer?.email || payload.data?.customer_id || null;
       const tier = customData?.planSelected;
       
       // 🔒 SECURE BACKEND CREDIT MAPPING
