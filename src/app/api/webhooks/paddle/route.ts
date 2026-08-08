@@ -121,11 +121,10 @@ export async function POST(req: Request) {
       const AGENCY_MONTHLY_ID = process.env.NEXT_PUBLIC_PADDLE_AGENCY_MONTHLY_ID || "";
       const AGENCY_YEARLY_ID = process.env.NEXT_PUBLIC_PADDLE_AGENCY_YEARLY_ID || "";
 
-      const PRICE_TO_CREDITS: Record<string, number> = {
-        [STARTER_PRICE_ID]: 150,
-        [GROWTH_PRICE_ID]: 500,
-        [ELITE_PRICE_ID]: 1500,
-      };
+      const PRICE_TO_CREDITS: Record<string, number> = {};
+      if (STARTER_PRICE_ID) PRICE_TO_CREDITS[STARTER_PRICE_ID] = 150;
+      if (GROWTH_PRICE_ID) PRICE_TO_CREDITS[GROWTH_PRICE_ID] = 500;
+      if (ELITE_PRICE_ID) PRICE_TO_CREDITS[ELITE_PRICE_ID] = 1500;
 
       // Calculate creditAmount based STRICTLY on the actual price ID paid for
       const creditAmount = priceId && PRICE_TO_CREDITS[priceId] ? PRICE_TO_CREDITS[priceId] : null;
@@ -170,13 +169,13 @@ export async function POST(req: Request) {
                return NextResponse.json({ received: true }, { status: 200 });
             }
 
-            console.log(`✅ [Tier Resolution] priceId=${priceId} | FINAL: ${finalTier} (${creditsToAdd} credits)`);
+            console.log(`✅ [Tier Resolution] priceId=${priceId} | FINAL: ${finalTier} (Adding ${creditsToAdd} credits)`);
 
             await db.creator.upsert({
               where: { id: userId },
               update: {
                 tier: finalTier,
-                aiCredits: creditsToAdd,
+                aiCredits: { increment: creditsToAdd },
                 has_completed_pricing: true,
                 has_completed_onboarding: true,
                 ...(paddleSubscriptionId && { paddleSubscriptionId })
