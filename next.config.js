@@ -2,6 +2,7 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['jsdom', 'html-encoding-sniffer', '@exodus/bytes'],
   async redirects() {
     return [
       {

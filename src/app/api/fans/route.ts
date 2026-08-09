@@ -4,7 +4,6 @@ import { getSession } from "@/utils/supabase/server";
 import { getAuthenticatedUser } from "@/lib/extension-auth";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
-import DOMPurify from 'isomorphic-dompurify';
 
 const FanPostSchema = z.object({
   username: z.string().min(1, "Username is required").max(255),
@@ -131,6 +130,7 @@ export async function POST(req: Request) {
 
     // --- Create Fan Memory if Context Provided ---
     if (latestContext) {
+      const DOMPurify = (await import('isomorphic-dompurify')).default;
       const sanitizedContext = DOMPurify.sanitize(latestContext);
       
       if (sanitizedContext.trim()) {

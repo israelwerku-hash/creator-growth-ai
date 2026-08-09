@@ -6,7 +6,7 @@
   "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
   "host_permissions": [
     "https://*.onlyfans.com/*",
-    "http://localhost:3000/*"
+    "https://strong-moonbeam-55e69e.netlify.app/*"
   ],
   "action": {
     "default_title": "Open Companion"
