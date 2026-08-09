@@ -96,79 +96,88 @@ async function coreHandler(req: Request) {
       );
     }
 
-    // Attempt to consume credits upfront
-    let creditResult: { success: boolean; remainingCredits?: number; error?: string; requiresUpgrade?: boolean } | null = null;
-    try {
-      creditResult = await consumeCredits(activeUser.id, "DM_GENERATION");
-      if (!creditResult || !creditResult.success) {
-        return NextResponse.json(
-          { error: creditResult?.error || "Insufficient credits.", requiresUpgrade: creditResult?.requiresUpgrade },
-          { status: 402 }
-        );
+    // 1. Verify credits BEFORE doing work, but do NOT consume yet
+    const creatorStatus = await db.creator.findUnique({
+      where: { id: activeUser.id },
+      select: { aiCredits: true }
+    });
+    if (!creatorStatus || creatorStatus.aiCredits < 1) {
+      return NextResponse.json({ error: "Insufficient credits." }, { status: 402 });
+    }
+
+    // 2. Fetch Fan Memories
+    let fanMemoriesSection = "";
+    if (fanId) {
+      try {
+        const fan = await db.fan.findFirst({
+          where: { OR: [{ id: fanId }, { username: fanId }], creatorId: activeUser.id }
+        });
+        if (fan) {
+          const memories = await db.fanMemory.findMany({
+            where: { fanId: fan.id },
+            orderBy: { createdAt: 'desc' }
+          });
+          if (memories.length > 0) {
+            const facts = memories.map((m: any) => `- ${m.keyFact}`).join("\n");
+            fanMemoriesSection = `\n\nFAN MEMORIES & PREFERENCES:\n${facts}`;
+          }
+        }
+      } catch (e) {
+        console.warn("[DM_GEN] Failed to fetch memories", e);
       }
-    } catch (creditError: any) {
-      console.error("[DM_GENERATION_ERROR] Credit system threw an exception:", creditError.message, creditError.stack);
-      return NextResponse.json(
-        { error: "Credit system error." },
-        { status: 500 }
-      );
     }
 
-    // --- Generate Job ID & Set Redis State ---
-    const jobId = uuidv4();
-    
-    // Save initial state to Redis with 1 hour expiry
-    await redis.set(
-      `job:${jobId}`,
-      JSON.stringify({
-        status: "PROCESSING",
-        creditsRemaining: creditResult.remainingCredits,
-      }),
-      { ex: 3600 }
-    );
+    // 3. Generate via AI
+    const Groq = (await import("groq-sdk")).default;
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error("AI Engine is not configured.");
+    const groq = new Groq({ apiKey });
 
-    // --- Dispatch to QStash ---
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    
-    try {
-      await qstashClient.publishJSON({
-        url: `${appUrl}/api/jobs/process-ai`,
-        body: {
-          jobId,
-          userId: activeUser.id,
-          targetAccount,
-          campaignGoal,
-          tone,
-          context,
-          fanId,
-          creditsRemaining: creditResult.remainingCredits,
-        },
-      });
-    } catch (qstashError: any) {
-      console.error("[DM_GENERATION_ERROR] Failed to publish to QStash:", qstashError);
+    const prompt = `You are an elite creator agency outreach strategist.
+Generate a highly personalized, natural-sounding DM for an outreach campaign.
+TARGET INDUSTRY: ${targetAccount}
+CAMPAIGN GOAL: ${campaignGoal}
+TONE & VIBE: ${tone}
+CONTEXT / HOOK: ${context || "Rely strictly on the industry and goal."}${fanMemoriesSection}
+
+CRITICAL RULES: Must be valid JSON. Keep it concise (max 150 words).
+Format: { "messageBody": "...", "toneDetected": "...", "campaignTags": ["t1", "t2"] }`;
+
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.1-8b-instant",
+      temperature: 0.7,
+      max_tokens: 300,
+      response_format: { type: "json_object" }
+    });
       
-      // Refund credits since dispatch failed
-      await db.creator.update({
-        where: { id: activeUser.id },
-        data: { aiCredits: { increment: 1 } }, // DM_GENERATION costs 1
-      });
-
-      await redis.set(`job:${jobId}`, JSON.stringify({ status: "FAILED", error: "Failed to queue job" }), { ex: 3600 });
-      return NextResponse.json({ error: "Failed to queue AI generation task." }, { status: 500 });
+    const parsedJson = JSON.parse(completion.choices[0]?.message?.content || "{}");
+    
+    // 4. Validate output before deducting credits
+    if (!parsedJson.messageBody || typeof parsedJson.messageBody !== 'string' || parsedJson.messageBody.trim() === "") {
+      throw new Error("AI generation failed or returned empty text");
     }
 
-    // Return the Job ID immediately
+    // 5. Deduct Credits safely
+    const creditResult = await consumeCredits(activeUser.id, "DM_GENERATION");
+    if (!creditResult.success) {
+      return NextResponse.json({ error: "Failed to deduct credits" }, { status: 402 });
+    }
+
+    // 6. Return standard synchronous payload with generatedText
     return NextResponse.json({ 
       success: true,
-      jobId,
-      status: "PROCESSING",
-      remainingCredits: creditResult!.remainingCredits,
-    }, { status: 202 });
+      generatedText: parsedJson.messageBody,
+      messageBody: parsedJson.messageBody,
+      toneDetected: parsedJson.toneDetected || tone,
+      campaignTags: parsedJson.campaignTags || [],
+      creditsRemaining: creditResult.remainingCredits,
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error("[DM_GENERATION_ERROR] Unhandled exception:", error.message, error.stack);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: error.message || "Internal Server Error" },
       { status: 500 }
     );
   }

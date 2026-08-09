@@ -113,7 +113,7 @@ function DmGenerationPage() {
         throw new Error(data.error || "Failed to generate outreach.");
       }
 
-      setGeneratedMessage(data.messageBody);
+      setGeneratedMessage(data.generatedText || data.messageBody);
       if (data.toneDetected) setToneDetected(data.toneDetected);
       if (data.campaignTags) setCampaignTags(data.campaignTags);
       
@@ -123,6 +123,7 @@ function DmGenerationPage() {
     } catch (err: any) {
       console.error(err);
       setGeneratedMessage(`Error: ${err.message}`);
+      alert(`Error generating DM: ${err.message}`);
     } finally {
       setIsGenerating(false);
     }
