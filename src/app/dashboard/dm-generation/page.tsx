@@ -19,6 +19,7 @@ import {
 import { getCreatorFansAction, getUserTierAction } from "@/app/dashboard/actions";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { CustomSelect } from "@/components/CustomSelect";
 
 export default function DmGenerationPageWrapper() {
   return (
@@ -171,18 +172,15 @@ function DmGenerationPage() {
                 Target Audience
               </label>
               <div className="relative">
-                <select
+                <CustomSelect
                   value={targetFanId}
-                  onChange={(e) => setTargetFanId(e.target.value)}
+                  onChange={setTargetFanId}
                   disabled={isLocked || fans.length === 0}
-                  className="w-full bg-white/5 border border-burgundy-dark/40 rounded-xl py-3 px-4 pr-10 text-sm text-white appearance-none focus:outline-none focus:ring-2 focus:ring-burgundy-primary/50 focus:border-burgundy-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <option className="bg-[#0A0A0A] text-zinc-500" value="">General Broadcast (No Specific Fan)</option>
-                  {fans.map(f => (
-                    <option key={f.id} className="bg-[#0A0A0A] text-white" value={f.id}>{f.name || f.username || 'Anonymous Fan'}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  options={[
+                    { label: "General Broadcast (No Specific Fan)", value: "" },
+                    ...fans.map(f => ({ label: f.name || f.username || 'Anonymous Fan', value: f.id }))
+                  ]}
+                />
               </div>
               {targetFanId && fans.some(f => f.id === targetFanId) && (
                 <div className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-burgundy-primary/10 border border-burgundy-primary/30 rounded-lg w-fit">
@@ -212,19 +210,18 @@ function DmGenerationPage() {
                 Campaign Goal
               </label>
               <div className="relative">
-                <select
+                <CustomSelect
                   value={campaignGoal}
-                  onChange={(e) => setCampaignGoal(e.target.value)}
+                  onChange={setCampaignGoal}
                   disabled={isLocked}
-                  className="w-full bg-white/5 border border-burgundy-dark/40 rounded-xl py-3 px-4 pr-10 text-sm text-white appearance-none focus:outline-none focus:ring-2 focus:ring-burgundy-primary/50 focus:border-burgundy-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <option className="bg-[#0A0A0A] text-white" value="Fan Welcome / New Subscriber Greeting">Fan Welcome / New Subscriber Greeting</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Pay-Per-View (PPV) Teaser & Pitch">Pay-Per-View (PPV) Teaser & Pitch</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Tip Menu Upsell & Custom Request">Tip Menu Upsell & Custom Request</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Dormant Fan Re-engagement">Dormant Fan Re-engagement</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Mass DM Broadcast / General Promo">Mass DM Broadcast / General Promo</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  options={[
+                    { label: "Fan Welcome / New Subscriber Greeting", value: "Fan Welcome / New Subscriber Greeting" },
+                    { label: "Pay-Per-View (PPV) Teaser & Pitch", value: "Pay-Per-View (PPV) Teaser & Pitch" },
+                    { label: "Tip Menu Upsell & Custom Request", value: "Tip Menu Upsell & Custom Request" },
+                    { label: "Dormant Fan Re-engagement", value: "Dormant Fan Re-engagement" },
+                    { label: "Mass DM Broadcast / General Promo", value: "Mass DM Broadcast / General Promo" }
+                  ]}
+                />
               </div>
             </div>
 
@@ -234,19 +231,18 @@ function DmGenerationPage() {
                 Tone & Vibe
               </label>
               <div className="relative">
-                <select
+                <CustomSelect
                   value={tone}
-                  onChange={(e) => setTone(e.target.value)}
+                  onChange={setTone}
                   disabled={isLocked}
-                  className="w-full bg-white/5 border border-burgundy-dark/40 rounded-xl py-3 px-4 pr-10 text-sm text-white appearance-none focus:outline-none focus:ring-2 focus:ring-burgundy-primary/50 focus:border-burgundy-primary/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <option className="bg-[#0A0A0A] text-white" value="Flirty & Playful">Flirty & Playful</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Casual & Warm">Casual & Warm</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Direct & Bold">Direct & Bold</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Exclusive & VIP Tease">Exclusive & VIP Tease</option>
-                  <option className="bg-[#0A0A0A] text-white" value="Sweet & Engaging">Sweet & Engaging</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  options={[
+                    { label: "Flirty & Playful", value: "Flirty & Playful" },
+                    { label: "Casual & Warm", value: "Casual & Warm" },
+                    { label: "Direct & Bold", value: "Direct & Bold" },
+                    { label: "Exclusive & VIP Tease", value: "Exclusive & VIP Tease" },
+                    { label: "Sweet & Engaging", value: "Sweet & Engaging" }
+                  ]}
+                />
               </div>
             </div>
 

@@ -41,9 +41,11 @@
           </div>
           <div class="input-group mb-4">
             <label>Target Fan ID / Username</label>
-            <select id="fanSelect" class="input neon-text" style="font-weight: bold;">
-              <option value="">Loading fans...</option>
-            </select>
+            <div class="custom-select-wrapper" id="wrapper-fanSelect">
+              <div class="custom-select-trigger" id="trigger-fanSelect">Loading fans...</div>
+              <div class="custom-select-options" id="options-fanSelect"></div>
+              <input type="hidden" id="fanSelect" value="">
+            </div>
           </div>
 
           <form id="vault-form" class="form mb-4">
@@ -73,28 +75,28 @@
           <form id="dm-form" class="form">
             <div class="input-group">
               <label>Target Fan ID</label>
-              <select id="dm-fan-id" class="input neon-text" style="font-weight: bold;">
-                <option value="">Loading fans...</option>
-              </select>
+              <div class="custom-select-wrapper" id="wrapper-dm-fan-id">
+                <div class="custom-select-trigger" id="trigger-dm-fan-id">Loading fans...</div>
+                <div class="custom-select-options" id="options-dm-fan-id"></div>
+                <input type="hidden" id="dm-fan-id" value="">
+              </div>
             </div>
             <div class="input-group">
               <label>Campaign Goal</label>
-              <select id="goal-input" class="input">
-                <option value="PPV Upsell">PPV Upsell</option>
-                <option value="Re-engagement">Re-engagement</option>
-                <option value="Custom Request">Custom Request</option>
-                <option value="Tipping Conversion">Tipping Conversion</option>
-              </select>
+              <div class="custom-select-wrapper" id="wrapper-goal-input">
+                <div class="custom-select-trigger" id="trigger-goal-input">PPV Upsell</div>
+                <div class="custom-select-options" id="options-goal-input"></div>
+                <input type="hidden" id="goal-input" value="PPV Upsell">
+              </div>
             </div>
             
             <div class="input-group">
               <label>Tone & Vibe</label>
-              <select id="tone-input" class="input">
-                <option value="Flirty & Playful">Flirty & Playful</option>
-                <option value="Direct & Confident">Direct & Confident</option>
-                <option value="Girlfriend Experience">Girlfriend Experience</option>
-                <option value="Teasing">Teasing</option>
-              </select>
+              <div class="custom-select-wrapper" id="wrapper-tone-input">
+                <div class="custom-select-trigger" id="trigger-tone-input">Flirty & Playful</div>
+                <div class="custom-select-options" id="options-tone-input"></div>
+                <input type="hidden" id="tone-input" value="Flirty & Playful">
+              </div>
             </div>
             
             <div class="input-group">

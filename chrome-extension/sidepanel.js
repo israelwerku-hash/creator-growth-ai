@@ -16,12 +16,92 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // --- CUSTOM DROPDOWN CLASS ---
+  class CustomDropdown {
+    constructor(elementId, onChange) {
+      this.wrapper = document.getElementById(`wrapper-${elementId}`);
+      this.trigger = document.getElementById(`trigger-${elementId}`);
+      this.optionsList = document.getElementById(`options-${elementId}`);
+      this.hiddenInput = document.getElementById(elementId);
+      this.onChangeCallback = onChange;
+      
+      if (this.trigger) {
+        this.trigger.addEventListener('click', () => {
+          const isShowing = this.optionsList.classList.contains('show');
+          document.querySelectorAll('.custom-select-options').forEach(el => el.classList.remove('show'));
+          document.querySelectorAll('.custom-select-wrapper').forEach(el => el.classList.remove('open'));
+          if (!isShowing) {
+            this.optionsList.classList.add('show');
+            this.wrapper.classList.add('open');
+          }
+        });
+      }
+      
+      document.addEventListener('click', (e) => {
+        if (this.wrapper && !this.wrapper.contains(e.target)) {
+          this.optionsList.classList.remove('show');
+          this.wrapper.classList.remove('open');
+        }
+      });
+    }
+    
+    setOptions(options) {
+      if (!this.optionsList) return;
+      this.optionsList.innerHTML = '';
+      if (options.length === 0) {
+        this.trigger.textContent = "No options";
+        return;
+      }
+      options.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'custom-select-option';
+        div.textContent = opt.label;
+        div.dataset.value = opt.value;
+        div.addEventListener('click', () => {
+          this.hiddenInput.value = opt.value;
+          this.trigger.textContent = opt.label;
+          this.optionsList.classList.remove('show');
+          this.wrapper.classList.remove('open');
+          if (this.onChangeCallback) this.onChangeCallback(opt.value);
+          this.hiddenInput.dispatchEvent(new Event('change'));
+        });
+        this.optionsList.appendChild(div);
+      });
+    }
+    
+    setValue(val) {
+      if (!this.optionsList) return;
+      const opt = this.optionsList.querySelector(`[data-value="${val}"]`);
+      if (opt) {
+        this.hiddenInput.value = val;
+        this.trigger.textContent = opt.textContent;
+      }
+    }
+  }
+
   // --- ELEMENT REFERENCES ---
   const fanSelect = document.getElementById("fanSelect");
   const dmFanSelect = document.getElementById("dm-fan-id");
   const vaultForm = document.getElementById("vault-form");
   const vaultInput = document.getElementById("vault-input");
   const vaultList = document.getElementById("vault-list");
+  
+  const vaultFanDropdown = new CustomDropdown('fanSelect');
+  const dmFanDropdown = new CustomDropdown('dm-fan-id');
+  const goalDropdown = new CustomDropdown('goal-input');
+  goalDropdown.setOptions([
+    { label: 'PPV Upsell', value: 'PPV Upsell' },
+    { label: 'Re-engagement', value: 'Re-engagement' },
+    { label: 'Custom Request', value: 'Custom Request' },
+    { label: 'Tipping Conversion', value: 'Tipping Conversion' }
+  ]);
+  const toneDropdown = new CustomDropdown('tone-input');
+  toneDropdown.setOptions([
+    { label: 'Flirty & Playful', value: 'Flirty & Playful' },
+    { label: 'Direct & Confident', value: 'Direct & Confident' },
+    { label: 'Girlfriend Experience', value: 'Girlfriend Experience' },
+    { label: 'Teasing', value: 'Teasing' }
+  ]);
 
   let fansData = [];
 
@@ -46,39 +126,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setDropdownError() {
-    fanSelect.innerHTML = '<option value="">No fans found / Check API Key</option>';
-    dmFanSelect.innerHTML = '<option value="">No fans found / Check API Key</option>';
+    vaultFanDropdown.setOptions([{ label: 'No fans found / Check API Key', value: '' }]);
+    dmFanDropdown.setOptions([{ label: 'No fans found / Check API Key', value: '' }]);
   }
 
   function populateFanDropdowns() {
     const currentVaultFan = fanSelect.value;
-
-    // Populate Vault dropdown
-    fanSelect.innerHTML = '';
-    fansData.forEach(fan => {
-      const opt = document.createElement("option");
-      opt.value = fan.id;
-      opt.textContent = `${fan.displayName || fan.username} ($${fan.totalSpend})`;
-      fanSelect.appendChild(opt);
-    });
-
-    // Populate DM Gen dropdown
-    dmFanSelect.innerHTML = '';
-    fansData.forEach(fan => {
-      const opt = document.createElement("option");
-      opt.value = fan.id;
-      opt.textContent = `${fan.displayName || fan.username} ($${fan.totalSpend})`;
-      dmFanSelect.appendChild(opt);
-    });
+    const options = fansData.map(fan => ({
+      label: `${fan.displayName || fan.username} ($${fan.totalSpend})`,
+      value: fan.id
+    }));
+    vaultFanDropdown.setOptions(options);
+    dmFanDropdown.setOptions(options);
 
     // Auto-select first fan (or restore previous selection)
     if (fansData.length > 0) {
       if (currentVaultFan && fansData.some(f => f.id === currentVaultFan)) {
-        fanSelect.value = currentVaultFan;
-        dmFanSelect.value = currentVaultFan;
+        vaultFanDropdown.setValue(currentVaultFan);
+        dmFanDropdown.setValue(currentVaultFan);
       } else {
-        fanSelect.value = fansData[0].id;
-        dmFanSelect.value = fansData[0].id;
+        vaultFanDropdown.setValue(fansData[0].id);
+        dmFanDropdown.setValue(fansData[0].id);
       }
       fanSelect.dispatchEvent(new Event("change"));
     }

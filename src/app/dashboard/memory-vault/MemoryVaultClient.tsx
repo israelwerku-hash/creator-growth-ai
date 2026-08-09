@@ -9,6 +9,7 @@ import * as z from "zod";
 import { 
   BrainCircuit, ArrowLeft, Sparkles, Plus, ShieldCheck, User, Bookmark, Loader2, Activity, Tag, CheckCircle2
 } from "lucide-react";
+import { CustomSelect } from "@/components/CustomSelect";
 
 const memorySchema = z.object({
   newFact: z.string().min(1, "Memory fact is required"),
@@ -163,7 +164,7 @@ export default function AIMemoryVaultPage() {
                         : "bg-black/40 border-zinc-900 text-zinc-400 hover:border-zinc-800 hover:text-zinc-200"
                     }`}
                   >
-                    <span className="truncate max-w-[150px]">{fan.name}</span>
+                    <span className="truncate max-w-[150px]">{fan.name || fan.username || 'Anonymous Fan'}</span>
                     <span className="text-[10px] text-zinc-500 shrink-0">${fan.totalSpend} spent</span>
                   </button>
                 ))}
@@ -184,16 +185,18 @@ export default function AIMemoryVaultPage() {
                 {memoryErrors.newFact && <p className="text-red-400 text-xs">{memoryErrors.newFact.message}</p>}
                 
                 <div className="flex items-center gap-3">
-                  <select 
-                    {...registerMemory("category")}
-                    className="bg-black/40 border border-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-400 focus:outline-none flex-1"
+                  <CustomSelect 
+                    value={watchMemory("category")}
+                    onChange={(val) => setMemoryValue("category", val)}
+                    options={[
+                      { label: "Preference", value: "Preference" },
+                      { label: "Fact", value: "Fact" },
+                      { label: "Interaction", value: "Interaction" },
+                      { label: "Milestone", value: "Milestone" }
+                    ]}
                     disabled={!selectedFanId || isSubmittingFact}
-                  >
-                    <option value="Preference">Preference</option>
-                    <option value="Fact">Fact</option>
-                    <option value="Interaction">Interaction</option>
-                    <option value="Milestone">Milestone</option>
-                  </select>
+                    className="flex-1"
+                  />
                   <button 
                     type="button"
                     onClick={() => setMemoryValue("isPriority", !isPriorityValue)}
