@@ -4,7 +4,7 @@ import { aiRateLimiter, publicRateLimiter, authRateLimiter, getRequestIdentifier
 
 // Routes that pass through immediately with ZERO auth checks.
 const PUBLIC_ROUTES = [
-  '/', '/pricing', '/auth/callback', '/welcome', '/paywall',
+  '/', '/pricing', '/auth/callback', '/welcome', '/paywall', '/verified',
 ];
 
 // Routes where we check auth to redirect logged-in users away,

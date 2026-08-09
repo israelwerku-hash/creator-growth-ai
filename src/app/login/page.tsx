@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowRight, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Mail, Lock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { getLoginRedirectAction } from "@/app/actions/auth";
 
@@ -23,6 +23,64 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const pendingEmailRef = useRef<string | null>(null);
+  const pendingPasswordRef = useRef<string | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // ── Cross-device verification polling ──
+  useEffect(() => {
+    // Only poll when we have a success message and pending credentials
+    if (!success || !pendingEmailRef.current || !pendingPasswordRef.current) {
+      return;
+    }
+
+    const email = pendingEmailRef.current;
+    const password = pendingPasswordRef.current;
+
+    console.log("[Auth] Starting verification polling for:", email);
+
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-verification?email=${encodeURIComponent(email)}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (data.verified) {
+          console.log("[Auth] Email verified! Auto-signing in...");
+          // Stop polling immediately
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+          // Sign in with stored credentials
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+          if (signInError) {
+            console.error("[Auth] Auto-sign-in failed:", signInError.message);
+            setSuccess(null);
+            setError("Email verified but auto-login failed. Please sign in manually.");
+            setIsSignUp(false);
+            pendingEmailRef.current = null;
+            pendingPasswordRef.current = null;
+            return;
+          }
+
+          // Clear pending state and redirect
+          pendingEmailRef.current = null;
+          pendingPasswordRef.current = null;
+          router.refresh();
+          router.push("/onboarding");
+        }
+      } catch (err) {
+        console.warn("[Auth] Polling error (will retry):", err);
+      }
+    }, 3000);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [success, supabase, router]);
 
   const {
     register,
@@ -83,6 +141,10 @@ export default function LoginPage() {
           }
           return;
         }
+
+        // Store credentials for polling auto-sign-in
+        pendingEmailRef.current = data.email;
+        pendingPasswordRef.current = data.password;
 
         // Show confirmation message — user must verify via email
         setSuccess("Check your email! We've sent a verification link to complete setup.");
@@ -173,9 +235,17 @@ export default function LoginPage() {
         )}
         
         {success && (
-          <div className="mb-4 p-3 rounded-lg bg-emerald-950/50 border border-emerald-900 flex items-start gap-2.5 text-emerald-400 text-sm">
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-            <p>{success}</p>
+          <div className="mb-4 p-4 rounded-xl bg-emerald-950/50 border border-emerald-900 text-sm">
+            <div className="flex items-start gap-2.5 text-emerald-400">
+              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+              <p>{success}</p>
+            </div>
+            {pendingEmailRef.current && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-emerald-900/50">
+                <Loader2 className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                <span className="text-xs text-zinc-400">Waiting for email verification...</span>
+              </div>
+            )}
           </div>
         )}
 

@@ -45,6 +45,11 @@ export async function GET(request: NextRequest) {
       next = "/dashboard";
     }
 
+    // Email verification links from signup set next=/onboarding.
+    // Redirect to /verified so the cross-device handoff page is shown.
+    // The user's original PC tab will auto-detect verification via polling.
+    const isEmailVerification = next === "/onboarding";
+
     if (!error) {
       if (data.user) {
         let redirectPath = next;
@@ -79,6 +84,12 @@ export async function GET(request: NextRequest) {
           } catch (dbErr) {
             console.error("Callback DB verification failed:", dbErr);
           }
+        }
+
+        // If this is an email verification flow, send to /verified page
+        // which shows the cross-device handoff message.
+        if (isEmailVerification) {
+          redirectPath = "/verified";
         }
 
         return NextResponse.redirect(new URL(redirectPath, requestUrl.origin));
