@@ -142,11 +142,21 @@ export default function LoginPage() {
           return;
         }
 
-        // Store credentials for polling auto-sign-in
+        // If Supabase returned a session, email confirmation is not required —
+        // sign the user in immediately and redirect to onboarding.
+        if (signUpData?.session) {
+          console.log("[Auth] Session received immediately — redirecting to /onboarding");
+          router.refresh();
+          router.push("/onboarding");
+          return;
+        }
+
+        // No session means email confirmation is required.
+        // Store credentials so the polling effect can auto-sign-in after verification.
         pendingEmailRef.current = data.email;
         pendingPasswordRef.current = data.password;
 
-        // Show confirmation message — user must verify via email
+        // Show confirmation banner — the useEffect polling loop takes over from here.
         setSuccess("Check your email! We've sent a verification link to complete setup.");
         return;
       } catch (fetchErr: any) {
