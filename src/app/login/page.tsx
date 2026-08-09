@@ -13,7 +13,12 @@ import { getLoginRedirectAction } from "@/app/actions/auth";
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address").min(1, "Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-});
+  terms_agreed: z.boolean().optional(),
+}).refine(data => {
+  // If it's a signup (we check this in the form submit handler too), they must agree to terms.
+  // We'll handle the required error message manually in the UI if we want, or just enforce true for signups.
+  return true;
+}, { message: "You must agree to the Terms of Service" });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -121,6 +126,11 @@ export default function LoginPage() {
   };
 
   const handleEmailAuth = async (data: LoginFormValues) => {
+    if (isSignUp && !data.terms_agreed) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+
     console.log("[Auth] Form submitted", { email: data.email, isSignUp });
 
     setError(null);
@@ -134,7 +144,7 @@ export default function LoginPage() {
           email: data.email,
           password: data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/verified`,
           },
         });
 
@@ -312,6 +322,20 @@ export default function LoginPage() {
             </div>
             {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
           </div>
+
+          {isSignUp && (
+            <div className="flex items-start gap-3 mt-4 ml-1">
+              <input 
+                type="checkbox" 
+                id="terms_agreed"
+                {...register("terms_agreed")}
+                className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-app-black"
+              />
+              <label htmlFor="terms_agreed" className="text-xs text-zinc-400 leading-relaxed">
+                By signing up, you agree to our <Link href="/terms" className="text-amber-500 hover:text-amber-400 underline underline-offset-2">Terms of Service</Link> and <Link href="/privacy" className="text-amber-500 hover:text-amber-400 underline underline-offset-2">Privacy Policy</Link>.
+              </label>
+            </div>
+          )}
 
           <button 
             type="submit"

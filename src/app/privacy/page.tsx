@@ -1,62 +1,53 @@
-import React from "react";
+"use client";
+
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-export default function PrivacyPolicyPage() {
+export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-black text-zinc-300 py-20 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
-        <p className="text-sm text-zinc-500">Last Updated: August 2026</p>
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 p-8 md:p-16">
+      <div className="max-w-3xl mx-auto">
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-amber-500 transition-colors mb-12">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-medium">Back</span>
+        </Link>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">1. Introduction</h2>
-          <p>
-            Welcome to Creator Growth AI ("we," "our," or "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy will inform you about how we look after your personal data when you visit our website and use our Chrome Extension, and tell you about your privacy rights and how the law protects you.
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-8">
+          Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">Policy</span>
+        </h1>
+
+        <div className="prose prose-invert prose-amber max-w-none">
+          <p className="text-zinc-400 leading-relaxed text-lg mb-8">
+            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
-        </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">2. Data Collection and Chrome Extension Disclosures</h2>
-          <p>
-            Our Chrome Extension operates by extracting necessary context from your active browser session solely for the purpose of generating personalized AI outreach and analytics. 
-          </p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>We DO NOT collect or store your personal browsing history.</li>
-            <li>Data extraction is strictly limited to the specific fan profiles and chat windows you actively choose to analyze.</li>
-            <li>Your API Key is hashed and stored securely.</li>
-          </ul>
-        </section>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">1. Information We Collect</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              We collect information you provide directly to us when you create an account, subscribe to our service, or communicate with us. This includes your email address, billing information, and usage data.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">3. Third-Party Processing (Supabase, Groq, Upstash)</h2>
-          <p>
-            To provide our services, we utilize industry-leading third-party processors:
-          </p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Supabase:</strong> Used for secure user authentication and encrypted database storage of your Memory Vault items.</li>
-            <li><strong>Groq:</strong> Used as our AI inference engine. We do not use your chat histories to train our own models, and data sent to Groq is processed strictly in accordance with their enterprise data policies.</li>
-            <li><strong>Upstash (Redis & QStash):</strong> Used for secure, ephemeral rate-limiting and asynchronous background job queuing. Job data is automatically purged.</li>
-          </ul>
-        </section>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">2. How We Use Your Information</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              We use the information we collect to provide, maintain, and improve our services, process transactions, and send you technical notices and support messages.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">4. Your GDPR Rights & Right to Erasure</h2>
-          <p>
-            Under the GDPR, you have the right to access, rectify, or erase your personal data. We have implemented a strict cascading deletion mechanism. By deleting your account in our dashboard, all associated Fan records, Memory Vault items, generated metrics, and API keys are permanently and irreversibly purged from our databases.
-          </p>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">5. Contact Us</h2>
-          <p>
-            For any privacy-related questions or data deletion requests, please contact us at support@creatorgrowthai.com.
-          </p>
-        </section>
-
-        <div className="pt-8 border-t border-zinc-800">
-          <Link href="/" className="text-emerald-400 hover:text-emerald-300 transition-colors">
-            &larr; Back to Home
-          </Link>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">3. Data Security</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              We implement appropriate technical and organizational measures to protect the security of your personal information against unauthorized access or disclosure.
+            </p>
+          </section>
+          
+          {/* Placeholder for more terms */}
+          <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 mt-12">
+            <p className="text-amber-400/80 text-sm text-center">
+              This is a placeholder Privacy Policy page. Please consult with legal counsel to draft an appropriate policy for your business.
+            </p>
+          </div>
         </div>
       </div>
     </div>

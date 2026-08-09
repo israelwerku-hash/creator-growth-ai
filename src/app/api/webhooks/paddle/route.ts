@@ -156,26 +156,26 @@ export async function POST(req: Request) {
 
             // Resolve final tier — Agency check FIRST to prevent Pro fallthrough
             let finalTier = "PRO";
-            let creditsToAdd = 500;
+            let creditsToAdd = 2600;
 
             if (isAgencyPrice || tier === "AGENCY") {
               finalTier = "AGENCY";
-              creditsToAdd = 6000;
+              creditsToAdd = 10000;
             } else if (isProPrice || tier === "PRO") {
               finalTier = "PRO";
-              creditsToAdd = 500;
+              creditsToAdd = 2600;
             } else if (!tier && !isAgencyPrice && !isProPrice) {
                console.log(`⚠️ Unrecognized purchase type for user: ${userId}. priceId=${priceId}, tier=${tier}`);
                return NextResponse.json({ received: true }, { status: 200 });
             }
 
-            console.log(`✅ [Tier Resolution] priceId=${priceId} | FINAL: ${finalTier} (Adding ${creditsToAdd} credits)`);
+            console.log(`✅ [Tier Resolution] priceId=${priceId} | FINAL: ${finalTier} (Setting to ${creditsToAdd} credits)`);
 
             await db.creator.upsert({
               where: { id: userId },
               update: {
                 tier: finalTier,
-                aiCredits: { increment: creditsToAdd },
+                aiCredits: creditsToAdd,
                 has_completed_pricing: true,
                 has_completed_onboarding: true,
                 ...(paddleSubscriptionId && { paddleSubscriptionId })

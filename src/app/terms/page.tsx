@@ -1,57 +1,53 @@
-import React from "react";
+"use client";
+
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-export default function TermsOfServicePage() {
+export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black text-zinc-300 py-20 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-white mb-4">Terms of Service</h1>
-        <p className="text-sm text-zinc-500">Last Updated: August 2026</p>
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 p-8 md:p-16">
+      <div className="max-w-3xl mx-auto">
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-amber-500 transition-colors mb-12">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-medium">Back</span>
+        </Link>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">1. Acceptance of Terms</h2>
-          <p>
-            By accessing and using Creator Growth AI, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our platform or Chrome extension.
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-8">
+          Terms of <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">Service</span>
+        </h1>
+
+        <div className="prose prose-invert prose-amber max-w-none">
+          <p className="text-zinc-400 leading-relaxed text-lg mb-8">
+            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
-        </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">2. Subscription Terms & AI Credits</h2>
-          <p>
-            Creator Growth AI operates on a subscription and credit-based model.
-          </p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>AI credits are consumed for actions such as DM Generation, Memory Vault Extraction, and Segmentation.</li>
-            <li>Credits refresh based on your active billing cycle (monthly or yearly). Unused credits do not roll over unless explicitly stated in your tier.</li>
-            <li>We reserve the right to modify the credit cost of specific AI features with 30 days prior notice.</li>
-          </ul>
-        </section>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              By accessing or using Creator Growth AI, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">3. AI Output Disclaimer</h2>
-          <p>
-            The generated direct messages, segmentations, and translations are produced by artificial intelligence. While we strive for high quality, Creator Growth AI does not guarantee the accuracy, appropriateness, or conversion rate of the generated text. You are solely responsible for reviewing and approving all AI-generated content before sending it to your audience.
-          </p>
-        </section>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">2. Description of Service</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              Creator Growth AI provides artificial intelligence tools designed to assist creators with content generation, segmentation, and audience management.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">4. Platform Non-Affiliation</h2>
-          <p>
-            Creator Growth AI is an independent analytics and CRM tool. We are <strong>not affiliated, associated, authorized, endorsed by, or in any way officially connected</strong> with OnlyFans, Fenix International Limited, or any of its subsidiaries or its affiliates. The official OnlyFans website can be found at onlyfans.com.
-          </p>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">5. Account Termination</h2>
-          <p>
-            We reserve the right to suspend or terminate your account immediately, without prior notice or liability, for any reason, including without limitation if you breach these Terms of Service.
-          </p>
-        </section>
-
-        <div className="pt-8 border-t border-zinc-800">
-          <Link href="/" className="text-emerald-400 hover:text-emerald-300 transition-colors">
-            &larr; Back to Home
-          </Link>
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-white mb-4">3. User Conduct</h2>
+            <p className="text-zinc-300 leading-relaxed mb-4">
+              You are responsible for all activity that occurs under your account. You agree not to use the service for any illegal or unauthorized purpose.
+            </p>
+          </section>
+          
+          {/* Placeholder for more terms */}
+          <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 mt-12">
+            <p className="text-amber-400/80 text-sm text-center">
+              This is a placeholder Terms of Service page. Please consult with legal counsel to draft appropriate terms for your business.
+            </p>
+          </div>
         </div>
       </div>
     </div>
