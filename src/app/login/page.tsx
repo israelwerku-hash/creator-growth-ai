@@ -50,24 +50,33 @@ export default function LoginPage() {
           // Stop polling immediately
           if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
 
-          // Sign in with stored credentials
-          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          try {
+            // Sign in with stored credentials
+            const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-          if (signInError) {
-            console.error("[Auth] Auto-sign-in failed:", signInError.message);
+            if (signInError) {
+              console.warn("[Auth] Auto-sign-in failed, switching to sign-in view:", signInError.message);
+              // Silently switch to sign-in mode — no scary error banner
+              setSuccess(null);
+              setIsSignUp(false);
+              pendingEmailRef.current = null;
+              pendingPasswordRef.current = null;
+              return;
+            }
+
+            // Clear pending state and redirect
+            pendingEmailRef.current = null;
+            pendingPasswordRef.current = null;
+            router.refresh();
+            router.push("/onboarding");
+          } catch {
+            // Network error during auto-sign-in — silently fall back
+            console.warn("[Auth] Auto-sign-in network error, switching to sign-in view");
             setSuccess(null);
-            setError("Email verified but auto-login failed. Please sign in manually.");
             setIsSignUp(false);
             pendingEmailRef.current = null;
             pendingPasswordRef.current = null;
-            return;
           }
-
-          // Clear pending state and redirect
-          pendingEmailRef.current = null;
-          pendingPasswordRef.current = null;
-          router.refresh();
-          router.push("/onboarding");
         }
       } catch (err) {
         console.warn("[Auth] Polling error (will retry):", err);
@@ -129,16 +138,26 @@ export default function LoginPage() {
           },
         });
 
-        console.log("[Auth] signUp response:", { user: signUpData?.user?.id, error: signUpError?.message });
+        console.log("[Auth] signUp response:", { user: signUpData?.user?.id, session: !!signUpData?.session, error: signUpError?.message });
 
         if (signUpError) {
           const errMsg = signUpError.message || "Sign up failed. Please try again.";
           if (errMsg.toLowerCase().includes("already registered") || errMsg.toLowerCase().includes("already exists")) {
-            setError("This email is already registered. Please sign in instead.");
+            setError("An account with this email already exists. Please sign in instead.");
             setIsSignUp(false);
           } else {
             setError(errMsg);
           }
+          return;
+        }
+
+        // Guard: Supabase returns user with empty identities[] for existing accounts
+        // (anti-enumeration behavior). Treat as "already registered" — do NOT start polling.
+        const identities = signUpData?.user?.identities;
+        if (signUpData?.user && (!identities || identities.length === 0)) {
+          console.log("[Auth] Detected existing account (empty identities). Switching to sign-in.");
+          setError("An account with this email already exists. Please sign in instead.");
+          setIsSignUp(false);
           return;
         }
 
