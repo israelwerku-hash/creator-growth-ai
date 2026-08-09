@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { TIER_CREDITS } from "@/lib/constants/pricing";
 
 export async function getUserTierAction() {
   try {
@@ -25,7 +26,7 @@ export async function activateFreePlanAction() {
       where: { id: user.id },
       update: {
         tier: "FREE",
-        aiCredits: 50,
+        aiCredits: TIER_CREDITS.FREE,
         has_completed_pricing: true,
         has_completed_onboarding: true,
       },
@@ -33,7 +34,7 @@ export async function activateFreePlanAction() {
         id: user.id,
         email: user.email!,
         tier: "FREE",
-        aiCredits: 50,
+        aiCredits: TIER_CREDITS.FREE,
         has_completed_onboarding: true,
         has_completed_pricing: true,
       },
@@ -55,7 +56,7 @@ export async function activatePremiumPlanAction() {
       where: { id: user.id },
       update: {
         tier: "PRO",
-        aiCredits: 500,
+        aiCredits: TIER_CREDITS.PRO,
         has_completed_pricing: true,
         has_completed_onboarding: true,
       },
@@ -63,7 +64,7 @@ export async function activatePremiumPlanAction() {
         id: user.id,
         email: user.email!,
         tier: "PRO",
-        aiCredits: 500,
+        aiCredits: TIER_CREDITS.PRO,
         has_completed_onboarding: true,
         has_completed_pricing: true,
       },
@@ -85,7 +86,7 @@ export async function activateAgencyPlanAction() {
       where: { id: user.id },
       update: {
         tier: "AGENCY",
-        aiCredits: 6000,
+        aiCredits: TIER_CREDITS.AGENCY,
         has_completed_pricing: true,
         has_completed_onboarding: true,
       },
@@ -93,7 +94,7 @@ export async function activateAgencyPlanAction() {
         id: user.id,
         email: user.email!,
         tier: "AGENCY",
-        aiCredits: 6000,
+        aiCredits: TIER_CREDITS.AGENCY,
         has_completed_onboarding: true,
         has_completed_pricing: true,
       },

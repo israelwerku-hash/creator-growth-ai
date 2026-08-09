@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, X, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -40,10 +41,18 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
     }
   };
 
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 antialiased">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 antialiased">
           
           {/* Backdrop */}
           <motion.div
@@ -51,7 +60,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={!isDeleting ? onClose : undefined}
-            className="absolute inset-0 bg-[#04060A]/80 backdrop-blur-xl"
+            className="absolute inset-0"
           />
 
           {/* Modal Card */}
@@ -120,6 +129,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

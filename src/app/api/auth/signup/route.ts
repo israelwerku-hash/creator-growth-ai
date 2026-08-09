@@ -4,6 +4,7 @@ import { db as prisma } from "@/lib/db";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { isDisposableEmail } from "@/lib/security/validate-email";
+import { TIER_CREDITS } from "@/lib/constants/pricing";
 
 // Use Service Role Key for admin operations (auto-confirm, bypass email verification)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
           id: userId,
           email: sanitizedEmail,
           name: name ?? null,
-          aiCredits: 100,
+          aiCredits: TIER_CREDITS.FREE,
         },
       });
     } catch (dbError: any) {

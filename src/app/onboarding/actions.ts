@@ -1,6 +1,7 @@
 "use server";
 import { db as prisma } from "@/lib/db";
 import { getSession } from "@/utils/supabase/server";
+import { TIER_CREDITS } from "@/lib/constants/pricing";
 
 export async function autoHealCreatorAction() {
   try {
@@ -17,7 +18,7 @@ export async function autoHealCreatorAction() {
         email: session?.user?.email || "",
         name: session?.user?.user_metadata?.name || "Creator",
         tier: "FREE",
-        aiCredits: 50,
+        aiCredits: TIER_CREDITS.FREE,
         has_completed_onboarding: false,
         has_completed_pricing: false,
       }
@@ -47,7 +48,7 @@ export async function completeOnboardingAction(answers: Record<string, string>) 
         email: session?.user?.email || "",
         name: session?.user?.user_metadata?.name || "Creator",
         tier: "FREE",
-        aiCredits: 50,
+        aiCredits: TIER_CREDITS.FREE,
         has_completed_onboarding: true,
         has_completed_pricing: false,
       }
