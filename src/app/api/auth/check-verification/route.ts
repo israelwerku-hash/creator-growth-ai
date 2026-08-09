@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       });
 
       const matchingUser = allUsersData?.users?.find(
-        (u) => u.email?.toLowerCase() === sanitizedEmail
+        (u: { email?: string }) => u.email?.toLowerCase() === sanitizedEmail
       );
 
       if (!matchingUser) {
