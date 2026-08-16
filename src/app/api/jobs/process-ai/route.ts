@@ -97,7 +97,7 @@ Return ONLY valid JSON.`;
       // --- TIER 1 ---
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama-3.1-8b-instant",
+        model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
         temperature: 0.7,
         max_tokens: 300,
         response_format: { type: "json_object" }

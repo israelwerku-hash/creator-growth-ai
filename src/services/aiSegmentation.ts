@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const MODEL = "llama-3.1-8b-instant";
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 // 🚀 BYPASS SWITCH: Set to true to test for free without API keys or limits
 const MOCK_MODE = false; 

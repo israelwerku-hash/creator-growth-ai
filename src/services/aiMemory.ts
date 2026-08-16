@@ -7,7 +7,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY! 
 });
 
-const MODEL = "llama-3.1-8b-instant";
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 // ... rest of your aiMemory.ts code remains exactly the same
 // --- BASIC MEMORY FUNCTIONS ---
