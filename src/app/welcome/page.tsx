@@ -16,7 +16,7 @@ function WelcomeContent() {
 
   useEffect(() => {
     const updatePremiumStatus = async () => {
-      // Because local testing doesn't receive Paddle webhooks, 
+      // Because local testing doesn't receive Whop webhooks, 
       // we manually trigger the DB upgrade via server action here.
       if (isAgency) {
         await activateAgencyPlanAction();

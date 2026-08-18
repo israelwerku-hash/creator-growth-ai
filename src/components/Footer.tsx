@@ -13,7 +13,7 @@ export function Footer() {
               The elite AI-powered CRM and outreach platform for top 1% creators. Understand your fans, automate DMs, and scale revenue instantly.
             </p>
             <p className="text-zinc-500 text-xs mt-4">
-              Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and returns.
+              Our order process is conducted by our online reseller Whop.com. Whop.com is the Merchant of Record for all our orders. Whop provides all customer service inquiries and returns.
             </p>
           </div>
 

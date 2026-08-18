@@ -9,18 +9,30 @@ export async function deleteAccountAction() {
   try {
     const user = await requireAuth();
 
-    // 1. Fetch user data (Paddle subscription ID would be stored here if applicable, 
-    // though the current schema doesn't store a explicit subscription_id yet. 
-    // In a real integration, we'd query Paddle's API to cancel active subs.)
+    // 1. Fetch membership ID for Whop cancellation
     const creator = await db.creator.findUnique({
       where: { id: user.id },
       select: { paddleSubscriptionId: true },
     });
 
-    if (creator) {
-      // NOTE: Here you would call Paddle's API to cancel the subscription:
-      // await cancelPaddleSubscription(creator.subscriptionId, { effective_from: 'immediately' });
-      // Since there's no paddle backend client configured in this codebase, we simulate the DB wipe.
+    if (creator?.paddleSubscriptionId) {
+      // Cancel Whop membership via API
+      const whopApiKey = process.env.WHOP_API_KEY;
+      if (whopApiKey) {
+        try {
+          await fetch(`https://api.whop.com/api/v2/memberships/${creator.paddleSubscriptionId}`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${whopApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ action: "cancel" }),
+          });
+          console.log(`[deleteAccountAction] Whop membership cancelled: ${creator.paddleSubscriptionId}`);
+        } catch (whopErr) {
+          console.error("[deleteAccountAction] Whop cancellation failed (non-fatal):", whopErr);
+        }
+      }
     }
 
     // 2. Wipe Prisma DB (Cascade deletes Fan, Metric, Goal, etc.)
@@ -28,12 +40,7 @@ export async function deleteAccountAction() {
       where: { id: user.id },
     });
 
-    // 3. Delete Supabase Auth User
-    // Need service role key to delete users via admin API.
-    // As a fallback for this demo, we'll just log them out since we don't have the service role key available here.
-    // But ideally: await supabaseAdmin.auth.admin.deleteUser(user.id);
-    
-    // 4. Log out the session
+    // 3. Log out the session
     const supabase = await createClient();
     await supabase.auth.signOut();
 

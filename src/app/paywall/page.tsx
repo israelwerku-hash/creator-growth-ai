@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Lock, Zap, Crown, Building2, Loader2, X } from "lucide-react";
-import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
+import { CheckCircle2, Lock, Zap, Crown, Building2, Loader2, X, ArrowRight } from "lucide-react";
 import { activateFreePlanAction } from "@/app/dashboard/actions";
 import { createClient } from "@/utils/supabase/client";
 
@@ -32,6 +31,25 @@ export default function PaywallPage() {
     }
   };
 
+  // Whop plan IDs mapped by toggle state
+  const whopPlanIds = {
+    proMonthly: process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || "plan_FoNiy1itUo9zU",
+    proAnnual: process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || "plan_K8zNMMW1INY9u",
+    agencyMonthly: process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || "plan_CBRF1UZk35x39",
+    agencyAnnual: process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "plan_1HGEvyOehwXBc",
+  };
+
+  const handleWhopCheckout = (tier: "PRO" | "AGENCY") => {
+    let planId: string;
+    if (tier === "PRO") {
+      planId = isAnnual ? whopPlanIds.proAnnual : whopPlanIds.proMonthly;
+    } else {
+      planId = isAnnual ? whopPlanIds.agencyAnnual : whopPlanIds.agencyMonthly;
+    }
+    const checkoutUrl = `https://whop.com/checkout/${planId}${userId ? `?metadata[userId]=${userId}` : ""}`;
+    window.open(checkoutUrl, "_blank");
+  };
+
   useEffect(() => {
     if (loadingTier) {
       const timer = setTimeout(() => {
@@ -40,14 +58,6 @@ export default function PaywallPage() {
       return () => clearTimeout(timer);
     }
   }, [loadingTier, router]);
-
-  // Map env price IDs for clean access
-  const priceIds = {
-    proMonthly: process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_ID ?? "pri_pro_mo",
-    proAnnual: process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_ID ?? "pri_pro_yr",
-    agencyMonthly: process.env.NEXT_PUBLIC_PADDLE_AGENCY_MONTHLY_ID ?? "pri_agency_mo",
-    agencyAnnual: process.env.NEXT_PUBLIC_PADDLE_AGENCY_YEARLY_ID ?? "pri_agency_yr",
-  };
 
   if (loadingTier) {
     return (
@@ -111,7 +121,7 @@ export default function PaywallPage() {
       {/* Pricing Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full items-stretch">
 
-        {/* ──────────── CARD 1: FREE TIER ──────────── */}
+        {/* CARD 1: FREE TIER */}
         <div className="bg-[#0a0a0a] border border-zinc-800/80 rounded-[2rem] p-8 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-3 mb-6">
@@ -120,14 +130,12 @@ export default function PaywallPage() {
               </div>
               <h3 className="text-lg font-bold text-zinc-300">Free Tier</h3>
             </div>
-
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-5xl font-black tracking-tight">$0</span>
             </div>
             <p className="text-sm text-zinc-500 mb-8 pb-6 border-b border-zinc-800/50 font-medium">
               Forever free — no credit card required
             </p>
-
             <ul className="space-y-4 mb-8">
               <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium">
                 <CheckCircle2 className="w-4 h-4 text-zinc-400 shrink-0" />
@@ -151,7 +159,6 @@ export default function PaywallPage() {
               </li>
             </ul>
           </div>
-
           <button
             onClick={handleFreeActivation}
             disabled={isActivatingFree}
@@ -161,15 +168,12 @@ export default function PaywallPage() {
           </button>
         </div>
 
-        {/* ──────────── CARD 2: PRO TIER (MOST POPULAR) ──────────── */}
+        {/* CARD 2: PRO TIER (MOST POPULAR) */}
         <div className="relative bg-[#0A0A0A] border border-neutral-800 rounded-[2rem] p-8 flex flex-col justify-between shadow-[0_0_40px_rgba(128,0,32,0.15)] md:-translate-y-3">
-          {/* Glow overlay */}
           <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-[#800020]/10 to-transparent pointer-events-none" />
-          {/* Badge */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black text-[10px] font-bold px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] uppercase tracking-wider">
             Most Popular
           </div>
-
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-[#800020]/20 border border-[#800020]/50 flex items-center justify-center">
@@ -177,7 +181,6 @@ export default function PaywallPage() {
               </div>
               <h3 className="text-lg font-bold text-white">Pro Access</h3>
             </div>
-
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-5xl font-black tracking-tight">
                 ${isAnnual ? "49" : "59"}
@@ -187,7 +190,6 @@ export default function PaywallPage() {
             <p className="text-sm text-zinc-400 mb-6 font-medium">
               {isAnnual ? "Billed annually at $588/yr" : "Billed monthly — cancel anytime"}
             </p>
-
             <div className="bg-[#111111] border border-neutral-800/80 rounded-xl p-4 mb-8 flex items-center justify-between shadow-inner">
               <div className="flex items-center gap-2.5">
                 <Zap className="w-4 h-4 text-[#800020]" />
@@ -195,7 +197,6 @@ export default function PaywallPage() {
               </div>
               <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Monthly</span>
             </div>
-
             <ul className="space-y-5 mb-8">
               <li className="flex items-start gap-3 text-sm">
                 <X className="w-4 h-4 text-[#800020] shrink-0 mt-0.5" />
@@ -220,17 +221,15 @@ export default function PaywallPage() {
               </li>
             </ul>
           </div>
-
-          <PaddleCheckoutButton
-            priceId={isAnnual ? priceIds.proAnnual : priceIds.proMonthly}
-            label="Activate Growth Engine"
-            variant="primary"
-            userId={userId}
-            onTriggerLoading={(plan) => setLoadingTier(plan || "PRO")}
-          />
+          <button
+            onClick={() => handleWhopCheckout("PRO")}
+            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+          >
+            Activate Growth Engine <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* ──────────── CARD 3: AGENCY TIER ──────────── */}
+        {/* CARD 3: AGENCY TIER */}
         <div className="bg-[#0a0a0a] border border-zinc-800/80 rounded-[2rem] p-8 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-3 mb-6">
@@ -239,7 +238,6 @@ export default function PaywallPage() {
               </div>
               <h3 className="text-lg font-bold text-zinc-300">Agency Tier</h3>
             </div>
-
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-5xl font-black tracking-tight">
                 ${isAnnual ? "149" : "199"}
@@ -249,7 +247,6 @@ export default function PaywallPage() {
             <p className="text-sm text-zinc-500 mb-8 pb-6 border-b border-zinc-800/50 font-medium">
               {isAnnual ? "Billed annually at $1,788/yr" : "Billed monthly — cancel anytime"}
             </p>
-
             <ul className="space-y-5 mb-8">
               <li className="flex items-center gap-3 text-sm text-zinc-300 font-medium pb-2 border-b border-neutral-800/60">
                 <Zap className="w-4 h-4 text-white shrink-0" />
@@ -278,16 +275,13 @@ export default function PaywallPage() {
               </li>
             </ul>
           </div>
-
-          <PaddleCheckoutButton
-            priceId={isAnnual ? priceIds.agencyAnnual : priceIds.agencyMonthly}
-            label="Delegate & Scale Now"
-            variant="secondary"
-            userId={userId}
-            onTriggerLoading={(plan) => setLoadingTier(plan || "AGENCY")}
-          />
+          <button
+            onClick={() => handleWhopCheckout("AGENCY")}
+            className="w-full py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border border-zinc-800 hover:bg-zinc-900"
+          >
+            Delegate & Scale Now <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-
       </div>
 
       {/* Skip / Free CTA */}

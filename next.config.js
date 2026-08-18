@@ -35,7 +35,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; frame-src 'self' https://sandbox-buy.paddle.com https://buy.paddle.com https://*.paddle.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com; style-src 'self' 'unsafe-inline' https://sandbox-cdn.paddle.com https://cdn.paddle.com https://fonts.googleapis.com https://*.paddle.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://sandbox-api.paddle.com https://api.paddle.com https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com https://*.sentry.io wss:; img-src 'self' data: blob: https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.paddle.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:;",
+            value: "default-src 'self'; frame-src 'self' https://whop.com https://*.whop.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://whop.com https://*.whop.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.whop.com https://whop.com https://*.whop.com https://*.sentry.io wss:; img-src 'self' data: blob: https://whop.com https://*.whop.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:;",
           },
         ],
       },

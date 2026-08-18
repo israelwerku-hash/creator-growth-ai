@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Check, Crown, Zap, Shield,
   MessageSquare, Users, Lock
 } from "lucide-react";
-import { initializePaddle, Paddle } from "@paddle/paddle-js";
 import { createClient } from "@/utils/supabase/client";
 import { activateFreePlanAction } from "@/app/dashboard/actions";
 import { useRouter } from "next/navigation";
@@ -19,30 +18,22 @@ interface PaywallModalProps {
 export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [paddle, setPaddle] = useState<Paddle | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [selectedPlan, setSelectedPlan] = useState<"free" | "pro" | "agency">("pro");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize Paddle when modal opens
-  useEffect(() => {
-    if (!isOpen) return;
-    const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
-    if (!token || paddle) return;
-
-    initializePaddle({
-      environment: "sandbox",
-      token,
-    }).then((instance) => {
-      if (instance) setPaddle(instance);
-    });
-  }, [isOpen, paddle]);
+  // Whop plan IDs
+  const whopPlanIds = {
+    proMonthly: process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || "plan_FoNiy1itUo9zU",
+    proAnnual: process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || "plan_K8zNMMW1INY9u",
+    agencyMonthly: process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || "plan_CBRF1UZk35x39",
+    agencyAnnual: process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "plan_1HGEvyOehwXBc",
+  };
 
   const handleAction = async () => {
     setIsLoading(true);
     try {
       if (selectedPlan === "free") {
-        // ─── FREE TIER: server action ───
         const result = await activateFreePlanAction();
         if (result?.success) {
           onClose();
@@ -51,7 +42,7 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
           alert(result?.error || "Could not activate the free plan.");
         }
       } else {
-        // ─── PRO / AGENCY: Paddle checkout ───
+        // ─── PRO / AGENCY: Whop checkout ───
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           onClose();
@@ -59,47 +50,15 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
           return;
         }
 
-        if (!paddle) {
-          alert("Payment system is still loading. Please wait a moment and try again.");
-          return;
-        }
-
-        // Pick price ID
-        let chosenPriceId = "";
+        let planId: string;
         if (selectedPlan === "pro") {
-          chosenPriceId = billingCycle === "monthly"
-            ? (process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_ID || "")
-            : (process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_ID || "");
+          planId = billingCycle === "monthly" ? whopPlanIds.proMonthly : whopPlanIds.proAnnual;
         } else {
-          chosenPriceId = billingCycle === "monthly"
-            ? (process.env.NEXT_PUBLIC_PADDLE_AGENCY_MONTHLY_ID || "")
-            : (process.env.NEXT_PUBLIC_PADDLE_AGENCY_YEARLY_ID || "");
+          planId = billingCycle === "monthly" ? whopPlanIds.agencyMonthly : whopPlanIds.agencyAnnual;
         }
 
-        if (!chosenPriceId) {
-          alert("Pricing configuration error. Please contact support.");
-          console.error(`Missing env var for ${selectedPlan} ${billingCycle} price ID`);
-          return;
-        }
-
-        // Open Paddle overlay checkout
-        paddle.Checkout.open({
-          items: [{ priceId: chosenPriceId, quantity: 1 }],
-          customer: {
-            email: user.email || "",
-          },
-          customData: {
-            userId: user.id,
-            planSelected: selectedPlan.toUpperCase(),
-          },
-          settings: {
-            displayMode: "overlay",
-            theme: "dark",
-            locale: "en",
-          },
-        });
-
-        // Close the paywall modal so the Paddle overlay shows
+        const checkoutUrl = `https://whop.com/checkout/${planId}?metadata[userId]=${user.id}`;
+        window.open(checkoutUrl, "_blank");
         onClose();
       }
     } catch (error) {
@@ -152,7 +111,6 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 <div className="inline-flex items-center gap-1.5 bg-[#7B2CBF]/10 border border-[#7B2CBF]/30 text-[#C199F9] px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-widest uppercase">
                   <Crown className="w-3 h-3 text-[#00F5D4]" /> Core Matrix
                 </div>
-
                 <div className="space-y-2">
                   <h3 className="text-xl font-extrabold text-[#F1F5F9] tracking-tight leading-tight">
                     Scale Infrastructure Access
@@ -161,7 +119,6 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     Deploy hyper-targeted automation to manage and convert your audience dynamically.
                   </p>
                 </div>
-
                 <div className="space-y-2.5 pt-2">
                   <div className="text-[10px] font-bold text-[#415375] tracking-widest uppercase">
                     TIER OPERATION PROTOCOLS
@@ -180,11 +137,10 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                   </div>
                 </div>
               </div>
-
               <div className="mt-8 md:mt-0 pt-4 flex items-center gap-2 border-t border-[#141A29]">
                 <Shield className="w-4 h-4 text-[#415375]" />
                 <span className="text-[10px] text-[#415375] font-semibold tracking-wide uppercase">
-                  Secured Transaction via Paddle
+                  Secured Transaction via Whop
                 </span>
               </div>
             </div>
@@ -215,7 +171,6 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
 
               {/* Plan Cards */}
               <div className="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
-
                 {/* FREE PLAN */}
                 <div
                   onClick={() => !isLoading && setSelectedPlan("free")}
@@ -295,7 +250,6 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     </span>
                   </div>
                 </div>
-
               </div>
 
               {/* Action Button */}
@@ -323,7 +277,6 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
               >
                 No thanks, I&apos;ll decide later
               </button>
-
             </div>
 
           </motion.div>

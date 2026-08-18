@@ -44,9 +44,9 @@ export async function GET(request: Request) {
       try {
         const payload = event.payload as any;
 
-        // If it's a Paddle event, the original data is inside payload.data
+        // If it's a Whop event, the original data is inside payload.data
         const eventData = payload.data;
-        const eventType = payload.eventType;
+        const eventType = payload.eventType || payload.event || payload.action;
         const creatorId = eventData?.customData?.creatorId as string | undefined;
 
         if (!creatorId) {
@@ -54,13 +54,17 @@ export async function GET(request: Request) {
         }
 
         switch (eventType) {
+          case "membership.went_valid":
+          case "payment.succeeded":
           case "transaction.completed": {
-            const priceId = eventData?.items?.[0]?.price?.id;
+            const planId = eventData?.plan_id || eventData?.plan?.id || eventData?.items?.[0]?.price?.id;
             
             let newTier = "FREE";
-            if (priceId === process.env.NEXT_PUBLIC_PADDLE_PRO_MONTHLY_ID || priceId === process.env.NEXT_PUBLIC_PADDLE_PRO_YEARLY_ID) {
+            const proPlanIds = [process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID, process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID];
+            const agencyPlanIds = [process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID, process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID];
+            if (proPlanIds.includes(planId)) {
               newTier = "PRO";
-            } else if (priceId === process.env.NEXT_PUBLIC_PADDLE_AGENCY_MONTHLY_ID || priceId === process.env.NEXT_PUBLIC_PADDLE_AGENCY_YEARLY_ID) {
+            } else if (agencyPlanIds.includes(planId)) {
               newTier = "AGENCY";
             }
 
@@ -79,7 +83,7 @@ export async function GET(request: Request) {
                 data: {
                   creatorId,
                   amount,
-                  source: `Paddle Subscription (${newTier})`,
+                  source: `Whop Subscription (${newTier})`,
                 },
               });
             }
@@ -89,11 +93,13 @@ export async function GET(request: Request) {
               creatorId,
               tierAssigned: newTier,
               revenueAmount: amount,
-              paddleEventId: event.id
+              whopEventId: event.id
             });
             break;
           }
 
+          case "membership.went_invalid":
+          case "membership.cancelled":
           case "subscription.canceled": {
             await db.creator.update({
               where: { id: creatorId },
@@ -104,7 +110,7 @@ export async function GET(request: Request) {
             await createAuditLog("SYSTEM_WEBHOOK", "SUBSCRIPTION_CANCELED", {
               creatorId,
               tierAssigned: "FREE",
-              paddleEventId: event.id
+              whopEventId: event.id
             });
             break;
           }

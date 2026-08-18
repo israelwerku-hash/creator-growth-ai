@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import {
   Zap,
   Loader2,
@@ -15,30 +14,8 @@ import {
   Receipt,
   ArrowRight,
   CreditCard,
-  AlertTriangle,
 } from "lucide-react";
 import { getUserTierAction } from "@/app/dashboard/actions";
-
-// ─── PADDLE CONFIG ──────────────────────────────────────────────────────────
-// 🔑 HOW TO SET UP:
-//
-// 1. Go to your Paddle Sandbox Dashboard → Catalog → Products → Create a Product
-//    for each credit bundle ("Starter Bundle", "Growth Pack", "Elite Vault").
-//
-// 2. Under each Product, create a one-time Price. Paddle will generate a
-//    price ID like "pri_01j..." — copy that value.
-//
-// 3. Paste each price ID into your .env.local file:
-//
-//    NEXT_PUBLIC_PADDLE_STARTER_PRICE_ID=pri_01j...your_real_id...
-//    NEXT_PUBLIC_PADDLE_GROWTH_PRICE_ID=pri_01j...your_real_id...
-//    NEXT_PUBLIC_PADDLE_ELITE_PRICE_ID=pri_01j...your_real_id...
-//
-// 4. Your client token should be set in .env.local:
-//    NEXT_PUBLIC_PADDLE_CLIENT_TOKEN=your_client_token_here
-//
-// 5. Restart `npm run dev` after editing .env.local for changes to take effect.
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ─── PRODUCT CONFIG ─────────────────────────────────────────────────────────
 const CREDIT_PACKAGES = [
@@ -50,8 +27,7 @@ const CREDIT_PACKAGES = [
     priceCents: 999,
     tagline: "Perfect for testing the waters",
     badge: null,
-    // ⚠️ Replace with your REAL Paddle sandbox price ID (pri_01j...)
-    paddlePriceId: process.env.NEXT_PUBLIC_PADDLE_STARTER_PRICE_ID || "",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || "plan_EcrupRkcyUBbY",
     features: [
       "150 AI execution credits",
       "Access all standard features",
@@ -67,8 +43,7 @@ const CREDIT_PACKAGES = [
     priceCents: 2499,
     tagline: "Best for daily active creators",
     badge: "Most Popular",
-    // ⚠️ Replace with your REAL Paddle sandbox price ID (pri_01j...)
-    paddlePriceId: process.env.NEXT_PUBLIC_PADDLE_GROWTH_PRICE_ID || "",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || "plan_3RZaGXuKIGBkG",
     features: [
       "500 AI execution credits",
       "Best value per credit",
@@ -84,8 +59,7 @@ const CREDIT_PACKAGES = [
     priceCents: 5999,
     tagline: "Designed for power users & agencies",
     badge: null,
-    // ⚠️ Replace with your REAL Paddle sandbox price ID (pri_01j...)
-    paddlePriceId: process.env.NEXT_PUBLIC_PADDLE_ELITE_PRICE_ID || "",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || "plan_YeAEmJVsE2pve",
     features: [
       "1,500 AI execution credits",
       "Maximum volume capacity",
@@ -102,63 +76,16 @@ export default function BillingPage() {
   const [tier, setTier] = useState<string>("FREE");
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
-  const [paddleReady, setPaddleReady] = useState(false);
-  const [paddleError, setPaddleError] = useState<string | null>(null);
-
-  // ── Paddle Event Callback (debug all events) ──
-  const handlePaddleEvent = useCallback((event: any) => {
-    console.log("[Paddle Event]", event.name || event.type || "unknown", event);
-
-    switch (event.name) {
-      case "checkout.loaded":
-        console.log("✅ [Paddle] Checkout overlay loaded successfully.");
-        break;
-      case "checkout.completed":
-        console.log("✅ [Paddle] Payment completed!", event.data);
-        router.refresh();
-        break;
-      case "checkout.closed":
-        console.log("ℹ️ [Paddle] Checkout overlay was closed by user.");
-        setPurchasingId(null);
-        break;
-      case "checkout.error":
-        console.error("❌ [Paddle] Checkout error:", event.data);
-        setPaddleError(
-          `Paddle checkout error: ${event.data?.error?.detail || event.data?.error?.code || JSON.stringify(event.data)}`
-        );
-        setPurchasingId(null);
-        break;
-      case "checkout.warning":
-        console.warn("⚠️ [Paddle] Checkout warning:", event.data);
-        break;
-      case "checkout.customer.created":
-        console.log("✅ [Paddle] Customer created:", event.data);
-        break;
-      case "checkout.payment.initiated":
-        console.log("💳 [Paddle] Payment initiated:", event.data);
-        break;
-      case "checkout.payment.failed":
-        console.error("❌ [Paddle] Payment failed:", event.data);
-        setPaddleError("Payment was declined. Please try a different card.");
-        setPurchasingId(null);
-        break;
-      default:
-        console.log(`[Paddle] Unhandled event: ${event.name}`, event);
-    }
-  }, [router]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Fetch tier and userId
         const tierRes = await getUserTierAction();
         if (tierRes.success) {
           if (tierRes.tier) setTier(tierRes.tier);
           if (tierRes.userId) setUserId(tierRes.userId);
         }
 
-        // Fetch credits
         const res = await fetch("/api/admin/proxy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -178,93 +105,9 @@ export default function BillingPage() {
     init();
   }, []);
 
-  // ── Initialize Paddle SDK after script loads ──
-  const initializePaddle = useCallback(() => {
-    if (!window.Paddle) {
-      console.error("❌ [Paddle] window.Paddle is undefined after script load.");
-      setPaddleError("Paddle SDK failed to attach to window.");
-      return;
-    }
-
-    const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
-    const environment = process.env.NEXT_PUBLIC_PADDLE_ENV || "sandbox";
-
-    console.log("[Paddle Init] Environment:", environment);
-    console.log("[Paddle Init] Client Token:", clientToken ? `${clientToken.substring(0, 12)}...` : "⚠️ MISSING");
-
-    if (!clientToken) {
-      setPaddleError(
-        "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN is not set in .env.local. " +
-        "Go to Paddle Dashboard → Developer Tools → Authentication → copy your client-side token."
-      );
-      return;
-    }
-
-    try {
-      window.Paddle.Environment.set(environment as any);
-      window.Paddle.Initialize({
-        token: clientToken,
-        eventCallback: handlePaddleEvent,
-      });
-
-      console.log("✅ [Paddle] SDK initialized successfully in", environment, "mode.");
-      setPaddleReady(true);
-    } catch (err: any) {
-      console.error("❌ [Paddle] Initialization failed:", err);
-      setPaddleError(`Paddle initialization error: ${err.message}`);
-    }
-  }, [handlePaddleEvent]);
-
-  const handlePurchase = async (pkg: (typeof CREDIT_PACKAGES)[number]) => {
-    setPurchasingId(pkg.id);
-    setPaddleError(null);
-
-    try {
-      // ── Pre-flight checks ──
-      if (!userId) {
-        throw new Error("Authentication error: User ID is missing. Please refresh the page and ensure you are logged in.");
-      }
-
-      if (!window.Paddle) {
-        throw new Error("Paddle SDK is not loaded. Please refresh the page.");
-      }
-
-      if (!paddleReady) {
-        throw new Error("Paddle SDK has not finished initializing. Please wait a moment and try again.");
-      }
-
-      if (!pkg.paddlePriceId) {
-        throw new Error(
-          `No Paddle Price ID configured for "${pkg.name}". ` +
-          `Set NEXT_PUBLIC_PADDLE_${pkg.id === "starter_bundle" ? "STARTER" : pkg.id === "growth_pack" ? "GROWTH" : "ELITE"}_PRICE_ID ` +
-          `in your .env.local file with a real pri_xxx ID from your Paddle dashboard.`
-        );
-      }
-
-      console.log(`[Billing] Opening Paddle checkout for "${pkg.name}"...`);
-      console.log(`[Billing] Price ID: ${pkg.paddlePriceId}`);
-      console.log(`[Billing] User ID for webhook: ${userId}`);
-
-      // ── Open Paddle V2 Checkout Overlay ──
-      window.Paddle.Checkout.open({
-        items: [
-          {
-            priceId: pkg.paddlePriceId,
-            quantity: 1,
-          },
-        ],
-        customData: {
-          userId: userId,
-          creditAmount: pkg.credits.toString(),
-          planSelected: pkg.id,
-        },
-      });
-
-    } catch (err: any) {
-      console.error("❌ [Billing] Purchase error:", err);
-      setPaddleError(err.message);
-      setPurchasingId(null);
-    }
+  const handlePurchase = (pkg: (typeof CREDIT_PACKAGES)[number]) => {
+    const checkoutUrl = `https://whop.com/checkout/${pkg.whopPlanId}${userId ? `?metadata[userId]=${userId}` : ""}`;
+    window.open(checkoutUrl, "_blank");
   };
 
   const isPremium = tier === "PRO" || tier === "AGENCY" || tier === "PREMIUM";
@@ -279,16 +122,6 @@ export default function BillingPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
-      {/* ── Paddle SDK Injector ── */}
-      <Script
-        src="https://cdn.paddle.com/paddle/v2/paddle.js"
-        strategy="afterInteractive"
-        onLoad={initializePaddle}
-        onError={(e) => {
-          console.error("❌ [Paddle] Script failed to load:", e);
-          setPaddleError("Paddle.js script failed to load. Check your network/ad-blocker.");
-        }}
-      />
 
       {/* ── Page Header ── */}
       <header>
@@ -299,17 +132,6 @@ export default function BillingPage() {
           Top up your AI execution credits to keep your growth engine running.
         </p>
       </header>
-
-      {/* ── Paddle Debug Banner ── */}
-      {paddleError && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-950/30 border border-amber-800/40">
-          <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-amber-400 mb-1">Paddle Configuration Issue</p>
-            <p className="text-xs text-amber-300/70 leading-relaxed">{paddleError}</p>
-          </div>
-        </div>
-      )}
 
       {/* ── Current Balance Card ── */}
       <div className="bg-neutral-950/60 border border-neutral-800/60 rounded-2xl p-6 sm:p-8 relative overflow-hidden">
@@ -369,8 +191,6 @@ export default function BillingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {CREDIT_PACKAGES.map((pkg) => {
             const isPopular = pkg.badge === "Most Popular";
-            const isProcessing = purchasingId === pkg.id;
-            const missingPriceId = !pkg.paddlePriceId;
 
             return (
               <div
@@ -407,39 +227,19 @@ export default function BillingPage() {
                     }`}
                   >
                     {pkg.id === "starter_bundle" && (
-                      <Sparkles
-                        className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`}
-                      />
+                      <Sparkles className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`} />
                     )}
                     {pkg.id === "growth_pack" && (
-                      <TrendingUp
-                        className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`}
-                      />
+                      <TrendingUp className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`} />
                     )}
                     {pkg.id === "elite_vault" && (
-                      <Shield
-                        className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`}
-                      />
+                      <Shield className={`w-5 h-5 ${isPopular ? "text-[#c46b6b]" : "text-neutral-500"}`} />
                     )}
                   </div>
 
                   {/* Name & Tagline */}
-                  <h3 className="text-base font-bold text-white mb-1">
-                    {pkg.name}
-                  </h3>
+                  <h3 className="text-base font-bold text-white mb-1">{pkg.name}</h3>
                   <p className="text-xs text-neutral-600 mb-5">{pkg.tagline}</p>
-
-                  {/* Missing Price ID Warning */}
-                  {missingPriceId && (
-                    <div className="mb-4 flex items-start gap-2 p-3 rounded-lg bg-amber-950/20 border border-amber-900/30">
-                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-                      <p className="text-[10px] text-amber-500/80 leading-relaxed">
-                        Missing env var. Set <code className="text-amber-400 font-mono">
-                        NEXT_PUBLIC_PADDLE_{pkg.id === "starter_bundle" ? "STARTER" : pkg.id === "growth_pack" ? "GROWTH" : "ELITE"}_PRICE_ID
-                        </code> in <code className="text-amber-400 font-mono">.env.local</code>
-                      </p>
-                    </div>
-                  )}
 
                   {/* Pricing Block */}
                   <div className="mb-6">
@@ -457,16 +257,9 @@ export default function BillingPage() {
                   {/* Feature List */}
                   <ul className="space-y-3 mb-8 flex-1">
                     {pkg.features.map((feat, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-2.5 text-sm text-neutral-400"
-                      >
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-neutral-400">
                         <CheckCircle2
-                          className={`w-4 h-4 mt-0.5 shrink-0 ${
-                            isPopular
-                              ? "text-[#8b3a3a]"
-                              : "text-neutral-700"
-                          }`}
+                          className={`w-4 h-4 mt-0.5 shrink-0 ${isPopular ? "text-[#8b3a3a]" : "text-neutral-700"}`}
                         />
                         <span className="leading-snug">{feat}</span>
                       </li>
@@ -477,24 +270,14 @@ export default function BillingPage() {
                   <button
                     type="button"
                     onClick={() => handlePurchase(pkg)}
-                    disabled={isProcessing || purchasingId !== null}
-                    className={`w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.97] disabled:cursor-not-allowed ${
+                    className={`w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.97] ${
                       isPopular
-                        ? "bg-[#4a1616] text-[#f0c8c8] hover:bg-[#5c1a1a] border border-[#6b1c1c]/40 shadow-[0_0_20px_rgba(80,20,20,0.2)] disabled:opacity-50"
-                        : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white border border-neutral-800/60 hover:border-neutral-700 disabled:opacity-40"
+                        ? "bg-[#4a1616] text-[#f0c8c8] hover:bg-[#5c1a1a] border border-[#6b1c1c]/40 shadow-[0_0_20px_rgba(80,20,20,0.2)]"
+                        : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white border border-neutral-800/60 hover:border-neutral-700"
                     }`}
                   >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4" />
-                        Purchase {pkg.credits.toLocaleString()} Credits
-                      </>
-                    )}
+                    <Zap className="w-4 h-4" />
+                    Purchase {pkg.credits.toLocaleString()} Credits
                   </button>
                 </div>
               </div>
@@ -514,28 +297,16 @@ export default function BillingPage() {
           <table className="w-full text-left border-collapse min-w-[500px]">
             <thead>
               <tr className="border-b border-neutral-800/60">
-                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">
-                  Date
-                </th>
-                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">
-                  Description
-                </th>
-                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">
-                  Amount
-                </th>
-                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest text-right">
-                  Status
-                </th>
+                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">Date</th>
+                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">Description</th>
+                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest">Amount</th>
+                <th className="pb-3 text-[11px] font-bold text-neutral-600 uppercase tracking-widest text-right">Status</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td
-                  colSpan={4}
-                  className="py-14 text-center text-neutral-700 text-sm font-medium"
-                >
-                  No transactions recorded yet. Your purchase history will
-                  appear here.
+                <td colSpan={4} className="py-14 text-center text-neutral-700 text-sm font-medium">
+                  No transactions recorded yet. Your purchase history will appear here.
                 </td>
               </tr>
             </tbody>

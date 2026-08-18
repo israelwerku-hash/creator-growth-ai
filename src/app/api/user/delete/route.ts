@@ -15,45 +15,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1. Database Lookup for paddleSubscriptionId
+    // 1. Database Lookup for membership/subscription ID
     const creator = await db.creator.findUnique({
       where: { id: userId },
       select: { paddleSubscriptionId: true }
     });
 
-    const subId = creator?.paddleSubscriptionId;
+    const membershipId = creator?.paddleSubscriptionId;
 
-    // 2. Paddle Cancellation (if subscription exists)
-    if (subId) {
-      console.log(`[Account Deletion] Attempting to cancel Paddle subscription: ${subId}`);
+    // 2. Whop Membership Cancellation (if membership exists)
+    if (membershipId) {
+      console.log(`[Account Deletion] Attempting to cancel Whop membership: ${membershipId}`);
       
-      const paddleApiKey = process.env.PADDLE_API_KEY;
-      const paddleEnv = process.env.NEXT_PUBLIC_PADDLE_ENV === "production" ? "api" : "sandbox-api";
+      const whopApiKey = process.env.WHOP_API_KEY;
       
-      if (paddleApiKey) {
+      if (whopApiKey) {
         try {
-          const paddleRes = await fetch(`https://${paddleEnv}.paddle.com/subscriptions/${subId}/cancel`, {
+          const whopRes = await fetch(`https://api.whop.com/api/v2/memberships/${membershipId}`, {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${paddleApiKey}`,
+              "Authorization": `Bearer ${whopApiKey}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ effective_from: "immediately" }),
+            body: JSON.stringify({ action: "cancel" }),
           });
 
-          if (!paddleRes.ok) {
-            const errorText = await paddleRes.text();
-            console.warn(`[Account Deletion] Paddle cancellation returned non-OK status: ${paddleRes.status}`, errorText);
-            // We proceed with deletion even if Paddle cancellation fails (e.g. if the sub was already cancelled)
+          if (!whopRes.ok) {
+            const errorText = await whopRes.text();
+            console.warn(`[Account Deletion] Whop cancellation returned non-OK status: ${whopRes.status}`, errorText);
           } else {
-            console.log(`✅ [Account Deletion] Paddle subscription ${subId} successfully cancelled.`);
+            console.log(`✅ [Account Deletion] Whop membership ${membershipId} successfully cancelled.`);
           }
-        } catch (paddleError) {
-          console.error(`[Account Deletion] Paddle cancellation exception:`, paddleError);
-          // Again, proceed with deletion to ensure the user isn't trapped
+        } catch (whopError) {
+          console.error(`[Account Deletion] Whop cancellation exception:`, whopError);
         }
       } else {
-        console.warn(`[Account Deletion] PADDLE_API_KEY missing! Could not cancel subscription ${subId}.`);
+        console.warn(`[Account Deletion] WHOP_API_KEY missing! Could not cancel membership ${membershipId}.`);
       }
     }
 

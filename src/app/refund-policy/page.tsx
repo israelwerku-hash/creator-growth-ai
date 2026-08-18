@@ -33,9 +33,9 @@ export default function RefundPolicyPage() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">3. Paddle Merchant of Record</h2>
+          <h2 className="text-2xl font-semibold text-white">3. Whop Merchant of Record</h2>
           <p>
-            Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles processed returns. For billing-specific inquiries, you may contact Paddle directly, though we recommend reaching out to our team first for software-related issues.
+            Our order process is conducted by our online reseller Whop.com. Whop.com is the Merchant of Record for all our orders. Whop provides all customer service inquiries and handles processed returns. For billing-specific inquiries, you may contact Whop directly, though we recommend reaching out to our team first for software-related issues.
           </p>
         </section>
 
