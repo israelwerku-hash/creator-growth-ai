@@ -134,7 +134,7 @@ async function coreHandler(req: Request) {
     if (!apiKey) throw new Error("AI Engine is not configured.");
     const groq = new Groq({ apiKey });
 
-    const systemPrompt = `You are an assistant that outputs strictly valid JSON without markdown code fences.`;
+    const systemPrompt = `You are a JSON-only API. Output valid raw JSON in this format: {"messageBody": "..."}.`;
 
     const userPrompt = `Generate a highly personalized, natural-sounding DM for an outreach campaign.
 TARGET INDUSTRY: ${targetAccount}
@@ -150,7 +150,7 @@ Respond with valid json in this exact format: { "messageBody": "...", "toneDetec
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
       temperature: 0.7,
       max_tokens: 300,
     });
