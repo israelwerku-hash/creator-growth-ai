@@ -134,7 +134,7 @@ async function coreHandler(req: Request) {
     if (!apiKey) throw new Error("AI Engine is not configured.");
     const groq = new Groq({ apiKey });
 
-    const systemPrompt = `You are a JSON-only API. You MUST output valid raw JSON matching this format: {"messageBody": "...", "toneDetected": "...", "campaignTags": ["t1", "t2"]}. Do NOT output markdown code fences or conversational text.`;
+    const systemPrompt = `You are an assistant that outputs strictly valid JSON without markdown code fences.`;
 
     const userPrompt = `Generate a highly personalized, natural-sounding DM for an outreach campaign.
 TARGET INDUSTRY: ${targetAccount}
@@ -150,13 +150,21 @@ Respond with valid json in this exact format: { "messageBody": "...", "toneDetec
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
       temperature: 0.7,
       max_tokens: 300,
     });
 
+    console.log('Groq raw output:', JSON.stringify(completion, null, 2));
+
+    const rawContent = completion.choices[0]?.message?.content || "";
+    if (!rawContent.trim()) {
+      console.error("[DM_GEN] Groq returned empty text. Completion details:", JSON.stringify(completion, null, 2));
+      return NextResponse.json({ error: "Groq returned empty text. Please try again." }, { status: 500 });
+    }
+
     // Safe JSON parsing with markdown code fence stripping via utility
-    const parsedJson = parseAIJson(completion.choices[0]?.message?.content || "{}");
+    const parsedJson = parseAIJson(rawContent);
     
     // 4. Validate output before deducting credits
     if (!parsedJson.messageBody || typeof parsedJson.messageBody !== 'string' || parsedJson.messageBody.trim() === "") {
