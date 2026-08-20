@@ -9,6 +9,7 @@ import { getSession } from "@/utils/supabase/server";
 import { Client } from "@upstash/qstash";
 import { redis } from "@/lib/redis";
 import { v4 as uuidv4 } from "uuid";
+import { parseAIJson } from "@/lib/ai-json";
 
 // Initialize QStash Client
 const qstashClient = new Client({
@@ -133,7 +134,7 @@ async function coreHandler(req: Request) {
     if (!apiKey) throw new Error("AI Engine is not configured.");
     const groq = new Groq({ apiKey });
 
-    const systemPrompt = `You are an elite creator agency outreach strategist. You MUST respond with valid JSON only. No markdown, no code fences, no explanation text outside the JSON object. Your response must be a single JSON object with exactly these keys: "messageBody" (string), "toneDetected" (string), "campaignTags" (array of strings).`;
+    const systemPrompt = `You are a JSON-only API. You MUST output valid raw JSON matching this format: {"messageBody": "...", "toneDetected": "...", "campaignTags": ["t1", "t2"]}. Do NOT output markdown code fences or conversational text.`;
 
     const userPrompt = `Generate a highly personalized, natural-sounding DM for an outreach campaign.
 TARGET INDUSTRY: ${targetAccount}
@@ -152,33 +153,10 @@ Respond with valid json in this exact format: { "messageBody": "...", "toneDetec
       model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
       temperature: 0.7,
       max_tokens: 300,
-      response_format: { type: "json_object" }
     });
 
-    // Safe JSON parsing with markdown code fence stripping
-    let rawContent = completion.choices[0]?.message?.content || "{}";
-
-    // Strip markdown code fences (```json ... ``` or ``` ... ```)
-    rawContent = rawContent.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
-
-    let parsedJson;
-    try {
-      parsedJson = JSON.parse(rawContent);
-    } catch (parseErr) {
-      console.warn("[DM_GEN] Initial JSON.parse failed, attempting extraction. Raw:", rawContent);
-      // Try to extract JSON object from surrounding text
-      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          parsedJson = JSON.parse(jsonMatch[0]);
-        } catch (innerErr) {
-          console.error("[DM_GEN] JSON extraction also failed:", innerErr);
-          throw new Error("AI returned malformed JSON. Please try again.");
-        }
-      } else {
-        throw new Error("AI returned non-JSON response. Please try again.");
-      }
-    }
+    // Safe JSON parsing with markdown code fence stripping via utility
+    const parsedJson = parseAIJson(completion.choices[0]?.message?.content || "{}");
     
     // 4. Validate output before deducting credits
     if (!parsedJson.messageBody || typeof parsedJson.messageBody !== 'string' || parsedJson.messageBody.trim() === "") {
