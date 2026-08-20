@@ -10,6 +10,25 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          id="catch-chunk-load-error"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                if (e.message && (e.message.includes('ChunkLoadError') || /Loading chunk .* failed/i.test(e.message))) {
+                  window.location.reload();
+                }
+              });
+              
+              window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason && e.reason.message && (e.reason.message.includes('ChunkLoadError') || /Loading chunk .* failed/i.test(e.reason.message))) {
+                  window.location.reload();
+                }
+              });
+            `,
+          }}
+        />
         {/* 2. Change the lowercase script tag to the uppercase NextJS Script component and give it an id */}
         <Script
           id="clean-skin-attribute"
