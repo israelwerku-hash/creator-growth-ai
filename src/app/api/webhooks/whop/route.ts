@@ -38,35 +38,37 @@ const TOPUP_PLAN_MAP: Record<string, number> = {
 };
 
 // ── HMAC Signature Verification ──────────────────────────────────────────────
-function verifyWhopSignature(rawBody: string, signature: string | null): boolean {
-  const secret = process.env.WHOP_WEBHOOK_SECRET;
-  if (!secret || !signature) return false;
-
-  try {
-    const expectedHmac = crypto
-      .createHmac("sha256", secret)
-      .update(rawBody)
-      .digest("hex");
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(expectedHmac, "hex")
-    );
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: Request) {
   try {
+    // 1. Read raw body text first (must happen before any .json() call)
     const rawBody = await req.text();
+
+    // 2. Get the Whop signature header
     const signature = req.headers.get("x-whop-signature");
 
-    // ── 1. HMAC Verification ──
-    if (!verifyWhopSignature(rawBody, signature)) {
-      console.warn("[Whop Webhook] Invalid or missing signature.");
+    // 3. Generate expected signature
+    const secret = process.env.WHOP_WEBHOOK_SECRET;
+    if (!secret || !signature) {
+      console.warn("[Whop Webhook] Missing WHOP_WEBHOOK_SECRET or x-whop-signature header.");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(rawBody)
+      .digest("hex");
+
+    // 4. Compare signatures
+    if (signature !== expectedSignature) {
+      console.warn("[Whop Webhook] Signature mismatch.", {
+        received: signature.substring(0, 12) + "...",
+        expected: expectedSignature.substring(0, 12) + "...",
+      });
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    // 5. Signature valid — parse the payload
     const payload = JSON.parse(rawBody);
     const eventType = payload.event || payload.action;
     const data = payload.data || payload;
