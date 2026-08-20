@@ -152,7 +152,7 @@ Respond with valid json in this exact format: { "messageBody": "...", "toneDetec
       ],
       model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 1500,
     });
 
     console.log('Groq raw output:', JSON.stringify(completion, null, 2));
