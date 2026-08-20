@@ -68,11 +68,26 @@ export async function POST(req: Request) {
     }
 
     // 5. Signature valid — extract event details
-    const eventType = payload.event || payload.action;
-    const data = payload.data || payload;
+    const bodyJson = JSON.parse(rawBody);
 
-    console.log(`[Whop Webhook] Received event: ${eventType}`);
+    // Debug: log the shape of both the unwrapped payload and raw body
+    console.log("Full unwrapped event keys:", Object.keys(payload));
+    console.log("Full raw body keys:", Object.keys(bodyJson));
+    console.log("Full unwrapped payload:", JSON.stringify(payload));
 
+    // Robust event type extraction — check every possible location
+    const eventType =
+      (payload as any).type ||
+      (payload as any).event ||
+      (payload as any).action ||
+      bodyJson.type ||
+      bodyJson.event ||
+      bodyJson.action ||
+      null;
+
+    const data = (payload as any).data || payload;
+
+    console.log(`[Whop Webhook] Resolved event type: ${eventType}`);
     console.log("Whop Webhook Received:", JSON.stringify(data));
 
     // ── 2. Extract user identifier ──
@@ -82,7 +97,7 @@ export async function POST(req: Request) {
       data.discord_account_id ||
       null;
 
-    const targetEmail = payload.data?.user?.email || payload.data?.email || payload.user?.email || null;
+    const targetEmail = (payload as any).data?.user?.email || (payload as any).data?.email || (payload as any).user?.email || bodyJson.data?.user?.email || bodyJson.data?.email || null;
 
     if (!userId && targetEmail) {
       const existingCreator = await db.creator.findFirst({
@@ -96,13 +111,16 @@ export async function POST(req: Request) {
     const planId = data.plan_id || data.plan?.id || null;
 
     // ── 3. Handle Subscription Payment Success ──
-    if (
+    // Check event type string OR data.status === "paid" as a catch-all
+    const isPaymentEvent =
       eventType === "membership.went_valid" ||
       eventType === "payment.succeeded" ||
       eventType === "payment_succeeded" ||
-      eventType === "action: payment.succeeded" ||
-      eventType === "membership.renewed"
-    ) {
+      eventType === "membership.renewed" ||
+      (eventType && typeof eventType === "string" && (eventType.includes("payment.succeeded") || eventType.includes("payment_succeeded"))) ||
+      data.status === "paid";
+
+    if (isPaymentEvent) {
       if (!userId) {
         console.warn("[Whop Webhook] Payment event received but no userId or email matched in database.", { planId, targetEmail });
         return NextResponse.json({ error: "User not found" }, { status: 400 });
