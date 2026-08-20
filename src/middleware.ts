@@ -75,23 +75,33 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const host = request.headers.get("host");
+    const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || (host ? `https://${host}` : "http://localhost:3000");
     const origin = request.headers.get("origin");
     const referer = request.headers.get("referer");
     const method = request.method;
     const isExtension = origin && origin.startsWith("chrome-extension://");
 
+    const isValidOrigin = (source: string | null) => {
+      if (!source) return false;
+      if (source.startsWith(ALLOWED_ORIGIN)) return true;
+      if (source.startsWith("https://ataraxi-a.netlify.app")) return true;
+      if (source.startsWith("http://localhost:3000")) return true;
+      if (source.startsWith("chrome-extension://")) return true;
+      return false;
+    };
+
     // Handle Preflight OPTIONS requests for CORS
     if (method === "OPTIONS") {
       const response = new NextResponse(null, { status: 200 });
-      response.headers.set("Access-Control-Allow-Origin", isExtension ? origin : ALLOWED_ORIGIN);
+      response.headers.set("Access-Control-Allow-Origin", (origin && isValidOrigin(origin)) ? origin : ALLOWED_ORIGIN);
       response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
       response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
       return response;
     }
 
     // Strict CORS Origin Check
-    if (origin && !origin.startsWith(ALLOWED_ORIGIN) && !isExtension) {
+    if (origin && !isValidOrigin(origin)) {
       console.warn(`[SECURITY] Blocked cross-origin request from unauthorized origin: ${origin}`);
       return new NextResponse(
         JSON.stringify({ error: "Forbidden: Invalid Origin" }),
@@ -102,9 +112,7 @@ export async function middleware(request: NextRequest) {
     // Anti-CSRF Check for Mutating Requests (POST, PUT, DELETE, PATCH)
     if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
       const source = origin || referer;
-      // Allow if it matches allowed origin OR is a Chrome Extension
-      const isValidSource = source && (source.startsWith(ALLOWED_ORIGIN) || source.startsWith("chrome-extension://"));
-      if (!isValidSource) {
+      if (!isValidOrigin(source)) {
         console.warn(`[SECURITY] CSRF Blocked: Mutating request lacked valid origin/referer. Source: ${source}`);
         return new NextResponse(
           JSON.stringify({ error: "Forbidden: CSRF token missing or invalid source" }),
@@ -264,9 +272,12 @@ export async function middleware(request: NextRequest) {
     // ──────────────────────────────────────────────────────────
     // 6. CORS HEADERS INJECTION
     // ──────────────────────────────────────────────────────────
+    const host = request.headers.get("host");
     const origin = request.headers.get("origin");
     const isExtension = origin && origin.startsWith("chrome-extension://");
-    const safeOrigin = isExtension ? origin : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+    const fallbackOrigin = process.env.NEXT_PUBLIC_APP_URL || (host ? `https://${host}` : "http://localhost:3000");
+    const isNetlifyOrigin = origin === "https://ataraxi-a.netlify.app";
+    const safeOrigin = (isExtension || isNetlifyOrigin) ? origin : fallbackOrigin;
     
     supabaseResponse.headers.set("Access-Control-Allow-Origin", safeOrigin);
     supabaseResponse.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -275,7 +286,12 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   } catch (err) {
     console.warn('[Proxy] Error:', (err as Error).message);
-    const safeOrigin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const host = request.headers.get("host");
+    const origin = request.headers.get("origin");
+    const isExtension = origin && origin.startsWith("chrome-extension://");
+    const fallbackOrigin = process.env.NEXT_PUBLIC_APP_URL || (host ? `https://${host}` : "http://localhost:3000");
+    const isNetlifyOrigin = origin === "https://ataraxi-a.netlify.app";
+    const safeOrigin = (isExtension || isNetlifyOrigin) ? origin : fallbackOrigin;
     
     // If it's already an auth route, let them see it instead of looping
     if (AUTH_ROUTES.includes(pathname) || PUBLIC_ROUTES.includes(pathname)) {
