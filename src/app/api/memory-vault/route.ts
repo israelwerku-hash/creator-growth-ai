@@ -9,6 +9,7 @@ import * as Sentry from "@sentry/nextjs";
 import DOMPurify from 'isomorphic-dompurify';
 import { getAuthenticatedUser } from "@/lib/extension-auth";
 import { getSession } from "@/utils/supabase/server";
+import { parseAIJson } from "@/lib/ai-json";
 
 // --- Validation Schema ---
 const MemoryVaultSchema = z.object({
@@ -188,28 +189,33 @@ async function coreHandler(req: Request) {
     }
     const groq = new Groq({ apiKey });
 
-    const prompt = `You are an elite OnlyFans CRM analyst. Analyze this chat history/snippet and extract memory vault data.
-Chat History: ${typeof chatHistory === 'string' ? chatHistory : JSON.stringify(chatHistory)}
-
-CRITICAL RULES:
-1. Extract the fan's key interests and indisputable facts.
-2. Determine their spending sentiment based on the conversation.
-3. You MUST return your entire response as a valid JSON object matching the following structure:
+    const systemPrompt = `You are an elite OnlyFans CRM analyst. You MUST respond with valid JSON only. No markdown, no code fences.
+Your response must be a single JSON object with exactly these keys:
 {
   "fanSummary": "Brief overview",
   "keyInterests": ["interest 1", "interest 2"],
   "spendingSentiment": "must be ONE of: high_roller, hesitant, window_shopper, unknown",
   "extractedFacts": ["fact 1", "fact 2"],
   "suggestedAction": "Optional recommendation"
-}
-Return ONLY valid JSON.`;
+}`;
+
+    const userPrompt = `Analyze this chat history/snippet and extract memory vault data.
+Chat History: ${typeof chatHistory === 'string' ? chatHistory : JSON.stringify(chatHistory)}
+
+CRITICAL RULES:
+1. Extract the fan's key interests and indisputable facts.
+2. Determine their spending sentiment based on the conversation.
+Respond with valid json in the exact format required.`;
 
     let validatedData;
 
     try {
       // --- TIER 1: Primary High-Speed Extraction ---
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
         model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
         temperature: 0.2,
         max_tokens: 400,
@@ -217,7 +223,7 @@ Return ONLY valid JSON.`;
       });
       
       const responseText = completion.choices[0]?.message?.content || "{}";
-      const parsedJson = JSON.parse(responseText);
+      const parsedJson = parseAIJson(responseText);
       
       const validationResult = MemoryVaultSchema.safeParse(parsedJson);
       
@@ -234,7 +240,10 @@ Return ONLY valid JSON.`;
       
       try {
         const completionTier2 = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
           model: "llama-3.3-70b-versatile",
           temperature: 0.1,
           max_tokens: 400,
@@ -242,7 +251,7 @@ Return ONLY valid JSON.`;
         });
         
         const responseTextTier2 = completionTier2.choices[0]?.message?.content || "{}";
-        const parsedJsonTier2 = JSON.parse(responseTextTier2);
+        const parsedJsonTier2 = parseAIJson(responseTextTier2);
         const validationResultTier2 = MemoryVaultSchema.safeParse(parsedJsonTier2);
         
         if (!validationResultTier2.success) {

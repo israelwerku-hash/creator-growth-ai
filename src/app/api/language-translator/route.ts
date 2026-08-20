@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { getAuthenticatedUser } from "@/lib/extension-auth";
 import { getSession } from "@/utils/supabase/server";
+import { parseAIJson } from "@/lib/ai-json";
 
 // --- Validation Schema ---
 const LanguageTranslatorSchema = z.object({
@@ -111,8 +112,16 @@ async function coreHandler(req: Request) {
     }
     const groq = new Groq({ apiKey });
 
-    const prompt = `You are an expert translator specializing in casual, flirty, and colloquial language (e.g., OnlyFans interactions).
-Translate the following text into ${targetLanguage}. Capture the exact tone and nuance of the original message.
+    const systemPrompt = `You are an expert translator specializing in casual, flirty, and colloquial language (e.g., OnlyFans interactions). You MUST respond with valid JSON only. No markdown, no code fences.
+Your response must be a single JSON object with exactly these keys:
+{
+  "translatedText": "The actual translation",
+  "detectedLanguage": "The source language detected",
+  "confidenceScore": 0.95,
+  "translationNotes": "Optional notes on slang or nuance"
+}`;
+
+    const userPrompt = `Translate the following text into ${targetLanguage}. Capture the exact tone and nuance of the original message.
 
 TEXT TO TRANSLATE:
 "${textToTranslate}"
@@ -122,21 +131,17 @@ CRITICAL RULES:
 2. Identify the detected source language.
 3. Provide a confidence score between 0 and 1.
 4. Optionally provide translationNotes if there are slang, idioms, or cultural nuances the sender should know about.
-5. You MUST return your entire response as a valid JSON object matching the following structure:
-{
-  "translatedText": "The actual translation",
-  "detectedLanguage": "The source language detected",
-  "confidenceScore": 0.95,
-  "translationNotes": "Optional notes on slang or nuance"
-}
-Return ONLY valid JSON.`;
+Respond with valid json in the exact format required.`;
 
     let validatedData;
 
     try {
       // --- TIER 1: Primary High-Speed Extraction ---
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
         model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
         temperature: 0.3,
         max_tokens: 300,
@@ -144,7 +149,7 @@ Return ONLY valid JSON.`;
       });
       
       const responseText = completion.choices[0]?.message?.content || "{}";
-      const parsedJson = JSON.parse(responseText);
+      const parsedJson = parseAIJson(responseText);
       
       const validationResult = LanguageTranslatorSchema.safeParse(parsedJson);
       
@@ -162,7 +167,10 @@ Return ONLY valid JSON.`;
       try {
         // --- TIER 2: Heavy Backup Model ---
         const completionTier2 = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
           model: "llama-3.3-70b-versatile", // More capable fallback model
           temperature: 0.3,
           max_tokens: 300,
@@ -170,7 +178,7 @@ Return ONLY valid JSON.`;
         });
         
         const responseTextTier2 = completionTier2.choices[0]?.message?.content || "{}";
-        const parsedJsonTier2 = JSON.parse(responseTextTier2);
+        const parsedJsonTier2 = parseAIJson(responseTextTier2);
         
         const validationResultTier2 = LanguageTranslatorSchema.safeParse(parsedJsonTier2);
         

@@ -4,6 +4,7 @@ import Groq from "groq-sdk";
 import { consumeCredits } from "@/utils/credits";
 import { aiRateLimiter, getRequestIdentifier } from "@/lib/ratelimit";
 import { withIdempotency } from "@/lib/idempotency";
+import { parseAIJson } from "@/lib/ai-json";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import DOMPurify from 'isomorphic-dompurify';
@@ -128,7 +129,15 @@ async function coreHandler(req: Request) {
     }
     const groq = new Groq({ apiKey });
 
-    const prompt = `You are an elite OnlyFans CRM AI. Analyze this fan's chat history and spending behavior to determine their marketing segment.
+    const systemPrompt = `You are an elite OnlyFans CRM AI. You MUST respond with valid JSON only. No markdown, no code fences.
+Your response must be a single JSON object with exactly these keys:
+{
+  "segments": ["must be chosen from: whale, active_spender, lurker, churn_risk, new_lead, highly_engaged"],
+  "engagementScore": 50,
+  "segmentationReasoning": "Brief explanation (MAXIMUM 140 characters)"
+}`;
+
+    const userPrompt = `Analyze this fan's chat history and spending behavior to determine their marketing segment.
 Chat History: ${typeof chatHistory === 'string' ? chatHistory : JSON.stringify(chatHistory)}
 Spending Data: ${spendingBehavior || "No spending data available"}
 
@@ -136,20 +145,17 @@ CRITICAL RULES:
 1. Provide up to 3 descriptive segments from the exact allowed list.
 2. Determine an engagementScore from 0-100 based on their responsiveness and spend.
 3. Provide a brief segmentationReasoning explaining your logic.
-4. You MUST return your entire response as a valid JSON object matching the following structure:
-{
-  "segments": ["must be chosen from: whale, active_spender, lurker, churn_risk, new_lead, highly_engaged"],
-  "engagementScore": 50,
-  "segmentationReasoning": "Brief explanation (MAXIMUM 140 characters)"
-}
-Return ONLY valid JSON.`;
+Respond with valid json in the exact format required.`;
 
     let validatedData;
 
     try {
       // --- TIER 1: Primary High-Speed Extraction ---
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
         model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
         temperature: 0.1,
         max_tokens: 300,
@@ -157,7 +163,7 @@ Return ONLY valid JSON.`;
       });
       
       const responseText = completion.choices[0]?.message?.content || "{}";
-      const parsedJson = JSON.parse(responseText);
+      const parsedJson = parseAIJson(responseText);
       
       const validationResult = AiSegmentationSchema.safeParse(parsedJson);
       
@@ -175,7 +181,10 @@ Return ONLY valid JSON.`;
       try {
         // --- TIER 2: Heavy Backup Model ---
         const completionTier2 = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
           model: "llama-3.3-70b-versatile", // More capable fallback model
           temperature: 0.1,
           max_tokens: 300,
@@ -183,7 +192,7 @@ Return ONLY valid JSON.`;
         });
         
         const responseTextTier2 = completionTier2.choices[0]?.message?.content || "{}";
-        const parsedJsonTier2 = JSON.parse(responseTextTier2);
+        const parsedJsonTier2 = parseAIJson(responseTextTier2);
         
         const validationResultTier2 = AiSegmentationSchema.safeParse(parsedJsonTier2);
         

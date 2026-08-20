@@ -133,25 +133,52 @@ async function coreHandler(req: Request) {
     if (!apiKey) throw new Error("AI Engine is not configured.");
     const groq = new Groq({ apiKey });
 
-    const prompt = `You are an elite creator agency outreach strategist.
-Generate a highly personalized, natural-sounding DM for an outreach campaign.
+    const systemPrompt = `You are an elite creator agency outreach strategist. You MUST respond with valid JSON only. No markdown, no code fences, no explanation text outside the JSON object. Your response must be a single JSON object with exactly these keys: "messageBody" (string), "toneDetected" (string), "campaignTags" (array of strings).`;
+
+    const userPrompt = `Generate a highly personalized, natural-sounding DM for an outreach campaign.
 TARGET INDUSTRY: ${targetAccount}
 CAMPAIGN GOAL: ${campaignGoal}
 TONE & VIBE: ${tone}
 CONTEXT / HOOK: ${context || "Rely strictly on the industry and goal."}${fanMemoriesSection}
 
-CRITICAL RULES: Must be valid JSON. Keep it concise (max 150 words).
-Format: { "messageBody": "...", "toneDetected": "...", "campaignTags": ["t1", "t2"] }`;
+CRITICAL RULES: Keep it concise (max 150 words).
+Respond with valid json in this exact format: { "messageBody": "...", "toneDetected": "...", "campaignTags": ["t1", "t2"] }`;
 
     const completion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
       model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
       temperature: 0.7,
       max_tokens: 300,
       response_format: { type: "json_object" }
     });
-      
-    const parsedJson = JSON.parse(completion.choices[0]?.message?.content || "{}");
+
+    // Safe JSON parsing with markdown code fence stripping
+    let rawContent = completion.choices[0]?.message?.content || "{}";
+
+    // Strip markdown code fences (```json ... ``` or ``` ... ```)
+    rawContent = rawContent.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+
+    let parsedJson;
+    try {
+      parsedJson = JSON.parse(rawContent);
+    } catch (parseErr) {
+      console.warn("[DM_GEN] Initial JSON.parse failed, attempting extraction. Raw:", rawContent);
+      // Try to extract JSON object from surrounding text
+      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsedJson = JSON.parse(jsonMatch[0]);
+        } catch (innerErr) {
+          console.error("[DM_GEN] JSON extraction also failed:", innerErr);
+          throw new Error("AI returned malformed JSON. Please try again.");
+        }
+      } else {
+        throw new Error("AI returned non-JSON response. Please try again.");
+      }
+    }
     
     // 4. Validate output before deducting credits
     if (!parsedJson.messageBody || typeof parsedJson.messageBody !== 'string' || parsedJson.messageBody.trim() === "") {
