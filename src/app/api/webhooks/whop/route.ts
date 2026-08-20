@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
+import { Whop } from "@whop/sdk";
 import { db } from "@/lib/db";
 import { TIER_CREDITS } from "@/lib/constants/pricing";
 import { createAuditLog } from "@/lib/audit";
 import * as Sentry from "@sentry/nextjs";
 
 export const runtime = "nodejs";
+
+// Initialize Whop SDK with webhookKey requiring btoa encoding
+const whopsdk = new Whop({
+  webhookKey: btoa(process.env.WHOP_WEBHOOK_SECRET || ""),
+});
 
 // ── Plan ID → Credit & Tier Mapping ──────────────────────────────────────────
 const SUBSCRIPTION_PLAN_MAP: Record<string, { tier: string; credits: number }> = {
@@ -37,48 +42,32 @@ const TOPUP_PLAN_MAP: Record<string, number> = {
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || "plan_YeAEmJVsE2pve"]: 1500,
 };
 
-// ── HMAC Signature Verification ──────────────────────────────────────────────
+// ── Webhook Signature Verification ───────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
     // 1. Read raw body text first (must happen before any .json() call)
     const rawBody = await req.text();
-
-    // 2. Get the Whop signature header (check all possible variations)
-    const signature =
-      req.headers.get("webhook-signature") ||
-      req.headers.get("x-whop-signature") ||
-      req.headers.get("whop-signature");
+    
+    // 2. Convert headers to a standard object as expected by the SDK
+    const headers = Object.fromEntries(req.headers.entries());
 
     // 3. Separate diagnostic checks
-    const secret = process.env.WHOP_WEBHOOK_SECRET;
-
-    if (!secret) {
+    if (!process.env.WHOP_WEBHOOK_SECRET) {
       console.error("[Whop Webhook] Error: WHOP_WEBHOOK_SECRET environment variable is missing on Netlify.");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
-    if (!signature) {
-      console.error("[Whop Webhook] Error: Signature header missing. Received headers:", JSON.stringify(Object.fromEntries(req.headers.entries())));
-      return NextResponse.json({ error: "Missing signature header" }, { status: 401 });
-    }
-
-    const expectedSignature = crypto
-      .createHmac("sha256", secret)
-      .update(rawBody)
-      .digest("hex");
-
-    // 4. Compare signatures
-    if (signature !== expectedSignature) {
-      console.warn("[Whop Webhook] Signature mismatch.", {
-        received: signature.substring(0, 12) + "...",
-        expected: expectedSignature.substring(0, 12) + "...",
-      });
+    // 4. Unwrap and verify using the SDK
+    let payload;
+    try {
+      payload = await whopsdk.webhooks.unwrap(rawBody, { headers });
+    } catch (err: any) {
+      console.warn("[Whop Webhook] Error: Signature verification failed.", err.message);
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
-    // 5. Signature valid — parse the payload
-    const payload = JSON.parse(rawBody);
+    // 5. Signature valid — extract event details
     const eventType = payload.event || payload.action;
     const data = payload.data || payload;
 
