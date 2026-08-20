@@ -87,9 +87,8 @@ export default function BillingPage() {
         }
 
         const res = await fetch("/api/admin/proxy", {
-          method: "POST",
+          method: "GET",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "GET_CREDITS" }),
         }).catch(() => null);
 
         if (res?.ok) {
