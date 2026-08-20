@@ -82,10 +82,12 @@ export async function POST(req: Request) {
       data.discord_account_id ||
       null;
 
-    const email = data.user?.email || data.email || null;
+    const targetEmail = payload.data?.user?.email || payload.data?.email || payload.user?.email || null;
 
-    if (!userId && email) {
-      const existingCreator = await db.creator.findFirst({ where: { email } });
+    if (!userId && targetEmail) {
+      const existingCreator = await db.creator.findFirst({
+        where: { email: { equals: targetEmail, mode: "insensitive" } },
+      });
       if (existingCreator) {
         userId = existingCreator.id;
       }
@@ -98,10 +100,11 @@ export async function POST(req: Request) {
       eventType === "membership.went_valid" ||
       eventType === "payment.succeeded" ||
       eventType === "payment_succeeded" ||
+      eventType === "action: payment.succeeded" ||
       eventType === "membership.renewed"
     ) {
       if (!userId) {
-        console.warn("[Whop Webhook] Payment event received but no userId or email matched in database.", { planId });
+        console.warn("[Whop Webhook] Payment event received but no userId or email matched in database.", { planId, targetEmail });
         return NextResponse.json({ error: "User not found" }, { status: 400 });
       }
 
@@ -117,80 +120,58 @@ export async function POST(req: Request) {
       } else if (planId && TOPUP_PLAN_MAP[planId]) {
         creditsToAdd = TOPUP_PLAN_MAP[planId];
       } else {
-        // Safety fallback: award 500 credits if plan ID is unknown so they get something
-        console.warn(`[Whop Webhook] Unknown plan ID: ${planId}. Using safety fallback of 500 credits.`);
-        creditsToAdd = 500; 
+        // Parse amount if present, or fallback to 500
+        const amount = data.amount ? parseFloat(data.amount) : 0;
+        if (amount > 0 && amount <= 10) creditsToAdd = 150;
+        else if (amount > 10 && amount <= 30) creditsToAdd = 500;
+        else if (amount > 30) creditsToAdd = 1500;
+        else creditsToAdd = 500;
+        
+        console.warn(`[Whop Webhook] Unknown plan ID: ${planId}. Using safety fallback of ${creditsToAdd} credits based on amount.`);
       }
 
+      const whopMembershipId = data.id || data.membership_id || null;
+      let updatedUser;
+
       if (isSubscription) {
-        console.log(
-          `[Whop Webhook] Subscription: ${tierToSet} | Credits: ${creditsToAdd} | User: ${userId}`
-        );
-
-        const whopMembershipId = data.id || data.membership_id || null;
-
-        const updatedUser = await db.creator.upsert({
+        console.log(`[Whop Webhook] Subscription: ${tierToSet} | Incrementing Credits: ${creditsToAdd} | User: ${userId}`);
+        
+        updatedUser = await db.creator.update({
           where: { id: userId },
-          update: {
+          data: {
             tier: tierToSet,
-            aiCredits: creditsToAdd,
+            aiCredits: { increment: creditsToAdd },
             has_completed_pricing: true,
             has_completed_onboarding: true,
             ...(whopMembershipId && { paddleSubscriptionId: whopMembershipId }),
           },
-          create: {
-            id: userId,
-            email: email || `${userId}@whop-user.com`,
-            name: data.user?.username || "Whop User",
-            tier: tierToSet,
-            aiCredits: creditsToAdd,
-            has_completed_onboarding: true,
-            has_completed_pricing: true,
-            paddleSubscriptionId: whopMembershipId,
-          },
         });
-
-        console.log(`[Whop Webhook] Updated User Record:`, updatedUser);
-
-        try {
-          await createAuditLog("SYSTEM_WEBHOOK", "SUBSCRIPTION_UPGRADE", {
-            creatorId: userId,
-            tierAssigned: tierToSet,
-            creditsSet: creditsToAdd,
-            whopPlanId: planId,
-            whopMembershipId,
-          });
-        } catch (auditErr) {
-          console.warn("[Whop Webhook] Audit log failed (non-fatal):", auditErr);
-        }
-
-        return NextResponse.json({ received: true, action: "subscription_provisioned" }, { status: 200 });
       } else {
-        console.log(
-          `[Whop Webhook] Top-Up: +${creditsToAdd} credits | User: ${userId}`
-        );
-
-        const updatedUser = await db.creator.update({
+        console.log(`[Whop Webhook] Top-Up: +${creditsToAdd} credits | User: ${userId}`);
+        
+        updatedUser = await db.creator.update({
           where: { id: userId },
           data: {
             aiCredits: { increment: creditsToAdd },
           },
         });
-
-        console.log(`[Whop Webhook] Updated User Record:`, updatedUser);
-
-        try {
-          await createAuditLog("SYSTEM_WEBHOOK", "CREDIT_TOPUP", {
-            creatorId: userId,
-            creditsAdded: creditsToAdd,
-            whopPlanId: planId,
-          });
-        } catch (auditErr) {
-          console.warn("[Whop Webhook] Audit log failed (non-fatal):", auditErr);
-        }
-
-        return NextResponse.json({ received: true, action: "topup_provisioned" }, { status: 200 });
       }
+
+      console.log(`[Whop Webhook] Updated User Record:`, updatedUser);
+
+      try {
+        await createAuditLog("SYSTEM_WEBHOOK", isSubscription ? "SUBSCRIPTION_UPGRADE" : "CREDIT_TOPUP", {
+          creatorId: userId,
+          creditsAdded: creditsToAdd,
+          ...(isSubscription && { tierAssigned: tierToSet }),
+          whopPlanId: planId,
+          whopMembershipId,
+        });
+      } catch (auditErr) {
+        console.warn("[Whop Webhook] Audit log failed (non-fatal):", auditErr);
+      }
+
+      return NextResponse.json({ received: true, action: isSubscription ? "subscription_provisioned" : "topup_provisioned" }, { status: 200 });
     }
 
     // ── 4. Handle Cancellation ──
