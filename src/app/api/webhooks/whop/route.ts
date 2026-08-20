@@ -73,12 +73,23 @@ export async function POST(req: Request) {
 
     console.log(`[Whop Webhook] Received event: ${eventType}`);
 
+    console.log("Whop Webhook Received:", JSON.stringify(data));
+
     // ── 2. Extract user identifier ──
-    const userId =
+    let userId =
       data.metadata?.userId ||
       data.custom_metadata?.userId ||
       data.discord_account_id ||
       null;
+
+    const email = data.user?.email || data.email || null;
+
+    if (!userId && email) {
+      const existingCreator = await db.creator.findFirst({ where: { email } });
+      if (existingCreator) {
+        userId = existingCreator.id;
+      }
+    }
 
     const planId = data.plan_id || data.plan?.id || null;
 
@@ -86,44 +97,66 @@ export async function POST(req: Request) {
     if (
       eventType === "membership.went_valid" ||
       eventType === "payment.succeeded" ||
+      eventType === "payment_succeeded" ||
       eventType === "membership.renewed"
     ) {
-      // Check subscription plans first
-      const subMapping = planId ? SUBSCRIPTION_PLAN_MAP[planId] : null;
+      if (!userId) {
+        console.warn("[Whop Webhook] Payment event received but no userId or email matched in database.", { planId });
+        return NextResponse.json({ error: "User not found" }, { status: 400 });
+      }
 
-      if (subMapping && userId) {
+      // Determine credits to add
+      let creditsToAdd = 0;
+      let isSubscription = false;
+      let tierToSet = "PRO"; // default fallback
+
+      if (planId && SUBSCRIPTION_PLAN_MAP[planId]) {
+        creditsToAdd = SUBSCRIPTION_PLAN_MAP[planId].credits;
+        tierToSet = SUBSCRIPTION_PLAN_MAP[planId].tier;
+        isSubscription = true;
+      } else if (planId && TOPUP_PLAN_MAP[planId]) {
+        creditsToAdd = TOPUP_PLAN_MAP[planId];
+      } else {
+        // Safety fallback: award 500 credits if plan ID is unknown so they get something
+        console.warn(`[Whop Webhook] Unknown plan ID: ${planId}. Using safety fallback of 500 credits.`);
+        creditsToAdd = 500; 
+      }
+
+      if (isSubscription) {
         console.log(
-          `[Whop Webhook] Subscription: ${subMapping.tier} | Credits: ${subMapping.credits} | User: ${userId}`
+          `[Whop Webhook] Subscription: ${tierToSet} | Credits: ${creditsToAdd} | User: ${userId}`
         );
 
         const whopMembershipId = data.id || data.membership_id || null;
 
-        await db.creator.upsert({
+        const updatedUser = await db.creator.upsert({
           where: { id: userId },
           update: {
-            tier: subMapping.tier,
-            aiCredits: subMapping.credits,
+            tier: tierToSet,
+            aiCredits: creditsToAdd,
             has_completed_pricing: true,
             has_completed_onboarding: true,
             ...(whopMembershipId && { paddleSubscriptionId: whopMembershipId }),
           },
           create: {
             id: userId,
-            email: data.email || `${userId}@whop-user.com`,
+            email: email || `${userId}@whop-user.com`,
             name: data.user?.username || "Whop User",
-            tier: subMapping.tier,
-            aiCredits: subMapping.credits,
+            tier: tierToSet,
+            aiCredits: creditsToAdd,
             has_completed_onboarding: true,
             has_completed_pricing: true,
             paddleSubscriptionId: whopMembershipId,
           },
         });
 
+        console.log(`[Whop Webhook] Updated User Record:`, updatedUser);
+
         try {
           await createAuditLog("SYSTEM_WEBHOOK", "SUBSCRIPTION_UPGRADE", {
             creatorId: userId,
-            tierAssigned: subMapping.tier,
-            creditsSet: subMapping.credits,
+            tierAssigned: tierToSet,
+            creditsSet: creditsToAdd,
             whopPlanId: planId,
             whopMembershipId,
           });
@@ -132,27 +165,24 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({ received: true, action: "subscription_provisioned" }, { status: 200 });
-      }
-
-      // Check top-up plans
-      const topupCredits = planId ? TOPUP_PLAN_MAP[planId] : null;
-
-      if (topupCredits && userId) {
+      } else {
         console.log(
-          `[Whop Webhook] Top-Up: +${topupCredits} credits | User: ${userId}`
+          `[Whop Webhook] Top-Up: +${creditsToAdd} credits | User: ${userId}`
         );
 
-        await db.creator.update({
+        const updatedUser = await db.creator.update({
           where: { id: userId },
           data: {
-            aiCredits: { increment: topupCredits },
+            aiCredits: { increment: creditsToAdd },
           },
         });
+
+        console.log(`[Whop Webhook] Updated User Record:`, updatedUser);
 
         try {
           await createAuditLog("SYSTEM_WEBHOOK", "CREDIT_TOPUP", {
             creatorId: userId,
-            creditsAdded: topupCredits,
+            creditsAdded: creditsToAdd,
             whopPlanId: planId,
           });
         } catch (auditErr) {
@@ -160,10 +190,6 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({ received: true, action: "topup_provisioned" }, { status: 200 });
-      }
-
-      if (!userId) {
-        console.warn("[Whop Webhook] Payment event received but no userId found in metadata.", { planId });
       }
     }
 
