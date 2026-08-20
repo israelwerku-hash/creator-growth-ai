@@ -44,14 +44,23 @@ export async function POST(req: Request) {
     // 1. Read raw body text first (must happen before any .json() call)
     const rawBody = await req.text();
 
-    // 2. Get the Whop signature header
-    const signature = req.headers.get("x-whop-signature");
+    // 2. Get the Whop signature header (check all possible variations)
+    const signature =
+      req.headers.get("webhook-signature") ||
+      req.headers.get("x-whop-signature") ||
+      req.headers.get("whop-signature");
 
-    // 3. Generate expected signature
+    // 3. Separate diagnostic checks
     const secret = process.env.WHOP_WEBHOOK_SECRET;
-    if (!secret || !signature) {
-      console.warn("[Whop Webhook] Missing WHOP_WEBHOOK_SECRET or x-whop-signature header.");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+
+    if (!secret) {
+      console.error("[Whop Webhook] Error: WHOP_WEBHOOK_SECRET environment variable is missing on Netlify.");
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+
+    if (!signature) {
+      console.error("[Whop Webhook] Error: Signature header missing. Received headers:", JSON.stringify(Object.fromEntries(req.headers.entries())));
+      return NextResponse.json({ error: "Missing signature header" }, { status: 401 });
     }
 
     const expectedSignature = crypto
