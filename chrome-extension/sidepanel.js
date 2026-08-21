@@ -1,5 +1,5 @@
 // Configuration
-const BACKEND_URL = "https://strong-moonbeam-55e69e.netlify.app";
+const BACKEND_URL = "https://ataraxi-a.netlify.app";
 
 // Tab Switching Logic
 document.addEventListener("DOMContentLoaded", () => {

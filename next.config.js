@@ -39,6 +39,18 @@ const nextConfig = {
             value: 'max-age=63072000; includeSubDomains; preload',
           },
           {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
             key: 'Content-Security-Policy',
             value: "default-src 'self'; frame-src 'self' https://whop.com https://*.whop.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://whop.com https://*.whop.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.whop.com https://whop.com https://*.whop.com https://*.sentry.io wss:; img-src 'self' data: blob: https://whop.com https://*.whop.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:;",
           },
