@@ -15,31 +15,31 @@ const whopsdk = new Whop({
 // ── Plan ID → Credit & Tier Mapping ──────────────────────────────────────────
 const SUBSCRIPTION_PLAN_MAP: Record<string, { tier: string; credits: number }> = {
   // Pro Monthly
-  [process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || "plan_FoNiy1itUo9zU"]: {
+  [process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || ""]: {
     tier: "PRO",
     credits: TIER_CREDITS.PRO,
   },
   // Pro Annual
-  [process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || "plan_K8zNMMW1INY9u"]: {
+  [process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || ""]: {
     tier: "PRO",
     credits: TIER_CREDITS.PRO,
   },
   // Agency Monthly
-  [process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || "plan_CBRF1UZk35x39"]: {
+  [process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || ""]: {
     tier: "AGENCY",
     credits: TIER_CREDITS.AGENCY,
   },
   // Agency Annual
-  [process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "plan_1HGEvyOehwXBc"]: {
+  [process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || ""]: {
     tier: "AGENCY",
     credits: TIER_CREDITS.AGENCY,
   },
 };
 
 const TOPUP_PLAN_MAP: Record<string, number> = {
-  [process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || "plan_EcrupRkcyUBbY"]: 150,
-  [process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || "plan_3RZaGXuKIGBkG"]: 500,
-  [process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || "plan_YeAEmJVsE2pve"]: 1500,
+  [process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || ""]: 150,
+  [process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || ""]: 500,
+  [process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || ""]: 1500,
 };
 
 // ── Webhook Signature Verification ───────────────────────────────────────────

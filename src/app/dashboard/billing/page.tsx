@@ -27,7 +27,7 @@ const CREDIT_PACKAGES = [
     priceCents: 999,
     tagline: "Perfect for testing the waters",
     badge: null,
-    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || "plan_EcrupRkcyUBbY",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || "",
     features: [
       "150 AI execution credits",
       "Access all standard features",
@@ -43,7 +43,7 @@ const CREDIT_PACKAGES = [
     priceCents: 2499,
     tagline: "Best for daily active creators",
     badge: "Most Popular",
-    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || "plan_3RZaGXuKIGBkG",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || "",
     features: [
       "500 AI execution credits",
       "Best value per credit",
@@ -59,7 +59,7 @@ const CREDIT_PACKAGES = [
     priceCents: 5999,
     tagline: "Designed for power users & agencies",
     badge: null,
-    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || "plan_YeAEmJVsE2pve",
+    whopPlanId: process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || "",
     features: [
       "1,500 AI execution credits",
       "Maximum volume capacity",

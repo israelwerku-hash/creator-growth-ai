@@ -445,7 +445,7 @@ export default function AuthView({
 
         // Step 3: Supabase Auth already sets cookies in SSR via the client
 
-        document.cookie = "userId=creator-verified-session-token; path=/; max-age=604800";
+        document.cookie = "userId=authenticated; path=/; max-age=604800";
         setIsSubmitting(false);
         window.location.href = "/onboarding";
       } catch (err: any) {

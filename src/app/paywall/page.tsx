@@ -33,10 +33,10 @@ export default function PaywallPage() {
 
   // Whop plan IDs mapped by toggle state
   const whopPlanIds = {
-    proMonthly: process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || "plan_FoNiy1itUo9zU",
-    proAnnual: process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || "plan_K8zNMMW1INY9u",
-    agencyMonthly: process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || "plan_CBRF1UZk35x39",
-    agencyAnnual: process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "plan_1HGEvyOehwXBc",
+    proMonthly: process.env.NEXT_PUBLIC_WHOP_PRO_MONTHLY_PLAN_ID || "",
+    proAnnual: process.env.NEXT_PUBLIC_WHOP_PRO_ANNUAL_PLAN_ID || "",
+    agencyMonthly: process.env.NEXT_PUBLIC_WHOP_AGENCY_MONTHLY_PLAN_ID || "",
+    agencyAnnual: process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "",
   };
 
   const handleWhopCheckout = (tier: "PRO" | "AGENCY") => {
