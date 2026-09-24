@@ -43,6 +43,8 @@ const TOPUP_PLAN_MAP: Record<string, number> = {
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || ""]: 150,
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || ""]: 500,
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || ""]: 1500,
+  // Hardcoded backups
+  "plan_fljWiiusecw5W": 500, // Growth Pack
 };
 
 // ── Helper: Resolve user from all available identifiers ──────────────────────
@@ -304,6 +306,7 @@ export async function POST(req: Request) {
       const finalUserId = userId || updatedUser?.id || newUserId;
 
       console.log(`[Whop Webhook] Updated/Created User Record:`, JSON.stringify(updatedUser));
+      console.log(`[Whop Webhook] FINAL CREDIT BALANCE for ${finalUserId}: ${updatedUser?.aiCredits} credits (Added: ${creditsToAdd})`);
 
       try {
         await createAuditLog("SYSTEM_WEBHOOK", isSubscription ? "SUBSCRIPTION_UPGRADE" : "CREDIT_TOPUP", {
