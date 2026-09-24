@@ -10,11 +10,11 @@ export async function getUserTierAction() {
     const user = await requireAuth();
     const creator = await db.creator.findUnique({
       where: { id: user.id },
-      select: { tier: true }
+      select: { tier: true, email: true }
     });
-    return { success: true, tier: creator?.tier || "FREE", userId: user.id };
+    return { success: true, tier: creator?.tier || "FREE", userId: user.id, email: creator?.email || user.email || null };
   } catch (error) {
-    return { success: false, tier: "FREE", userId: null };
+    return { success: false, tier: "FREE", userId: null, email: null };
   }
 }
 

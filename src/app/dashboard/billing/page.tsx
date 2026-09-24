@@ -75,6 +75,7 @@ export default function BillingPage() {
   const [credits, setCredits] = useState<number | null>(null);
   const [tier, setTier] = useState<string>("FREE");
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function BillingPage() {
         if (tierRes.success) {
           if (tierRes.tier) setTier(tierRes.tier);
           if (tierRes.userId) setUserId(tierRes.userId);
+          if (tierRes.email) setUserEmail(tierRes.email);
         }
 
         const res = await fetch("/api/admin/proxy", {
@@ -105,7 +107,11 @@ export default function BillingPage() {
   }, []);
 
   const handlePurchase = (pkg: (typeof CREDIT_PACKAGES)[number]) => {
-    const checkoutUrl = `https://whop.com/checkout/${pkg.whopPlanId}${userId ? `?metadata[userId]=${userId}` : ""}`;
+    const params = new URLSearchParams();
+    if (userId) params.set("metadata[userId]", userId);
+    if (userEmail) params.set("metadata[email]", userEmail);
+    const queryString = params.toString();
+    const checkoutUrl = `https://whop.com/checkout/${pkg.whopPlanId}${queryString ? `?${queryString}` : ""}`;
     window.open(checkoutUrl, "_blank");
   };
 

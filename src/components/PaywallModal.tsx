@@ -57,7 +57,10 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
           planId = billingCycle === "monthly" ? whopPlanIds.agencyMonthly : whopPlanIds.agencyAnnual;
         }
 
-        const checkoutUrl = `https://whop.com/checkout/${planId}?metadata[userId]=${user.id}`;
+        const params = new URLSearchParams();
+        params.set("metadata[userId]", user.id);
+        if (user.email) params.set("metadata[email]", user.email);
+        const checkoutUrl = `https://whop.com/checkout/${planId}?${params.toString()}`;
         window.open(checkoutUrl, "_blank");
         onClose();
       }

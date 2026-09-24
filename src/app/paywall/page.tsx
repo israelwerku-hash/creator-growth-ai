@@ -39,14 +39,20 @@ export default function PaywallPage() {
     agencyAnnual: process.env.NEXT_PUBLIC_WHOP_AGENCY_ANNUAL_PLAN_ID || "",
   };
 
-  const handleWhopCheckout = (tier: "PRO" | "AGENCY") => {
+  const handleWhopCheckout = async (tier: "PRO" | "AGENCY") => {
     let planId: string;
     if (tier === "PRO") {
       planId = isAnnual ? whopPlanIds.proAnnual : whopPlanIds.proMonthly;
     } else {
       planId = isAnnual ? whopPlanIds.agencyAnnual : whopPlanIds.agencyMonthly;
     }
-    const checkoutUrl = `https://whop.com/checkout/${planId}${userId ? `?metadata[userId]=${userId}` : ""}`;
+    // Fetch email for metadata
+    const { data: { user } } = await supabase.auth.getUser();
+    const params = new URLSearchParams();
+    if (userId) params.set("metadata[userId]", userId);
+    if (user?.email) params.set("metadata[email]", user.email);
+    const queryString = params.toString();
+    const checkoutUrl = `https://whop.com/checkout/${planId}${queryString ? `?${queryString}` : ""}`;
     window.open(checkoutUrl, "_blank");
   };
 

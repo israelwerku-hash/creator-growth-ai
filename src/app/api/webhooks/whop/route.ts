@@ -90,14 +90,38 @@ export async function POST(req: Request) {
     console.log(`[Whop Webhook] Resolved event type: ${eventType}`);
     console.log("Whop Webhook Received:", JSON.stringify(data));
 
-    // ── 2. Extract user identifier ──
+    // ── 2. Extract user identifier (check every possible location) ──
     let userId =
       data.metadata?.userId ||
       data.custom_metadata?.userId ||
+      data.custom_fields?.userId ||
       data.discord_account_id ||
       null;
 
-    const targetEmail = (payload as any).data?.user?.email || (payload as any).data?.email || (payload as any).user?.email || bodyJson.data?.user?.email || bodyJson.data?.email || null;
+    // Extract email from every possible Whop payload location
+    const targetEmail =
+      data.metadata?.email ||
+      data.custom_metadata?.email ||
+      data.custom_fields?.email ||
+      (payload as any).data?.user?.email ||
+      (payload as any).data?.email ||
+      (payload as any).user?.email ||
+      data.user?.email ||
+      data.email ||
+      bodyJson.data?.user?.email ||
+      bodyJson.data?.email ||
+      null;
+
+    console.log(`[Whop Webhook] Extracted identifiers — userId: ${userId}, email: ${targetEmail}`);
+
+    // Fallback: look up user by email if userId is missing or not found in DB
+    if (userId) {
+      const existingById = await db.creator.findUnique({ where: { id: userId } });
+      if (!existingById) {
+        console.warn(`[Whop Webhook] userId "${userId}" from metadata not found in DB. Falling back to email lookup.`);
+        userId = null; // Force email fallback
+      }
+    }
 
     if (!userId && targetEmail) {
       const existingCreator = await db.creator.findFirst({
@@ -105,6 +129,7 @@ export async function POST(req: Request) {
       });
       if (existingCreator) {
         userId = existingCreator.id;
+        console.log(`[Whop Webhook] Matched user by email: ${targetEmail} → ${userId}`);
       }
     }
 
@@ -122,7 +147,8 @@ export async function POST(req: Request) {
 
     if (isPaymentEvent) {
       if (!userId) {
-        console.warn("[Whop Webhook] Payment event received but no userId or email matched in database.", { planId, targetEmail });
+        console.error("[Whop Webhook] PAYMENT EVENT — USER NOT FOUND. Full event.data payload:", JSON.stringify(data, null, 2));
+        console.error("[Whop Webhook] Full raw body:", rawBody);
         return NextResponse.json({ error: "User not found" }, { status: 400 });
       }
 
