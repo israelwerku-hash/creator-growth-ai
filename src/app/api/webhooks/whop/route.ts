@@ -43,8 +43,6 @@ const TOPUP_PLAN_MAP: Record<string, number> = {
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_STARTER_PLAN_ID || ""]: 150,
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_GROWTH_PLAN_ID || ""]: 500,
   [process.env.NEXT_PUBLIC_WHOP_TOPUP_ELITE_PLAN_ID || ""]: 1500,
-  // Hardcoded backups
-  "plan_fljWiiusecw5W": 500, // Growth Pack
 };
 
 // ── Helper: Resolve user from all available identifiers ──────────────────────
@@ -208,31 +206,38 @@ export async function POST(req: Request) {
       let isSubscription = false;
       let tierToSet = "PRO";
 
-      if (planId && SUBSCRIPTION_PLAN_MAP[planId]) {
+      // 1. Prioritize Product Title Matching First
+      const productTitle = (data.product?.title || "").toLowerCase();
+      const productRoute = (data.product?.route || "").toLowerCase();
+      const matchStr = `${productTitle}${productRoute}`;
+      let matchedByString = false;
+
+      // Strict Keyword Evaluation Order
+      if (matchStr.includes("elite")) {
+        creditsToAdd = 1500;
+        matchedByString = true;
+      } else if (matchStr.includes("starter")) {
+        creditsToAdd = 150;
+        matchedByString = true;
+      } else if (matchStr.includes("growth")) {
+        creditsToAdd = 500;
+        matchedByString = true;
+      }
+
+      if (matchedByString) {
+        console.log(`[Whop Webhook] MATCHED TIER: (${matchStr} -> Provisioning) ${creditsToAdd} credits`);
+      } else if (planId && SUBSCRIPTION_PLAN_MAP[planId]) {
         creditsToAdd = SUBSCRIPTION_PLAN_MAP[planId].credits;
         tierToSet = SUBSCRIPTION_PLAN_MAP[planId].tier;
         isSubscription = true;
+        console.log(`[Whop Webhook] MATCHED TIER: (${tierToSet} -> Provisioning) ${creditsToAdd} credits`);
       } else if (planId && TOPUP_PLAN_MAP[planId]) {
         creditsToAdd = TOPUP_PLAN_MAP[planId];
+        console.log(`[Whop Webhook] MATCHED TIER: (TOP-UP PLAN ID -> Provisioning) ${creditsToAdd} credits`);
       } else {
-        // Fallback: Check product titles and routes instead of amount
-        const productTitle = typeof data.product?.title === "string" ? data.product.title.toLowerCase() : "";
-        const productRoute = typeof data.product?.route === "string" ? data.product.route.toLowerCase() : "";
-        const fallbackPlanId = typeof planId === "string" ? planId.toLowerCase() : "";
-
-        const payloadStr = `${productTitle} ${productRoute} ${fallbackPlanId}`;
-
-        if (payloadStr.includes("elite") || payloadStr.includes("1500")) {
-          creditsToAdd = 1500;
-        } else if (payloadStr.includes("starter") || payloadStr.includes("150")) {
-          creditsToAdd = 150;
-        } else if (payloadStr.includes("growth") || payloadStr.includes("500") || payloadStr.includes("plan_fljwiiusecw5w")) {
-          creditsToAdd = 500;
-        } else {
-          console.error(`[Whop Webhook] CRITICAL: Unknown credit package. Payload product: ${JSON.stringify(data.product)}, Plan ID: ${planId}`);
-          // Do not default to 500 credits. Return early so we don't accidentally update the user's credits improperly.
-          return NextResponse.json({ success: true, warning: "Unknown credit package logged" }, { status: 200 });
-        }
+        console.error(`[Whop Webhook] CRITICAL: Unknown credit package. Payload product: ${JSON.stringify(data.product)}, Plan ID: ${planId}`);
+        // Do not default to 500 credits. Return early so we don't accidentally update the user's credits improperly.
+        return NextResponse.json({ success: true, warning: "Unknown credit package logged" }, { status: 200 });
       }
 
       const whopMembershipId = data.membership?.id || data.membership_id || data.id || null;
