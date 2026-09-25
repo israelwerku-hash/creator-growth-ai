@@ -137,7 +137,7 @@ export default function AIMemoryVaultPage() {
               <BrainCircuit className="w-5 h-5 text-burgundy-primary" />
             </div>
             <div>
-              <h1 className="text-md font-black text-white tracking-tight">Fan Memory Vault <span className="text-burgundy-primary text-xs">(Local Test Mode)</span></h1>
+              <h1 className="text-md font-black text-white tracking-tight">Fan Memory Vault</h1>
               <p className="text-xs text-zinc-500">Track interactions, traits, and let AI build context.</p>
             </div>
           </div>
