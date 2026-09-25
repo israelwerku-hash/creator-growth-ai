@@ -226,10 +226,6 @@ export default function AIMemoryVaultPage() {
                 </h2>
                 
                 <div className="flex items-center gap-3">
-                  <div className="text-[10px] font-mono px-3 py-1 bg-burgundy-primary/10 text-burgundy-primary border border-burgundy-primary/20 rounded-full">
-                    {currentMemories.length} Active Vectors
-                  </div>
-                  
                   {selectedFanId && (
                     <button 
                       onClick={handleAnalyzeVault}

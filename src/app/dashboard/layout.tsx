@@ -101,7 +101,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
           
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 bg-app-black border border-neutral-800/60 px-3 py-1.5 rounded-lg">
-              <div className="w-1.5 h-1.5 rounded-full bg-burgundy-primary animate-pulse" />
               <span className="text-[11px] font-bold text-zinc-400">{credits} Credits</span>
             </div>
             
