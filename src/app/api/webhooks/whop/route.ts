@@ -212,12 +212,24 @@ export async function POST(req: Request) {
       } else if (planId && TOPUP_PLAN_MAP[planId]) {
         creditsToAdd = TOPUP_PLAN_MAP[planId];
       } else {
-        const amount = data.amount ? parseFloat(data.amount) : 0;
-        if (amount > 0 && amount <= 10) creditsToAdd = 150;
-        else if (amount > 10 && amount <= 30) creditsToAdd = 500;
-        else if (amount > 30) creditsToAdd = 1500;
-        else creditsToAdd = 500;
-        console.warn(`[Whop Webhook] Unknown plan ID: ${planId}. Fallback: ${creditsToAdd} credits (amount: ${amount}).`);
+        // Fallback: Check product titles and routes instead of amount
+        const productTitle = typeof data.product?.title === "string" ? data.product.title.toLowerCase() : "";
+        const productRoute = typeof data.product?.route === "string" ? data.product.route.toLowerCase() : "";
+        const fallbackPlanId = typeof planId === "string" ? planId.toLowerCase() : "";
+
+        const payloadStr = `${productTitle} ${productRoute} ${fallbackPlanId}`;
+
+        if (payloadStr.includes("starter")) {
+          creditsToAdd = 150;
+        } else if (payloadStr.includes("growth") || payloadStr.includes("plan_fljwiiusecw5w")) {
+          creditsToAdd = 500;
+        } else if (payloadStr.includes("elite")) {
+          creditsToAdd = 1500;
+        } else {
+          console.error(`[Whop Webhook] CRITICAL: Unknown credit package. Payload product: ${JSON.stringify(data.product)}, Plan ID: ${planId}`);
+          // Do not default to 500 credits. Return early so we don't accidentally update the user's credits improperly.
+          return NextResponse.json({ success: true, warning: "Unknown credit package logged" }, { status: 200 });
+        }
       }
 
       const whopMembershipId = data.membership?.id || data.membership_id || data.id || null;
