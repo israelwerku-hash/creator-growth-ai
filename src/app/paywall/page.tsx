@@ -53,7 +53,7 @@ export default function PaywallPage() {
     if (user?.email) params.set("metadata[email]", user.email);
     const queryString = params.toString();
     const checkoutUrl = `https://whop.com/checkout/${planId}${queryString ? `?${queryString}` : ""}`;
-    window.open(checkoutUrl, "_blank");
+    window.location.href = checkoutUrl;
   };
 
   useEffect(() => {

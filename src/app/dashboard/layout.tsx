@@ -6,6 +6,7 @@ import { getSession } from "@/utils/supabase/server";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { SidebarNav } from "@/components/SidebarNav";
+import { CheckoutSuccessHandler } from "@/components/CheckoutSuccessHandler";
 import { db } from "@/lib/db";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -110,6 +111,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {/* 3. Page Content */}
         <main className="flex-1 overflow-y-auto p-8 relative z-10">
+          <CheckoutSuccessHandler />
           {children}
         </main>
       </div>
