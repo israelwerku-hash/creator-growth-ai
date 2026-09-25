@@ -179,6 +179,9 @@ export async function POST(req: Request) {
 
     console.log(`[Whop Webhook] Resolved event type: ${eventType}`);
     console.log("[Whop Webhook] Event data:", JSON.stringify(data));
+    
+    // Log plan and product identifiers for debugging checkout links
+    console.log(`[Whop Webhook] Plan/Product Debug — Plan ID: ${data.plan?.id || data.plan_id}, Product Title: ${data.product?.title}, Product Route: ${data.product?.route}`);
 
     // ── Resolve User ──
     const { userId, resolvedEmail } = await resolveUserId(data, payload, bodyJson);
@@ -219,12 +222,12 @@ export async function POST(req: Request) {
 
         const payloadStr = `${productTitle} ${productRoute} ${fallbackPlanId}`;
 
-        if (payloadStr.includes("starter")) {
-          creditsToAdd = 150;
-        } else if (payloadStr.includes("growth") || payloadStr.includes("plan_fljwiiusecw5w")) {
-          creditsToAdd = 500;
-        } else if (payloadStr.includes("elite")) {
+        if (payloadStr.includes("elite") || payloadStr.includes("1500")) {
           creditsToAdd = 1500;
+        } else if (payloadStr.includes("starter") || payloadStr.includes("150")) {
+          creditsToAdd = 150;
+        } else if (payloadStr.includes("growth") || payloadStr.includes("500") || payloadStr.includes("plan_fljwiiusecw5w")) {
+          creditsToAdd = 500;
         } else {
           console.error(`[Whop Webhook] CRITICAL: Unknown credit package. Payload product: ${JSON.stringify(data.product)}, Plan ID: ${planId}`);
           // Do not default to 500 credits. Return early so we don't accidentally update the user's credits improperly.
