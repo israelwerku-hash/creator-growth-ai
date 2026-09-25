@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Instagram, Mail } from "lucide-react";
+import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Instagram, Mail, Loader2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
@@ -246,66 +249,95 @@ export default function LandingPage() {
             
             <form className="space-y-6 text-left" onSubmit={async (e) => {
               e.preventDefault();
-              const form = e.currentTarget;
-              const formData = new FormData(form);
-              const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-              const statusEl = document.getElementById('contact-status');
               
-              submitBtn.disabled = true;
-              submitBtn.textContent = 'Sending...';
-              if (statusEl) { statusEl.textContent = ''; statusEl.className = ''; }
+              if (!contactForm.name || !contactForm.email || !contactForm.message) {
+                setSubmitStatus({ type: 'error', text: 'Please fill in all mandatory fields.' });
+                return;
+              }
+
+              setIsSubmitting(true);
+              setSubmitStatus(null);
 
               try {
                 const res = await fetch('/api/contact', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    message: formData.get('message'),
-                  }),
+                  body: JSON.stringify(contactForm),
                 });
                 const data = await res.json();
+                
                 if (res.ok && data.success) {
-                  if (statusEl) {
-                    statusEl.textContent = 'Message Sent! We will get back to you shortly.';
-                    statusEl.className = 'text-sm text-emerald-400 font-semibold mt-4 text-center';
-                  }
-                  form.reset();
+                  setSubmitStatus({ type: 'success', text: 'Message Sent! We will get back to you shortly.' });
+                  setContactForm({ name: '', email: '', message: '' });
                 } else {
-                  if (statusEl) {
-                    statusEl.textContent = data.error || 'Something went wrong. Please try again.';
-                    statusEl.className = 'text-sm text-red-400 font-semibold mt-4 text-center';
-                  }
+                  setSubmitStatus({ type: 'error', text: data.error || 'Something went wrong. Please try again.' });
                 }
               } catch (err) {
-                if (statusEl) {
-                  statusEl.textContent = 'Network error. Please check your connection.';
-                  statusEl.className = 'text-sm text-red-400 font-semibold mt-4 text-center';
-                }
+                setSubmitStatus({ type: 'error', text: 'Network error. Please check your connection.' });
               } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg> Send Message';
+                setIsSubmitting(false);
               }
             }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Name</label>
-                  <input name="name" type="text" required className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="Jane Doe" />
+                  <input 
+                    name="name" 
+                    type="text" 
+                    required 
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" 
+                    placeholder="Jane Doe" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Email</label>
-                  <input name="email" type="email" required className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" placeholder="jane@agency.com" />
+                  <input 
+                    name="email" 
+                    type="email" 
+                    required 
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" 
+                    placeholder="jane@agency.com" 
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Message</label>
-                <textarea name="message" rows={5} required minLength={10} className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors resize-none" placeholder="How can we help you scale?"></textarea>
+                <textarea 
+                  name="message" 
+                  rows={5} 
+                  required 
+                  minLength={10} 
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                  className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors resize-none" 
+                  placeholder="How can we help you scale?"
+                ></textarea>
               </div>
-              <button type="submit" className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-200 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                <Mail className="w-5 h-5" /> Send Message
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-200 transition-transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5" /> Send Message
+                  </>
+                )}
               </button>
-              <p id="contact-status"></p>
+              
+              {submitStatus && (
+                <p className={`text-sm font-semibold mt-4 text-center ${submitStatus.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {submitStatus.text}
+                </p>
+              )}
             </form>
           </div>
         </section>
