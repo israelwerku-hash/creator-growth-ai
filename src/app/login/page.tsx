@@ -28,9 +28,21 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const pendingEmailRef = useRef<string | null>(null);
   const pendingPasswordRef = useRef<string | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // ── Persistent session: auto-redirect if already signed in ──
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/dashboard");
+      } else {
+        setIsCheckingSession(false);
+      }
+    });
+  }, [supabase, router]);
 
   // ── Cross-device verification polling ──
   useEffect(() => {
@@ -213,12 +225,29 @@ export default function LoginPage() {
       }
 
       if (res.ok && result.success) {
+        // Establish the client-side Supabase session so the browser cookie persists
+        // across tab closes and page refreshes. The server already validated credentials,
+        // so this call will always succeed.
+        await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
         router.push("/dashboard");
         router.refresh();
         return; // Keep loading state while navigating
       }
     }
   };
+
+  // Show nothing while checking for an existing session (prevents form flash)
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <Loader2 className="w-8 h-8 text-zinc-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#050505] text-white font-sans selection:bg-white/20 px-4 py-12">

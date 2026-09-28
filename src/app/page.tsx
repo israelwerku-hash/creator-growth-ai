@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [videoReady, setVideoReady] = React.useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -54,9 +55,32 @@ export default function LandingPage() {
         {/* 2. Immersive Hero Section */}
         <section className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center z-0">
           {isMounted && (
-            <video ref={videoRef} autoPlay loop muted playsInline preload="auto" suppressHydrationWarning className="absolute top-0 left-0 w-full h-full object-cover">
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              poster="/poster.webp"
+              onCanPlayThrough={() => setVideoReady(true)}
+              onPlaying={() => setVideoReady(true)}
+              suppressHydrationWarning
+              className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+                videoReady ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <source src="/premium-hero.webm" type="video/webm" />
               <source src="/premium-hero.mp4" type="video/mp4" />
             </video>
+          )}
+          {/* Poster fallback shown while video is buffering */}
+          {isMounted && !videoReady && (
+            <img
+              src="/poster.webp"
+              alt=""
+              className="absolute top-0 left-0 w-full h-full object-cover"
+            />
           )}
           <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
           
