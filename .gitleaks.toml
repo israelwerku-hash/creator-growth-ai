@@ -1,0 +1,20 @@
+# Gitleaks Configuration
+# Allow-list for secrets that existed in historical commits but have since been
+# removed and rotated. These are no longer present in the current codebase.
+#
+# IMPORTANT: The admin password found in the old AuthView commit has been
+# rotated. The Whop plan IDs are non-secret product identifiers but trigger
+# the generic-api-key rule due to their format.
+
+[allowlist]
+  description = "Allowlisted historical findings (secrets already removed and rotated)"
+
+  commits = [
+    # AuthView.tsx — hardcoded admin credentials (removed in 1105dba, password rotated)
+    "907325fc4d3159a1ac48c6e377dcf324543e3488",
+    "1105dba4ade210f54e56e1419e3fef85ec751157",
+
+    # billing/page.tsx — hardcoded Whop plan ID fallbacks (removed in 1a2a32b)
+    "ce644912f6a93498ab2ee57144b3bf41376954ee",
+    "f642d54c2edc1ab46617b08de882b44784f2a967",
+  ]
