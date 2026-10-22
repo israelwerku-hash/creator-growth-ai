@@ -2,9 +2,10 @@ import "./globals.css";
 // 1. Add this import at the very top of the file
 import Script from 'next/script';
 import { Metadata } from 'next';
+import { PostHogProvider } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Ataraxi AI',
+  title: 'Ataraxia',
   description: 'AI Growth Engine',
   icons: {
     icon: '/icon.png',
@@ -102,7 +103,9 @@ export default function RootLayout({
         className="font-sans bg-app-black text-white antialiased"
         suppressHydrationWarning
       >
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

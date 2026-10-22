@@ -52,7 +52,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; frame-src 'self' https://whop.com https://*.whop.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://whop.com https://*.whop.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.whop.com https://whop.com https://*.whop.com https://*.sentry.io wss:; img-src 'self' data: blob: https://whop.com https://*.whop.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:;",
+            value: "default-src 'self'; frame-src 'self' https://whop.com https://*.whop.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://whop.com https://*.whop.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.whop.com https://whop.com https://*.whop.com https://*.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com wss:; img-src 'self' data: blob: https://whop.com https://*.whop.com; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:;",
           },
         ],
       },

@@ -33,7 +33,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(255,255,255,0.5)]">
               Ω
             </div>
-            <span className="font-bold tracking-tight text-lg">DNA Growth</span>
+            <span className="font-bold tracking-tight text-lg">Ataraxia</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
             <a href="#features" className="hover:text-white transition-colors">Features</a>

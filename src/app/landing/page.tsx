@@ -26,7 +26,7 @@ export default function LandingPage() {
             </div>
             <div>
               <span className="font-mono text-[9px] tracking-widest text-pink-400 uppercase block font-bold leading-none mb-0.5">PLATFORM TRACK</span>
-              <span className="text-sm font-black text-white tracking-tight block leading-none">DNA GROWTH</span>
+              <span className="text-sm font-black text-white tracking-tight block leading-none">ATARAXIA</span>
             </div>
           </Link>
 
