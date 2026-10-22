@@ -18,11 +18,20 @@ export default function LandingPage() {
     setIsMounted(true);
   }, []);
 
+  // Eagerly play and optimize buffering once mounted
   React.useEffect(() => {
-    if (isMounted && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Force eager buffering in browsers that support it
+    if ('requestVideoFrameCallback' in video) {
+      (video as any).requestVideoFrameCallback(() => {
+        setVideoReady(true);
+      });
     }
-  }, [isMounted]);
+
+    video.play().catch(() => {});
+  }, []);
 
   return (
     <div suppressHydrationWarning className="min-h-screen bg-[#050505] text-white selection:bg-white/20 font-sans">
@@ -54,32 +63,38 @@ export default function LandingPage() {
       <main>
         {/* 2. Immersive Hero Section */}
         <section className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center z-0">
-          {isMounted && (
-            <video
-              ref={videoRef}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              poster="/poster.webp"
-              onCanPlayThrough={() => setVideoReady(true)}
-              onPlaying={() => setVideoReady(true)}
-              suppressHydrationWarning
-              className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
-                videoReady ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <source src="/premium-hero.webm" type="video/webm" />
-              <source src="/premium-hero.mp4" type="video/mp4" />
-            </video>
-          )}
+          {/* Video renders immediately in SSR markup so the browser begins preloading on first paint */}
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            poster="/poster.webp"
+            // @ts-expect-error — fetchPriority is a valid HTML attribute, not yet in React types
+            fetchPriority="high"
+            onCanPlayThrough={() => setVideoReady(true)}
+            onPlaying={() => setVideoReady(true)}
+            suppressHydrationWarning
+            className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
+              videoReady ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
+          >
+            <source src="/premium-hero.webm" type="video/webm" />
+            <source src="/premium-hero.mp4" type="video/mp4" />
+          </video>
           {/* Poster fallback shown while video is buffering */}
-          {isMounted && !videoReady && (
+          {!videoReady && (
             <img
               src="/poster.webp"
               alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              decoding="async"
               className="absolute top-0 left-0 w-full h-full object-cover"
+              style={{ willChange: 'transform', transform: 'translateZ(0)' }}
             />
           )}
           <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
