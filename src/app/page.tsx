@@ -8,29 +8,12 @@ import { Footer } from "@/components/Footer";
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
-  const [videoReady, setVideoReady] = React.useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
-  }, []);
-
-  // Eagerly play and optimize buffering once mounted
-  React.useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Force eager buffering in browsers that support it
-    if ('requestVideoFrameCallback' in video) {
-      (video as any).requestVideoFrameCallback(() => {
-        setVideoReady(true);
-      });
-    }
-
-    video.play().catch(() => {});
   }, []);
 
   return (
@@ -61,57 +44,143 @@ export default function LandingPage() {
       </nav>
 
       <main>
-        {/* 2. Immersive Hero Section */}
-        <section className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center z-0">
-          {/* Video renders immediately in SSR markup so the browser begins preloading on first paint */}
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster="/poster.webp"
-            // @ts-expect-error — fetchPriority is a valid HTML attribute, not yet in React types
-            fetchPriority="high"
-            onCanPlayThrough={() => setVideoReady(true)}
-            onPlaying={() => setVideoReady(true)}
-            suppressHydrationWarning
-            className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ${
-              videoReady ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
-          >
-            <source src="/premium-hero.webm" type="video/webm" />
-            <source src="/premium-hero.mp4" type="video/mp4" />
-          </video>
-          {/* Poster fallback shown while video is buffering */}
-          {!videoReady && (
-            <img
-              src="/poster.webp"
-              alt=""
-              aria-hidden="true"
-              fetchPriority="high"
-              decoding="async"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-              style={{ willChange: 'transform', transform: 'translateZ(0)' }}
-            />
-          )}
-          <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
-          
-          <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-white drop-shadow-glow-burgundy mb-6">
-              Scale Your OnlyFans With AI.
+        {/* 2. B2B Conversion-Optimized Hero Section */}
+        <section className="relative w-full min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #0B0F17 0%, #0d1120 40%, #0B0F17 100%)' }}>
+          {/* Subtle ambient glow — GPU-composited */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-500/[0.07] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
+
+          {/* Hero Copy */}
+          <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
+            {/* Trust badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-8">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-semibold text-indigo-300 tracking-wide uppercase">Beta — Now accepting agencies</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-extrabold tracking-tight text-white leading-[1.1] mb-6">
+              The OnlyFans CRM Built for{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Agency Operations.</span>
             </h1>
-            <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mb-10 leading-relaxed font-medium">
-              The premier AI growth engine and automated DM system for top 0.1% creators.
+
+            <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed font-medium">
+              Track &#36;1,000+ VIP spenders, manage chatter shifts, and organize custom content requests in one clean dashboard.
             </p>
-            <Link 
-              href="/login" 
-              className="backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 text-white font-bold px-8 py-4 rounded-2xl flex items-center justify-center gap-2 shadow-xl"
-            >
-              Start Scaling Now <ArrowRight className="w-5 h-5" />
-            </Link>
+
+            {/* CTA Row */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+              <Link
+                href="/login"
+                className="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 shadow-lg shadow-indigo-500/25 text-base"
+              >
+                Get Beta Access <ArrowRight className="w-5 h-5" />
+              </Link>
+              <a
+                href="#features"
+                className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                See how it works <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+            <p className="text-xs text-zinc-600 font-medium">No credit card required · 14-day free trial</p>
+          </div>
+
+          {/* Product UI Mockup — Realistic CRM Dashboard Preview */}
+          <div className="relative z-10 w-full max-w-5xl mx-auto mt-16 px-2 sm:px-0">
+            {/* Browser chrome frame */}
+            <div className="rounded-xl border border-white/[0.08] bg-[#0d1117] shadow-2xl shadow-black/60 overflow-hidden">
+              {/* Title bar */}
+              <div className="flex items-center gap-2 px-4 py-3 bg-[#161b22] border-b border-white/[0.06]">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div className="px-4 py-1 rounded-md bg-white/[0.05] text-[11px] text-zinc-500 font-mono">app.ataraxia.io/dashboard</div>
+                </div>
+              </div>
+
+              {/* Dashboard body */}
+              <div className="flex min-h-[380px] sm:min-h-[420px]">
+                {/* Sidebar */}
+                <div className="hidden sm:flex flex-col w-48 border-r border-white/[0.06] bg-[#0d1117] p-4 gap-1 shrink-0">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-semibold">
+                    <PieChart className="w-3.5 h-3.5" /> Dashboard
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
+                    <MessageSquare className="w-3.5 h-3.5" /> Chatters
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
+                    <BrainCircuit className="w-3.5 h-3.5" /> AI Copilot
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
+                    <Instagram className="w-3.5 h-3.5" /> Content
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
+                    <Mail className="w-3.5 h-3.5" /> Custom Requests
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
+                    <Lock className="w-3.5 h-3.5" /> Settings
+                  </div>
+                </div>
+
+                {/* Main content area */}
+                <div className="flex-1 p-5 space-y-5 overflow-hidden">
+                  {/* Metric cards row */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { label: 'Monthly Revenue', value: '\$48,290', delta: '+12.4%', up: true },
+                      { label: 'VIP Subscribers', value: '342', delta: '+8.1%', up: true },
+                      { label: 'Active Chatters', value: '12', delta: 'On shift', up: true },
+                      { label: 'Pending Requests', value: '27', delta: '3 urgent', up: false },
+                    ].map((m) => (
+                      <div key={m.label} className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                        <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mb-1">{m.label}</p>
+                        <p className="text-lg font-bold text-white leading-none mb-0.5">{m.value}</p>
+                        <p className={`text-[10px] font-semibold ${m.up ? 'text-emerald-400' : 'text-amber-400'}`}>{m.delta}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Activity table */}
+                  <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+                      <p className="text-xs font-semibold text-zinc-300">Recent VIP Activity</p>
+                      <span className="text-[10px] text-indigo-400 font-semibold cursor-pointer hover:text-indigo-300">View all</span>
+                    </div>
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="text-[10px] uppercase tracking-wider text-zinc-600 font-semibold border-b border-white/[0.04]">
+                          <th className="px-4 py-2">Subscriber</th>
+                          <th className="px-4 py-2 hidden sm:table-cell">Spend</th>
+                          <th className="px-4 py-2 hidden md:table-cell">Chatter</th>
+                          <th className="px-4 py-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-xs text-zinc-300">
+                        {[
+                          { name: 'user_vip_maxR', spend: '\$4,210', chatter: 'Sarah K.', status: 'Renewing', color: 'text-emerald-400 bg-emerald-400/10' },
+                          { name: 'user_diamondJ', spend: '\$2,880', chatter: 'Mike T.', status: 'Custom Req', color: 'text-amber-400 bg-amber-400/10' },
+                          { name: 'user_eliteW99', spend: '\$1,750', chatter: 'AI Copilot', status: 'Active', color: 'text-indigo-400 bg-indigo-400/10' },
+                          { name: 'user_premC', spend: '\$1,320', chatter: 'Sarah K.', status: 'Expiring', color: 'text-red-400 bg-red-400/10' },
+                        ].map((r) => (
+                          <tr key={r.name} className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
+                            <td className="px-4 py-2.5 font-medium font-mono text-zinc-200">{r.name}</td>
+                            <td className="px-4 py-2.5 hidden sm:table-cell font-semibold text-white">{r.spend}</td>
+                            <td className="px-4 py-2.5 hidden md:table-cell">{r.chatter}</td>
+                            <td className="px-4 py-2.5">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${r.color}`}>{r.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Bottom gradient fade for polish */}
+            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0B0F17] to-transparent pointer-events-none" />
           </div>
         </section>
 
