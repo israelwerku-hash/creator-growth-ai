@@ -45,21 +45,15 @@ export default function LandingPage() {
 
       <main>
         {/* 2. B2B Conversion-Optimized Hero Section */}
-        <section className="relative w-full min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #0B0F17 0%, #0d1120 40%, #0B0F17 100%)' }}>
+        <section className="relative w-full min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #080e0a 0%, #0c1a10 40%, #080e0a 100%)' }}>
           {/* Subtle ambient glow — GPU-composited */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-500/[0.07] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" style={{ backgroundColor: 'rgba(27,77,46,0.07)' }} />
 
           {/* Hero Copy */}
           <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
-            {/* Trust badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-8">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold text-indigo-300 tracking-wide uppercase">Beta — Now accepting agencies</span>
-            </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-              The OnlyFans CRM Built for{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Agency Operations.</span>
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-extrabold tracking-tight text-white leading-[1.1] mb-6">
+              The OnlyFans CRM Built for Agency Operations.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed font-medium">
@@ -67,10 +61,11 @@ export default function LandingPage() {
             </p>
 
             {/* CTA Row */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/login"
-                className="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 shadow-lg shadow-indigo-500/25 text-base"
+                className="text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 shadow-lg text-base border border-[#2a5e3a]/40"
+                style={{ backgroundColor: '#1b4d2e', boxShadow: '0 10px 25px -5px rgba(27,77,46,0.35)' }}
               >
                 Get Beta Access <ArrowRight className="w-5 h-5" />
               </Link>
@@ -81,7 +76,6 @@ export default function LandingPage() {
                 See how it works <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
-            <p className="text-xs text-zinc-600 font-medium">No credit card required · 14-day free trial</p>
           </div>
 
           {/* Product UI Mockup — Realistic CRM Dashboard Preview */}
@@ -104,7 +98,7 @@ export default function LandingPage() {
               <div className="flex min-h-[380px] sm:min-h-[420px]">
                 {/* Sidebar */}
                 <div className="hidden sm:flex flex-col w-48 border-r border-white/[0.06] bg-[#0d1117] p-4 gap-1 shrink-0">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-semibold">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold" style={{ backgroundColor: 'rgba(27,77,46,0.15)', color: '#4ade80' }}>
                     <PieChart className="w-3.5 h-3.5" /> Dashboard
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
@@ -146,7 +140,7 @@ export default function LandingPage() {
                   <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                     <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
                       <p className="text-xs font-semibold text-zinc-300">Recent VIP Activity</p>
-                      <span className="text-[10px] text-indigo-400 font-semibold cursor-pointer hover:text-indigo-300">View all</span>
+                      <span className="text-[10px] font-semibold cursor-pointer transition-colors" style={{ color: '#4ade80' }}>View all</span>
                     </div>
                     <table className="w-full text-left">
                       <thead>
@@ -161,7 +155,7 @@ export default function LandingPage() {
                         {[
                           { name: 'user_vip_maxR', spend: '\$4,210', chatter: 'Sarah K.', status: 'Renewing', color: 'text-emerald-400 bg-emerald-400/10' },
                           { name: 'user_diamondJ', spend: '\$2,880', chatter: 'Mike T.', status: 'Custom Req', color: 'text-amber-400 bg-amber-400/10' },
-                          { name: 'user_eliteW99', spend: '\$1,750', chatter: 'AI Copilot', status: 'Active', color: 'text-indigo-400 bg-indigo-400/10' },
+                          { name: 'user_eliteW99', spend: '\$1,750', chatter: 'AI Copilot', status: 'Active', color: 'text-emerald-400 bg-emerald-400/10' },
                           { name: 'user_premC', spend: '\$1,320', chatter: 'Sarah K.', status: 'Expiring', color: 'text-red-400 bg-red-400/10' },
                         ].map((r) => (
                           <tr key={r.name} className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
@@ -180,7 +174,7 @@ export default function LandingPage() {
               </div>
             </div>
             {/* Bottom gradient fade for polish */}
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0B0F17] to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#080e0a] to-transparent pointer-events-none" />
           </div>
         </section>
 

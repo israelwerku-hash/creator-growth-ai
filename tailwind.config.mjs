@@ -21,7 +21,8 @@ const config = {
         "glow-subtle": "0 0 15px rgba(128, 0, 32, 0.05)"
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'sans-serif']
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif']
       }
     }
   },
