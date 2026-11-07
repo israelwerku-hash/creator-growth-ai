@@ -2,45 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Mail, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Mail, Loader2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "Managing chatter handoffs across timezones used to bleed thousands in lost VIP context every weekend. With Ataraxia's Memory Vault, our chatters know every whale's preferences instantly. Our VIP retention jumped 28% in the first 30 days.",
-    author: "Sarah Hayes",
-    role: "Founder & Head of Operations",
-    agency: "Veloce Talent Agency (14 Creators)",
-    avatar:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-    stars: 5,
-  },
-  {
-    quote:
-      "Before Ataraxia, our shift notes were scattered across Slack channels and Notion docs. Now the Memory Vault logs VIP spend habits, tone notes, and open tips automatically. It paid for itself within 48 hours of onboarding.",
-    author: "Marcus Vance",
-    role: "Managing Partner",
-    agency: "Apex Creator Management (8 Creators)",
-    avatar:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
-    stars: 5,
-  },
-  {
-    quote:
-      "Clean, fast, and engineered specifically for high-volume agencies. We eliminated chatter handoff confusion completely, and our top-spending fans are renewing without any dropped conversations.",
-    author: "Elena Rostova",
-    role: "Operations Lead",
-    agency: "Illume Talent Group (18 Creators)",
-    avatar:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
-    stars: 5,
-  },
-];
 
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [isMounted, setIsMounted] = React.useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,83 +72,75 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Right Column — Memory Vault (floating raw, zero box wrapper) */}
+              {/* Right Column — Editorial Portrait + Memory Vault Overlay */}
               <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="relative w-full max-w-md">
-                  {/* Terminal header */}
-                  <div className="flex items-center justify-between mb-6 pb-2 border-b border-neutral-200/50">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                      </div>
-                      <span className="text-[10px] text-neutral-400 font-mono ml-2">memory-vault</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">LIVE</span>
+                <div className="relative w-full max-w-lg">
+
+                  {/* Editorial Portrait */}
+                  <div className="relative w-full aspect-[3/4] max-w-[360px] mx-auto rounded-3xl overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+                      alt="Agency operator"
+                      className="w-full h-full object-cover object-top"
+                      loading="eager"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                   </div>
 
-                  {/* VIP Context Entry */}
-                  <div className="space-y-4">
-                    <div className="py-2.5 border-b border-neutral-200/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">VIP Context Log</span>
-                        <span className="text-[10px] font-mono text-emerald-600 font-medium">2m ago</span>
+                  {/* Floating Memory Vault Terminal — overlaid at bottom-right */}
+                  <div className="absolute -bottom-6 -right-4 sm:right-0 w-[280px] sm:w-[320px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-neutral-950/10 border border-neutral-200/80 p-4">
+                    {/* Terminal header */}
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-100">
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 rounded-full bg-red-400" />
+                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                        </div>
+                        <span className="text-[9px] text-neutral-400 font-mono ml-1">memory-vault</span>
                       </div>
-                      <div className="space-y-1.5 text-xs font-mono">
-                        <div className="flex gap-2">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">LIVE</span>
+                    </div>
+
+                    {/* VIP Context Entry */}
+                    <div className="mb-2.5 pb-2.5 border-b border-neutral-100">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">VIP Context Log</span>
+                        <span className="text-[8px] font-mono text-emerald-600">2m ago</span>
+                      </div>
+                      <div className="space-y-1 text-[10px] font-mono">
+                        <div className="flex gap-1.5">
                           <span className="text-neutral-400 shrink-0">fan:</span>
                           <span className="text-neutral-700">user_vip_maxR</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5">
                           <span className="text-neutral-400 shrink-0">ltv:</span>
                           <span className="text-neutral-900 font-semibold">&#36;4,210</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5">
                           <span className="text-neutral-400 shrink-0">note:</span>
-                          <span className="text-neutral-600">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Shift Handoff Log */}
-                    <div className="py-2.5 border-b border-neutral-200/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">Shift Handoff</span>
-                        <span className="text-[10px] font-mono text-amber-600 font-medium">pending</span>
-                      </div>
-                      <div className="space-y-1.5 text-xs font-mono">
-                        <div className="flex gap-2">
-                          <span className="text-neutral-400 shrink-0">from:</span>
-                          <span className="text-neutral-700">Sarah K.</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-neutral-400 shrink-0">to:</span>
-                          <span className="text-neutral-700">Mike T.</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-neutral-400 shrink-0">ctx:</span>
-                          <span className="text-neutral-600">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
+                          <span className="text-neutral-600">Prefers voice notes. Birthday May 12.</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Retention Metric Strip */}
-                    <div className="flex items-center justify-between pt-3">
+                    <div className="flex items-center justify-between">
                       <div className="text-center">
-                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">98.2%</p>
-                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Retention</p>
+                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">98.2%</p>
+                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Retention</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">342</p>
-                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">VIPs Tracked</p>
+                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">342</p>
+                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">VIPs</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">0</p>
-                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Dropped</p>
+                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">0</p>
+                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Dropped</p>
                       </div>
                     </div>
                   </div>
+
                 </div>
               </div>
 
@@ -190,74 +148,46 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonial — Dribbble Editorial Layout */}
-        <section className="w-full bg-[#FAF9F6] py-20 sm:py-28 border-t border-b border-neutral-200/50">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-              
-              {/* Left Side: Avatar Image Frame */}
-              <div className="lg:col-span-5 flex justify-center lg:justify-start">
-                <div className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-neutral-950/10 border border-neutral-200/80 bg-neutral-100">
-                  <img
-                    src={TESTIMONIALS[testimonialIndex].avatar}
-                    alt={TESTIMONIALS[testimonialIndex].author}
-                    className="w-full h-full object-cover object-top transition-all duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-3xl pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Right Side: Stars, Editorial Quote, Author, Arrows */}
-              <div className="lg:col-span-7 flex flex-col justify-between">
-                <div>
-                  {/* 5 glowing gold stars */}
-                  <div className="flex items-center gap-1.5 mb-8">
-                    {Array.from({ length: TESTIMONIALS[testimonialIndex].stars }).map((_, i) => (
-                      <span key={i} className="text-xl text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.35)]">
-                        ★
-                      </span>
+        {/* Testimonials — 3-Column Bento */}
+        <section className="w-full bg-[#FAF9F6] pb-24 sm:pb-32">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-sans font-semibold mb-10">What operators are saying</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "We lost \$12K in a single month from botched handoffs. Ataraxia made that impossible. Every chatter now picks up exactly where the last one left off.",
+                  name: "J. Rivera",
+                  role: "Agency Owner · 8 creators",
+                  stars: 5,
+                },
+                {
+                  quote: "The Memory Vault changed everything. Our VIP renewal rate jumped 23% in the first 60 days because chatters finally had real context.",
+                  name: "M. Chen",
+                  role: "Operations Lead · Top 0.5% agency",
+                  stars: 5,
+                },
+                {
+                  quote: "Clean, fast, no fluff. It's the first tool I've used that actually feels built for how agencies operate — not how developers think we should.",
+                  name: "S. Okonkwo",
+                  role: "Managing Partner · 14 chatters",
+                  stars: 4,
+                },
+              ].map((t) => (
+                <div key={t.name} className="rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm">
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className={`text-sm ${i < t.stars ? 'text-amber-400' : 'text-neutral-200'}`}>★</span>
                     ))}
                   </div>
-
-                  {/* Sharp Editorial Quote in Instrument Serif */}
-                  <blockquote className="font-serif italic text-2xl sm:text-3xl lg:text-4xl text-neutral-900 leading-[1.3] mb-8">
-                    &ldquo;{TESTIMONIALS[testimonialIndex].quote}&rdquo;
-                  </blockquote>
-
-                  {/* Author Meta */}
-                  <div className="pt-2">
-                    <p className="font-sans font-bold text-lg sm:text-xl text-neutral-900 tracking-tight">
-                      {TESTIMONIALS[testimonialIndex].author}
-                    </p>
-                    <p className="font-sans text-sm text-neutral-500 mt-1">
-                      {TESTIMONIALS[testimonialIndex].role} &middot; <span className="text-neutral-700 font-medium">{TESTIMONIALS[testimonialIndex].agency}</span>
-                    </p>
+                  <p className="text-base leading-relaxed text-neutral-600 italic mb-8">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-900 font-sans">{t.name}</p>
+                    <p className="text-xs text-neutral-400 font-sans">{t.role}</p>
                   </div>
                 </div>
-
-                {/* Minimalist circular left/right navigation arrow buttons */}
-                <div className="flex items-center gap-3 mt-10 pt-6 border-t border-neutral-200/60">
-                  <button
-                    onClick={() => setTestimonialIndex((prev) => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1))}
-                    aria-label="Previous testimonial"
-                    className="w-11 h-11 rounded-full border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all duration-200 flex items-center justify-center text-neutral-700 active:scale-95 shadow-sm"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setTestimonialIndex((prev) => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1))}
-                    aria-label="Next testimonial"
-                    className="w-11 h-11 rounded-full border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all duration-200 flex items-center justify-center text-neutral-700 active:scale-95 shadow-sm"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                  <span className="text-xs font-sans text-neutral-400 ml-2">
-                    0{testimonialIndex + 1} / 0{TESTIMONIALS.length}
-                  </span>
-                </div>
-              </div>
-
+              ))}
             </div>
           </div>
         </section>
