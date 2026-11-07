@@ -72,7 +72,7 @@ export default function LandingPage() {
             </div>
 
             {/* Right Column — Hero Portrait flush to right edge */}
-            <div className="relative w-full h-[520px] lg:h-[580px] overflow-hidden pr-0">
+            <div className="relative w-full h-[520px] lg:h-[580px] overflow-hidden pr-0 flex items-start">
               <img
                 src="/hero-portrait.jpg"
                 alt="Hero Portrait"
