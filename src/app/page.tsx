@@ -72,75 +72,15 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Right Column — Editorial Portrait + Memory Vault Overlay */}
+              {/* Right Column — Editorial Portrait */}
               <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="relative w-full max-w-lg">
-
-                  {/* Editorial Portrait */}
-                  <div className="relative w-full aspect-[3/4] max-w-[360px] mx-auto rounded-3xl overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
-                      alt="Agency operator"
-                      className="w-full h-full object-cover object-top"
-                      loading="eager"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
-                  </div>
-
-                  {/* Floating Memory Vault Terminal — overlaid at bottom-right */}
-                  <div className="absolute -bottom-6 -right-4 sm:right-0 w-[280px] sm:w-[320px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-neutral-950/10 border border-neutral-200/80 p-4">
-                    {/* Terminal header */}
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-100">
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 rounded-full bg-red-400" />
-                          <div className="w-2 h-2 rounded-full bg-amber-400" />
-                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                        </div>
-                        <span className="text-[9px] text-neutral-400 font-mono ml-1">memory-vault</span>
-                      </div>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">LIVE</span>
-                    </div>
-
-                    {/* VIP Context Entry */}
-                    <div className="mb-2.5 pb-2.5 border-b border-neutral-100">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">VIP Context Log</span>
-                        <span className="text-[8px] font-mono text-emerald-600">2m ago</span>
-                      </div>
-                      <div className="space-y-1 text-[10px] font-mono">
-                        <div className="flex gap-1.5">
-                          <span className="text-neutral-400 shrink-0">fan:</span>
-                          <span className="text-neutral-700">user_vip_maxR</span>
-                        </div>
-                        <div className="flex gap-1.5">
-                          <span className="text-neutral-400 shrink-0">ltv:</span>
-                          <span className="text-neutral-900 font-semibold">&#36;4,210</span>
-                        </div>
-                        <div className="flex gap-1.5">
-                          <span className="text-neutral-400 shrink-0">note:</span>
-                          <span className="text-neutral-600">Prefers voice notes. Birthday May 12.</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Retention Metric Strip */}
-                    <div className="flex items-center justify-between">
-                      <div className="text-center">
-                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">98.2%</p>
-                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Retention</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">342</p>
-                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">VIPs</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-bold text-neutral-900 leading-none font-sans">0</p>
-                        <p className="text-[8px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Dropped</p>
-                      </div>
-                    </div>
-                  </div>
-
+                <div className="w-full max-w-[420px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl shadow-neutral-950/8">
+                  <img
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop"
+                    alt="Agency operator"
+                    className="w-full h-full object-cover object-top"
+                    loading="eager"
+                  />
                 </div>
               </div>
 
@@ -148,11 +88,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials — 3-Column Bento */}
+        {/* Testimonials — 3-Column Bento Grid */}
         <section className="w-full bg-[#FAF9F6] pb-24 sm:pb-32">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
             <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-sans font-semibold mb-10">What operators are saying</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
                   quote: "We lost \$12K in a single month from botched handoffs. Ataraxia made that impossible. Every chatter now picks up exactly where the last one left off.",
@@ -174,17 +114,19 @@ export default function LandingPage() {
                 },
               ].map((t) => (
                 <div key={t.name} className="rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm">
-                  <div className="flex gap-0.5 mb-4">
+                  <div className="flex gap-1 mb-4">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className={`text-sm ${i < t.stars ? 'text-amber-400' : 'text-neutral-200'}`}>★</span>
+                      <span key={i} className={`text-base ${i < t.stars ? 'text-amber-400' : 'text-neutral-300'}`}>
+                        {i < t.stars ? '★' : '☆'}
+                      </span>
                     ))}
                   </div>
-                  <p className="text-base leading-relaxed text-neutral-600 italic mb-8">
+                  <p className="text-base sm:text-lg leading-relaxed text-neutral-900 font-serif italic mb-8">
                     &ldquo;{t.quote}&rdquo;
                   </p>
                   <div>
                     <p className="text-sm font-semibold text-neutral-900 font-sans">{t.name}</p>
-                    <p className="text-xs text-neutral-400 font-sans">{t.role}</p>
+                    <p className="text-xs text-neutral-400 font-sans mt-0.5">{t.role}</p>
                   </div>
                 </div>
               ))}
@@ -236,118 +178,117 @@ export default function LandingPage() {
         </section>
 
         {/* 4. Luxury Pricing Structure */}
-        <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto">
+        <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto bg-[#FAF9F6]">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">Invest in your infrastructure.</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-neutral-900 font-sans">Invest in your infrastructure.</h2>
             
-            <div className="inline-flex items-center bg-zinc-900 border border-zinc-800 rounded-full p-1.5">
+            <div className="inline-flex items-center bg-neutral-200/80 border border-neutral-300/80 rounded-full p-1.5 font-sans">
               <button 
                 onClick={() => setIsAnnual(false)} 
-                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all ${!isAnnual ? 'bg-white text-black shadow-glow-burgundy' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all ${!isAnnual ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}
               >
                 Monthly
               </button>
               <button 
                 onClick={() => setIsAnnual(true)} 
-                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${isAnnual ? 'bg-white text-black shadow-glow-burgundy' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${isAnnual ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}
               >
-                Annual <span className={`text-[10px] px-2 py-0.5 rounded-full ${isAnnual ? 'bg-black text-white' : 'bg-white/10 text-white'}`}>SAVE 20%</span>
+                Annual <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isAnnual ? 'bg-[#0F2942] text-white' : 'bg-neutral-300 text-neutral-700'}`}>SAVE 20%</span>
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             {/* Starter Tier */}
-            <div className="bg-[#0a0a0a] border border-zinc-800/80 rounded-[2.5rem] p-10 relative overflow-hidden">
-              <h3 className="text-xl font-bold text-zinc-400 mb-2">Starter</h3>
-              <div className="flex items-baseline gap-2 mb-10">
-                <span className="text-5xl font-black tracking-tight">Free</span>
+            <div className="bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+              <h3 className="text-xl font-bold text-neutral-900 mb-2 font-sans">Starter</h3>
+              <div className="flex items-baseline gap-2 mb-8">
+                <span className="text-5xl font-black tracking-tight text-neutral-900 font-sans">Free</span>
               </div>
-              <ul className="space-y-5 mb-10">
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> 50 Starter Credits
+              <ul className="space-y-4 mb-8 font-sans">
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> 50 Starter Credits
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Basic Analytics Dashboard
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Basic Analytics Dashboard
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-600 font-medium">
-                  <Lock className="w-5 h-5 text-zinc-800" /> AI DM Generation
+                <li className="flex items-center gap-3 text-sm text-neutral-400 font-medium">
+                  <Lock className="w-5 h-5 text-neutral-300 shrink-0" /> AI DM Generation
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-600 font-medium">
-                  <Lock className="w-5 h-5 text-zinc-800" /> Smart Segmentation
+                <li className="flex items-center gap-3 text-sm text-neutral-400 font-medium">
+                  <Lock className="w-5 h-5 text-neutral-300 shrink-0" /> Smart Segmentation
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-600 font-medium">
-                  <Lock className="w-5 h-5 text-zinc-800" /> Memory Vault Access
+                <li className="flex items-center gap-3 text-sm text-neutral-400 font-medium">
+                  <Lock className="w-5 h-5 text-neutral-300 shrink-0" /> Memory Vault Access
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-600 font-medium">
-                  <Lock className="w-5 h-5 text-zinc-800" /> Priority Support
+                <li className="flex items-center gap-3 text-sm text-neutral-400 font-medium">
+                  <Lock className="w-5 h-5 text-neutral-300 shrink-0" /> Priority Support
                 </li>
               </ul>
-              <Link href="/login" className="block w-full py-4 rounded-2xl border border-zinc-800 text-center text-sm font-bold hover:bg-zinc-900 transition-colors">
+              <Link href="/login" className="block w-full py-4 rounded-xl border border-neutral-300 text-neutral-900 text-center text-sm font-bold hover:bg-neutral-50 transition-colors font-sans">
                 Start Free
               </Link>
             </div>
 
             {/* Pro Tier */}
-            <div className="bg-zinc-900 border border-zinc-700 rounded-[2.5rem] p-10 relative transform md:-translate-y-4 shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-[2.5rem] pointer-events-none" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <div className="bg-white border-2 border-[#0F2942] rounded-2xl p-8 relative transform md:-translate-y-4 shadow-md">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0F2942] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm font-sans tracking-wide">
                 MOST POPULAR
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+              <h3 className="text-xl font-bold text-neutral-900 mb-2 font-sans">Pro</h3>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl font-black tracking-tight">${isAnnual ? '49' : '59'}</span>
-                <span className="text-zinc-400 font-medium">/mo</span>
+                <span className="text-5xl font-black tracking-tight text-neutral-900 font-sans">${isAnnual ? '49' : '59'}</span>
+                <span className="text-neutral-600 font-medium font-sans">/mo</span>
               </div>
-              <p className="text-sm text-zinc-400 mb-10 font-medium pb-6 border-b border-zinc-800">2,600 AI Engine Credits / mo</p>
-              <ul className="space-y-5 mb-10">
-                <li className="flex items-center gap-4 text-sm text-white font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Full Analytics Suite
+              <p className="text-sm text-neutral-600 mb-8 font-medium pb-6 border-b border-neutral-200 font-sans">2,600 AI Engine Credits / mo</p>
+              <ul className="space-y-4 mb-8 font-sans">
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Full Analytics Suite
                 </li>
-                <li className="flex items-center gap-4 text-sm text-white font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> AI DM Generation Engine
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> AI DM Generation Engine
                 </li>
-                <li className="flex items-center gap-4 text-sm text-white font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Smart Fan Segmentation
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Smart Fan Segmentation
                 </li>
-                <li className="flex items-center gap-4 text-sm text-white font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Memory Vault Access
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Memory Vault Access
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-500 font-medium">
-                  <Lock className="w-5 h-5 text-zinc-700" /> Priority Support
+                <li className="flex items-center gap-3 text-sm text-neutral-400 font-medium">
+                  <Lock className="w-5 h-5 text-neutral-300 shrink-0" /> Priority Support
                 </li>
               </ul>
-              <Link href="/login" className="block w-full py-4 rounded-2xl bg-white text-black text-center text-sm font-bold hover:bg-zinc-200 transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              <Link href="/login" className="block w-full py-4 rounded-xl bg-[#0F2942] text-white text-center text-sm font-bold hover:bg-[#153554] transition-colors shadow-sm font-sans">
                 Upgrade to Pro
               </Link>
             </div>
 
             {/* Agency Tier */}
-            <div className="bg-[#0a0a0a] border border-zinc-800/80 rounded-[2.5rem] p-10 relative overflow-hidden">
-              <h3 className="text-xl font-bold text-zinc-400 mb-2">Agency</h3>
+            <div className="bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+              <h3 className="text-xl font-bold text-neutral-900 mb-2 font-sans">Agency</h3>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl font-black tracking-tight">${isAnnual ? '149' : '199'}</span>
-                <span className="text-zinc-500 font-medium">/mo</span>
+                <span className="text-5xl font-black tracking-tight text-neutral-900 font-sans">${isAnnual ? '149' : '199'}</span>
+                <span className="text-neutral-600 font-medium font-sans">/mo</span>
               </div>
-              <p className="text-sm text-zinc-500 mb-10 font-medium pb-6 border-b border-zinc-800/50">10,000 AI Engine Credits / mo</p>
-              <ul className="space-y-5 mb-10">
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Everything in Pro
+              <p className="text-sm text-neutral-600 mb-8 font-medium pb-6 border-b border-neutral-200 font-sans">10,000 AI Engine Credits / mo</p>
+              <ul className="space-y-4 mb-8 font-sans">
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Everything in Pro
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Multi-Account Support
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Multi-Account Support
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> Custom AI Training
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> Custom AI Training
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> API Access
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> API Access
                 </li>
-                <li className="flex items-center gap-4 text-sm text-zinc-300 font-medium">
-                  <CheckCircle2 className="w-5 h-5 text-white" /> 24/7 Priority Support
+                <li className="flex items-center gap-3 text-sm text-neutral-800 font-medium">
+                  <CheckCircle2 className="w-5 h-5 text-[#0F2942] shrink-0" /> 24/7 Priority Support
                 </li>
               </ul>
-              <Link href="/login" className="block w-full py-4 rounded-2xl border border-zinc-800 text-center text-sm font-bold hover:bg-zinc-900 transition-colors">
+              <Link href="/login" className="block w-full py-4 rounded-xl border border-neutral-300 text-neutral-900 text-center text-sm font-bold hover:bg-neutral-50 transition-colors font-sans">
                 Contact Sales
               </Link>
             </div>
@@ -355,10 +296,10 @@ export default function LandingPage() {
         </section>
 
         {/* 5. Modern Contact Portal */}
-        <section id="contact" className="py-32 px-6 border-t border-white/5 bg-zinc-950/30">
+        <section id="contact" className="py-32 px-6 border-t border-neutral-200/60 bg-[#FAF9F6]">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Let's talk scale.</h2>
-            <p className="text-neutral-900 mb-12 text-lg">Questions about Enterprise or Agency implementation? Send us a message.</p>
+            <h2 className="font-display text-4xl sm:text-5xl uppercase tracking-wider text-[#B91C1C] mb-4">Let's talk scale.</h2>
+            <p className="text-neutral-600 mb-12 text-lg font-serif italic">Questions about Enterprise or Agency implementation? Send us a message.</p>
             
             <form className="space-y-6 text-left" onSubmit={async (e) => {
               e.preventDefault();
@@ -393,32 +334,32 @@ export default function LandingPage() {
             }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Name</label>
+                  <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-widest pl-1 font-sans">Name</label>
                   <input 
                     name="name" 
                     type="text" 
                     required 
                     value={contactForm.name}
                     onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                    className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" 
+                    className="w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder:text-neutral-400 p-4 focus:border-[#0F2942] focus:ring-1 focus:ring-[#0F2942] outline-none font-sans transition-colors" 
                     placeholder="Jane Doe" 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Email</label>
+                  <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-widest pl-1 font-sans">Email</label>
                   <input 
                     name="email" 
                     type="email" 
                     required 
                     value={contactForm.email}
                     onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors" 
+                    className="w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder:text-neutral-400 p-4 focus:border-[#0F2942] focus:ring-1 focus:ring-[#0F2942] outline-none font-sans transition-colors" 
                     placeholder="jane@agency.com" 
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Message</label>
+                <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-widest pl-1 font-sans">Message</label>
                 <textarea 
                   name="message" 
                   rows={5} 
@@ -426,14 +367,14 @@ export default function LandingPage() {
                   minLength={10} 
                   value={contactForm.message}
                   onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                  className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-white transition-colors resize-none" 
+                  className="w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder:text-neutral-400 p-4 focus:border-[#0F2942] focus:ring-1 focus:ring-[#0F2942] outline-none font-sans transition-colors resize-none" 
                   placeholder="How can we help you scale?"
                 ></textarea>
               </div>
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-zinc-200 transition-transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#0F2942] text-white hover:bg-[#153554] py-4 rounded-xl font-medium transition-colors font-sans flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {isSubmitting ? (
                   <>
@@ -447,7 +388,7 @@ export default function LandingPage() {
               </button>
               
               {submitStatus && (
-                <p className={`text-sm font-semibold mt-4 text-center ${submitStatus.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p className={`text-sm font-semibold mt-4 text-center ${submitStatus.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
                   {submitStatus.text}
                 </p>
               )}
