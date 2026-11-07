@@ -26,7 +26,10 @@ export default function LandingPage() {
             </div>
             <span className="font-display text-lg tracking-wider uppercase text-neutral-900">Ataraxia</span>
           </div>
-          <Link href="/login" className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors font-sans">
+          <Link
+            href="/login"
+            className="bg-[#0F2942] text-white hover:bg-[#153554] transition-colors rounded-lg px-4 py-2 text-sm font-medium font-sans"
+          >
             Sign In
           </Link>
       </nav>
@@ -71,7 +74,7 @@ export default function LandingPage() {
 
               {/* Right Column — Memory Vault (floating, no wrapper) */}
               <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="relative w-full max-w-md p-6 sm:p-8">
+                <div className="relative w-full max-w-md">
                   {/* Terminal header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
@@ -201,7 +204,7 @@ export default function LandingPage() {
         <section id="features" className="py-32 px-6 max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Architected for dominance.</h2>
-            <p className="text-zinc-400 text-lg">Every tool you need to maximize lifetime value.</p>
+            <p className="text-neutral-900 text-lg">Every tool you need to maximize lifetime value.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -212,7 +215,7 @@ export default function LandingPage() {
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4">AI DM Engine</h3>
-              <p className="text-zinc-400 leading-relaxed text-sm">
+              <p className="text-neutral-900 leading-relaxed text-sm">
                 Autonomous high-conversion chat sequencing. Generate perfectly toned payload hooks and PPV scripts instantly.
               </p>
             </div>
@@ -224,7 +227,7 @@ export default function LandingPage() {
                 <PieChart className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Smart Segmentation</h3>
-              <p className="text-zinc-400 leading-relaxed text-sm">
+              <p className="text-neutral-900 leading-relaxed text-sm">
                 Identify whales instantly. Predictive analytics categorize your fans by spend habits, churn risk, and conversion opportunity.
               </p>
             </div>
@@ -236,7 +239,7 @@ export default function LandingPage() {
                 <BrainCircuit className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Memory Vault</h3>
-              <p className="text-zinc-400 leading-relaxed text-sm">
+              <p className="text-neutral-900 leading-relaxed text-sm">
                 Never forget a detail. Track interactions, store custom traits, and let AI build rich sub-context for every single fan.
               </p>
             </div>
@@ -366,7 +369,7 @@ export default function LandingPage() {
         <section id="contact" className="py-32 px-6 border-t border-white/5 bg-zinc-950/30">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Let's talk scale.</h2>
-            <p className="text-zinc-400 mb-12 text-lg">Questions about Enterprise or Agency implementation? Send us a message.</p>
+            <p className="text-neutral-900 mb-12 text-lg">Questions about Enterprise or Agency implementation? Send us a message.</p>
             
             <form className="space-y-6 text-left" onSubmit={async (e) => {
               e.preventDefault();
@@ -401,7 +404,7 @@ export default function LandingPage() {
             }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Name</label>
+                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Name</label>
                   <input 
                     name="name" 
                     type="text" 
@@ -413,7 +416,7 @@ export default function LandingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Email</label>
+                  <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Email</label>
                   <input 
                     name="email" 
                     type="email" 
@@ -426,7 +429,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-1">Message</label>
+                <label className="text-[10px] font-bold text-neutral-900 uppercase tracking-widest pl-1">Message</label>
                 <textarea 
                   name="message" 
                   rows={5} 
