@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Instagram, Mail, Loader2 } from "lucide-react";
+import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Mail, Loader2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
 export default function LandingPage() {
@@ -44,137 +44,137 @@ export default function LandingPage() {
       </nav>
 
       <main>
-        {/* 2. B2B Conversion-Optimized Hero Section */}
-        <section className="relative w-full min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, #080e0a 0%, #0c1a10 40%, #080e0a 100%)' }}>
-          {/* Subtle ambient glow — GPU-composited */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full blur-[120px] pointer-events-none" aria-hidden="true" style={{ backgroundColor: 'rgba(27,77,46,0.07)' }} />
+        {/* 2. Editorial Hero Section — Split Layout */}
+        <section className="relative w-full overflow-hidden" style={{ background: 'linear-gradient(180deg, #080e0a 0%, #0a120c 50%, #080e0a 100%)' }}>
+          {/* Subtle ambient glow */}
+          <div className="absolute top-20 right-1/4 w-[600px] h-[400px] rounded-full blur-[140px] pointer-events-none" aria-hidden="true" style={{ backgroundColor: 'rgba(27,77,46,0.06)' }} />
 
-          {/* Hero Copy */}
-          <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
+          <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-36 sm:pt-40 pb-24 sm:pb-32">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
 
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-              The OnlyFans CRM Built for Agency Operations.
-            </h1>
+              {/* Left Column — Copy & CTA */}
+              <div className="flex flex-col items-start max-w-xl">
+                <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.08] mb-7">
+                  Flawless Chatter Operations.
+                </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed font-medium">
-              Track &#36;1,000+ VIP spenders, manage chatter shifts, and organize custom content requests in one clean dashboard.
-            </p>
+                <p className="text-base sm:text-lg text-zinc-400 leading-relaxed font-medium mb-10 max-w-md">
+                  The terminal CRM for agency owners to log VIP context, track shift handoffs, and eliminate lost revenue.
+                </p>
 
-            {/* CTA Row */}
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <Link
-                href="/login"
-                className="text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 shadow-lg text-base border border-[#2a5e3a]/40"
-                style={{ backgroundColor: '#1b4d2e', boxShadow: '0 10px 25px -5px rgba(27,77,46,0.35)' }}
-              >
-                Get Beta Access <ArrowRight className="w-5 h-5" />
-              </Link>
-              <a
-                href="#features"
-                className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5"
-              >
-                See how it works <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Product UI Mockup — Realistic CRM Dashboard Preview */}
-          <div className="relative z-10 w-full max-w-5xl mx-auto mt-16 px-2 sm:px-0">
-            {/* Browser chrome frame */}
-            <div className="rounded-xl border border-white/[0.08] bg-[#0d1117] shadow-2xl shadow-black/60 overflow-hidden">
-              {/* Title bar */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-[#161b22] border-b border-white/[0.06]">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                {/* CTA Row */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
+                  <Link
+                    href="/login"
+                    className="text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base border border-[#2a5e3a]/40"
+                    style={{ backgroundColor: '#1b4d2e', boxShadow: '0 10px 30px -5px rgba(27,77,46,0.4)' }}
+                  >
+                    Get Beta Access <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <a
+                    href="#features"
+                    className="text-sm font-semibold text-zinc-500 hover:text-white transition-colors flex items-center gap-1.5"
+                  >
+                    Watch 10s Demo <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
                 </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="px-4 py-1 rounded-md bg-white/[0.05] text-[11px] text-zinc-500 font-mono">app.ataraxia.io/dashboard</div>
-                </div>
+
+                {/* Trust badge */}
+                <p className="text-xs text-zinc-600 font-medium tracking-wide">
+                  Built for high-volume agency ops&nbsp;&nbsp;·&nbsp;&nbsp;100% Context Retention
+                </p>
               </div>
 
-              {/* Dashboard body */}
-              <div className="flex min-h-[380px] sm:min-h-[420px]">
-                {/* Sidebar */}
-                <div className="hidden sm:flex flex-col w-48 border-r border-white/[0.06] bg-[#0d1117] p-4 gap-1 shrink-0">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold" style={{ backgroundColor: 'rgba(27,77,46,0.15)', color: '#4ade80' }}>
-                    <PieChart className="w-3.5 h-3.5" /> Dashboard
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
-                    <MessageSquare className="w-3.5 h-3.5" /> Chatters
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
-                    <BrainCircuit className="w-3.5 h-3.5" /> AI Copilot
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
-                    <Instagram className="w-3.5 h-3.5" /> Content
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
-                    <Mail className="w-3.5 h-3.5" /> Custom Requests
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors">
-                    <Lock className="w-3.5 h-3.5" /> Settings
-                  </div>
+              {/* Right Column — Memory Vault Terminal Card */}
+              <div className="relative flex items-center justify-center lg:justify-end">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                  <div className="w-[420px] h-[420px] rounded-full blur-[80px]" style={{ backgroundColor: 'rgba(27,77,46,0.08)' }} />
                 </div>
 
-                {/* Main content area */}
-                <div className="flex-1 p-5 space-y-5 overflow-hidden">
-                  {/* Metric cards row */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[
-                      { label: 'Monthly Revenue', value: '\$48,290', delta: '+12.4%', up: true },
-                      { label: 'VIP Subscribers', value: '342', delta: '+8.1%', up: true },
-                      { label: 'Active Chatters', value: '12', delta: 'On shift', up: true },
-                      { label: 'Pending Requests', value: '27', delta: '3 urgent', up: false },
-                    ].map((m) => (
-                      <div key={m.label} className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                        <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mb-1">{m.label}</p>
-                        <p className="text-lg font-bold text-white leading-none mb-0.5">{m.value}</p>
-                        <p className={`text-[10px] font-semibold ${m.up ? 'text-emerald-400' : 'text-amber-400'}`}>{m.delta}</p>
+                {/* Glassmorphic terminal card */}
+                <div
+                  className="relative w-full max-w-md rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl"
+                  style={{ backgroundColor: 'rgba(10,18,12,0.85)', boxShadow: '0 25px 60px -15px rgba(0,0,0,0.7), 0 0 40px rgba(27,77,46,0.08)' }}
+                >
+                  {/* Terminal header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
                       </div>
-                    ))}
+                      <span className="text-[10px] text-zinc-600 font-mono ml-2">memory-vault</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-zinc-500">LIVE</span>
                   </div>
 
-                  {/* Activity table */}
-                  <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] overflow-hidden">
-                    <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-                      <p className="text-xs font-semibold text-zinc-300">Recent VIP Activity</p>
-                      <span className="text-[10px] font-semibold cursor-pointer transition-colors" style={{ color: '#4ade80' }}>View all</span>
+                  {/* VIP Context Entry */}
+                  <div className="space-y-4">
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">VIP Context Log</span>
+                        <span className="text-[10px] font-mono text-emerald-400/70">2m ago</span>
+                      </div>
+                      <div className="space-y-2 text-xs font-mono">
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">fan:</span>
+                          <span className="text-zinc-300">user_vip_maxR</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">ltv:</span>
+                          <span className="text-white font-semibold">&#36;4,210</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">note:</span>
+                          <span className="text-zinc-400">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
+                        </div>
+                      </div>
                     </div>
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="text-[10px] uppercase tracking-wider text-zinc-600 font-semibold border-b border-white/[0.04]">
-                          <th className="px-4 py-2">Subscriber</th>
-                          <th className="px-4 py-2 hidden sm:table-cell">Spend</th>
-                          <th className="px-4 py-2 hidden md:table-cell">Chatter</th>
-                          <th className="px-4 py-2">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-xs text-zinc-300">
-                        {[
-                          { name: 'user_vip_maxR', spend: '\$4,210', chatter: 'Sarah K.', status: 'Renewing', color: 'text-emerald-400 bg-emerald-400/10' },
-                          { name: 'user_diamondJ', spend: '\$2,880', chatter: 'Mike T.', status: 'Custom Req', color: 'text-amber-400 bg-amber-400/10' },
-                          { name: 'user_eliteW99', spend: '\$1,750', chatter: 'AI Copilot', status: 'Active', color: 'text-emerald-400 bg-emerald-400/10' },
-                          { name: 'user_premC', spend: '\$1,320', chatter: 'Sarah K.', status: 'Expiring', color: 'text-red-400 bg-red-400/10' },
-                        ].map((r) => (
-                          <tr key={r.name} className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
-                            <td className="px-4 py-2.5 font-medium font-mono text-zinc-200">{r.name}</td>
-                            <td className="px-4 py-2.5 hidden sm:table-cell font-semibold text-white">{r.spend}</td>
-                            <td className="px-4 py-2.5 hidden md:table-cell">{r.chatter}</td>
-                            <td className="px-4 py-2.5">
-                              <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${r.color}`}>{r.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+
+                    {/* Shift Handoff Log */}
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">Shift Handoff</span>
+                        <span className="text-[10px] font-mono text-amber-400/70">pending</span>
+                      </div>
+                      <div className="space-y-2 text-xs font-mono">
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">from:</span>
+                          <span className="text-zinc-300">Sarah K.</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">to:</span>
+                          <span className="text-zinc-300">Mike T.</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-zinc-600 shrink-0">ctx:</span>
+                          <span className="text-zinc-400">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Retention Metric Strip */}
+                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-white leading-none">98.2%</p>
+                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Retention</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-white leading-none">342</p>
+                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">VIPs Tracked</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-white leading-none">0</p>
+                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Dropped Context</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
             </div>
-            {/* Bottom gradient fade for polish */}
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#080e0a] to-transparent pointer-events-none" />
           </div>
         </section>
 
