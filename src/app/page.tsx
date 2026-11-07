@@ -17,26 +17,26 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div suppressHydrationWarning className="min-h-screen bg-[#050505] text-white selection:bg-white/20 font-sans">
+    <div suppressHydrationWarning className="min-h-screen bg-[#FAF9F6] text-neutral-900 selection:bg-neutral-200 font-serif">
       {/* 1. Navigation Bar */}
       <nav suppressHydrationWarning className="fixed top-0 inset-x-0 z-50 flex justify-center p-6">
-        <div suppressHydrationWarning className="w-full max-w-5xl rounded-2xl bg-white/5 border border-burgundy-dark/40 backdrop-blur-xl px-6 py-4 flex items-center justify-between shadow-2xl">
+        <div suppressHydrationWarning className="w-full max-w-5xl rounded-2xl bg-white/80 border border-neutral-200/60 backdrop-blur-xl px-6 py-4 flex items-center justify-between shadow-lg shadow-neutral-950/[0.03]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center font-bold text-xl">
               Ω
             </div>
-            <span className="font-bold tracking-tight text-lg">Ataraxia</span>
+            <span className="font-display text-lg tracking-wider uppercase text-neutral-900">Ataraxia</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-500 font-sans">
+            <a href="#features" className="hover:text-neutral-900 transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-neutral-900 transition-colors">Pricing</a>
+            <a href="#contact" className="hover:text-neutral-900 transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+            <Link href="/login" className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors font-sans">
               Sign In
             </Link>
-            <Link href="/login" className="text-sm font-bold bg-white text-black px-5 py-2.5 rounded-xl hover:bg-zinc-200 transition-colors flex items-center gap-2">
+            <Link href="/login" className="text-sm font-bold bg-neutral-900 text-white px-5 py-2.5 rounded-xl hover:bg-neutral-800 transition-colors flex items-center gap-2 font-sans">
               Get Started <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -44,136 +44,159 @@ export default function LandingPage() {
       </nav>
 
       <main>
-        {/* 2. Editorial Hero Section — Split Layout */}
-        <section className="relative w-full overflow-hidden" style={{ background: 'linear-gradient(180deg, #080e0a 0%, #0a120c 50%, #080e0a 100%)' }}>
-          {/* Subtle ambient glow */}
-          <div className="absolute top-20 right-1/4 w-[600px] h-[400px] rounded-full blur-[140px] pointer-events-none" aria-hidden="true" style={{ backgroundColor: 'rgba(27,77,46,0.06)' }} />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-36 sm:pt-40 pb-24 sm:pb-32">
+        {/* 2. Editorial Hero Section — Light Mode Split Layout */}
+        <section className="relative w-full overflow-hidden bg-[#FAF9F6]">
+          <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-40 sm:pt-48 pb-24 sm:pb-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
 
               {/* Left Column — Copy & CTA */}
               <div className="flex flex-col items-start max-w-xl">
-                <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.08] mb-7">
-                  Flawless Chatter Operations.
+                <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] uppercase tracking-wider text-[#B91C1C] leading-[1.0] mb-7">
+                  Flawless Chatter Operations
                 </h1>
 
-                <p className="text-base sm:text-lg text-zinc-400 leading-relaxed font-medium mb-10 max-w-md">
-                  The terminal CRM for agency owners to log VIP context, track shift handoffs, and eliminate lost revenue.
+                <p className="text-base sm:text-lg text-neutral-500 leading-relaxed mb-10 max-w-md italic">
+                  Eliminate chatter handoff chaos and protect VIP revenue. The structured CRM for agency owners who refuse to lose context between shifts.
                 </p>
 
                 {/* CTA Row */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
                   <Link
                     href="/login"
-                    className="text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base border border-[#2a5e3a]/40"
-                    style={{ backgroundColor: '#1b4d2e', boxShadow: '0 10px 30px -5px rgba(27,77,46,0.4)' }}
+                    className="bg-neutral-900 hover:bg-neutral-800 active:bg-black text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base font-sans shadow-lg shadow-neutral-950/10"
                   >
-                    Get Beta Access <ArrowRight className="w-5 h-5" />
+                    Get Early Beta <ArrowRight className="w-5 h-5" />
                   </Link>
                   <a
                     href="#features"
-                    className="text-sm font-semibold text-zinc-500 hover:text-white transition-colors flex items-center gap-1.5"
+                    className="text-sm font-medium text-neutral-400 hover:text-neutral-900 transition-colors flex items-center gap-1.5 font-sans"
                   >
                     Watch 10s Demo <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
 
-                {/* Trust badge */}
-                <p className="text-xs text-zinc-600 font-medium tracking-wide">
+                {/* Trust line */}
+                <p className="text-xs text-neutral-400 font-sans font-medium tracking-wide">
                   Built for high-volume agency ops&nbsp;&nbsp;·&nbsp;&nbsp;100% Context Retention
                 </p>
               </div>
 
-              {/* Right Column — Memory Vault Terminal Card */}
+              {/* Right Column — Memory Vault Product Card (Light) */}
               <div className="relative flex items-center justify-center lg:justify-end">
-                {/* Outer glow ring */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-                  <div className="w-[420px] h-[420px] rounded-full blur-[80px]" style={{ backgroundColor: 'rgba(27,77,46,0.08)' }} />
-                </div>
-
-                {/* Glassmorphic terminal card */}
-                <div
-                  className="relative w-full max-w-md rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl"
-                  style={{ backgroundColor: 'rgba(10,18,12,0.85)', boxShadow: '0 25px 60px -15px rgba(0,0,0,0.7), 0 0 40px rgba(27,77,46,0.08)' }}
-                >
+                <div className="relative w-full max-w-md rounded-2xl border border-neutral-200/80 p-6 sm:p-8 bg-white shadow-2xl shadow-neutral-950/[0.05]">
                   {/* Terminal header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                       </div>
-                      <span className="text-[10px] text-zinc-600 font-mono ml-2">memory-vault</span>
+                      <span className="text-[10px] text-neutral-400 font-mono ml-2">memory-vault</span>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-zinc-500">LIVE</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">LIVE</span>
                   </div>
 
                   {/* VIP Context Entry */}
                   <div className="space-y-4">
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">VIP Context Log</span>
-                        <span className="text-[10px] font-mono text-emerald-400/70">2m ago</span>
+                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">VIP Context Log</span>
+                        <span className="text-[10px] font-mono text-emerald-500">2m ago</span>
                       </div>
                       <div className="space-y-2 text-xs font-mono">
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">fan:</span>
-                          <span className="text-zinc-300">user_vip_maxR</span>
+                          <span className="text-neutral-400 shrink-0">fan:</span>
+                          <span className="text-neutral-700">user_vip_maxR</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">ltv:</span>
-                          <span className="text-white font-semibold">&#36;4,210</span>
+                          <span className="text-neutral-400 shrink-0">ltv:</span>
+                          <span className="text-neutral-900 font-semibold">&#36;4,210</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">note:</span>
-                          <span className="text-zinc-400">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
+                          <span className="text-neutral-400 shrink-0">note:</span>
+                          <span className="text-neutral-500">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Shift Handoff Log */}
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">Shift Handoff</span>
-                        <span className="text-[10px] font-mono text-amber-400/70">pending</span>
+                        <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">Shift Handoff</span>
+                        <span className="text-[10px] font-mono text-amber-500">pending</span>
                       </div>
                       <div className="space-y-2 text-xs font-mono">
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">from:</span>
-                          <span className="text-zinc-300">Sarah K.</span>
+                          <span className="text-neutral-400 shrink-0">from:</span>
+                          <span className="text-neutral-700">Sarah K.</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">to:</span>
-                          <span className="text-zinc-300">Mike T.</span>
+                          <span className="text-neutral-400 shrink-0">to:</span>
+                          <span className="text-neutral-700">Mike T.</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-zinc-600 shrink-0">ctx:</span>
-                          <span className="text-zinc-400">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
+                          <span className="text-neutral-400 shrink-0">ctx:</span>
+                          <span className="text-neutral-500">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Retention Metric Strip */}
-                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                    <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
                       <div className="text-center">
-                        <p className="text-lg font-bold text-white leading-none">98.2%</p>
-                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Retention</p>
+                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">98.2%</p>
+                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Retention</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-white leading-none">342</p>
-                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">VIPs Tracked</p>
+                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">342</p>
+                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">VIPs Tracked</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-white leading-none">0</p>
-                        <p className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">Dropped Context</p>
+                        <p className="text-lg font-bold text-neutral-900 leading-none font-sans">0</p>
+                        <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Dropped</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials — Editorial Bento */}
+        <section className="w-full bg-[#FAF9F6] pb-24 sm:pb-32">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-sans font-semibold mb-10">What operators are saying</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "We lost \$12K in a single month from botched handoffs. Ataraxia made that impossible. Every chatter now picks up exactly where the last one left off.",
+                  name: "J. Rivera",
+                  role: "Agency Owner · 8 creators",
+                },
+                {
+                  quote: "The Memory Vault changed everything. Our VIP renewal rate jumped 23% in the first 60 days because chatters finally had real context.",
+                  name: "M. Chen",
+                  role: "Operations Lead · Top 0.5% agency",
+                },
+                {
+                  quote: "Clean, fast, no fluff. It's the first tool I've used that actually feels built for how agencies operate — not how developers think we should.",
+                  name: "S. Okonkwo",
+                  role: "Managing Partner · 14 chatters",
+                },
+              ].map((t) => (
+                <div key={t.name} className="rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm">
+                  <p className="text-base leading-relaxed text-neutral-600 italic mb-8">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-900 font-sans">{t.name}</p>
+                    <p className="text-xs text-neutral-400 font-sans">{t.role}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
