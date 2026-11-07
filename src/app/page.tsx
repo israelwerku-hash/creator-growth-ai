@@ -2,11 +2,45 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Mail, Loader2 } from "lucide-react";
+import { ArrowRight, Lock, CheckCircle2, MessageSquare, PieChart, BrainCircuit, Mail, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Footer } from "@/components/Footer";
+
+const TESTIMONIALS = [
+  {
+    quote:
+      "Managing chatter handoffs across timezones used to bleed thousands in lost VIP context every weekend. With Ataraxia's Memory Vault, our chatters know every whale's preferences instantly. Our VIP retention jumped 28% in the first 30 days.",
+    author: "Sarah Hayes",
+    role: "Founder & Head of Operations",
+    agency: "Veloce Talent Agency (14 Creators)",
+    avatar:
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+    stars: 5,
+  },
+  {
+    quote:
+      "Before Ataraxia, our shift notes were scattered across Slack channels and Notion docs. Now the Memory Vault logs VIP spend habits, tone notes, and open tips automatically. It paid for itself within 48 hours of onboarding.",
+    author: "Marcus Vance",
+    role: "Managing Partner",
+    agency: "Apex Creator Management (8 Creators)",
+    avatar:
+      "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
+    stars: 5,
+  },
+  {
+    quote:
+      "Clean, fast, and engineered specifically for high-volume agencies. We eliminated chatter handoff confusion completely, and our top-spending fans are renewing without any dropped conversations.",
+    author: "Elena Rostova",
+    role: "Operations Lead",
+    agency: "Illume Talent Group (18 Creators)",
+    avatar:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
+    stars: 5,
+  },
+];
 
 export default function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [isMounted, setIsMounted] = React.useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,11 +106,11 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Right Column — Memory Vault (floating, no wrapper) */}
+              {/* Right Column — Memory Vault (floating raw, zero box wrapper) */}
               <div className="relative flex items-center justify-center lg:justify-end">
                 <div className="relative w-full max-w-md">
                   {/* Terminal header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center justify-between mb-6 pb-2 border-b border-neutral-200/50">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
@@ -90,12 +124,12 @@ export default function LandingPage() {
 
                   {/* VIP Context Entry */}
                   <div className="space-y-4">
-                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4">
-                      <div className="flex items-center justify-between mb-3">
+                    <div className="py-2.5 border-b border-neutral-200/50">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">VIP Context Log</span>
-                        <span className="text-[10px] font-mono text-emerald-500">2m ago</span>
+                        <span className="text-[10px] font-mono text-emerald-600 font-medium">2m ago</span>
                       </div>
-                      <div className="space-y-2 text-xs font-mono">
+                      <div className="space-y-1.5 text-xs font-mono">
                         <div className="flex gap-2">
                           <span className="text-neutral-400 shrink-0">fan:</span>
                           <span className="text-neutral-700">user_vip_maxR</span>
@@ -106,18 +140,18 @@ export default function LandingPage() {
                         </div>
                         <div className="flex gap-2">
                           <span className="text-neutral-400 shrink-0">note:</span>
-                          <span className="text-neutral-500">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
+                          <span className="text-neutral-600">Prefers voice notes. Birthday May 12. Renewing sub — offer custom bundle.</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Shift Handoff Log */}
-                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4">
-                      <div className="flex items-center justify-between mb-3">
+                    <div className="py-2.5 border-b border-neutral-200/50">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold font-sans">Shift Handoff</span>
-                        <span className="text-[10px] font-mono text-amber-500">pending</span>
+                        <span className="text-[10px] font-mono text-amber-600 font-medium">pending</span>
                       </div>
-                      <div className="space-y-2 text-xs font-mono">
+                      <div className="space-y-1.5 text-xs font-mono">
                         <div className="flex gap-2">
                           <span className="text-neutral-400 shrink-0">from:</span>
                           <span className="text-neutral-700">Sarah K.</span>
@@ -128,13 +162,13 @@ export default function LandingPage() {
                         </div>
                         <div className="flex gap-2">
                           <span className="text-neutral-400 shrink-0">ctx:</span>
-                          <span className="text-neutral-500">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
+                          <span className="text-neutral-600">3 active convos, 1 pending custom req (&#36;180 tip potential)</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Retention Metric Strip */}
-                    <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
+                    <div className="flex items-center justify-between pt-3">
                       <div className="text-center">
                         <p className="text-lg font-bold text-neutral-900 leading-none font-sans">98.2%</p>
                         <p className="text-[9px] text-neutral-400 uppercase tracking-wider mt-0.5 font-sans">Retention</p>
@@ -156,46 +190,74 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials — Editorial Bento */}
-        <section className="w-full bg-[#FAF9F6] pb-24 sm:pb-32">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <p className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-sans font-semibold mb-10">What operators are saying</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  quote: "We lost \$12K in a single month from botched handoffs. Ataraxia made that impossible. Every chatter now picks up exactly where the last one left off.",
-                  name: "J. Rivera",
-                  role: "Agency Owner · 8 creators",
-                  stars: 5,
-                },
-                {
-                  quote: "The Memory Vault changed everything. Our VIP renewal rate jumped 23% in the first 60 days because chatters finally had real context.",
-                  name: "M. Chen",
-                  role: "Operations Lead · Top 0.5% agency",
-                  stars: 5,
-                },
-                {
-                  quote: "Clean, fast, no fluff. It's the first tool I've used that actually feels built for how agencies operate — not how developers think we should.",
-                  name: "S. Okonkwo",
-                  role: "Managing Partner · 14 chatters",
-                  stars: 4,
-                },
-              ].map((t) => (
-                <div key={t.name} className="rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm">
-                  <div className="flex gap-0.5 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className={`text-sm ${i < t.stars ? 'text-amber-400' : 'text-neutral-200'}`}>★</span>
+        {/* Testimonial — Dribbble Editorial Layout */}
+        <section className="w-full bg-[#FAF9F6] py-20 sm:py-28 border-t border-b border-neutral-200/50">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              
+              {/* Left Side: Avatar Image Frame */}
+              <div className="lg:col-span-5 flex justify-center lg:justify-start">
+                <div className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-neutral-950/10 border border-neutral-200/80 bg-neutral-100">
+                  <img
+                    src={TESTIMONIALS[testimonialIndex].avatar}
+                    alt={TESTIMONIALS[testimonialIndex].author}
+                    className="w-full h-full object-cover object-top transition-all duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-3xl pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Right Side: Stars, Editorial Quote, Author, Arrows */}
+              <div className="lg:col-span-7 flex flex-col justify-between">
+                <div>
+                  {/* 5 glowing gold stars */}
+                  <div className="flex items-center gap-1.5 mb-8">
+                    {Array.from({ length: TESTIMONIALS[testimonialIndex].stars }).map((_, i) => (
+                      <span key={i} className="text-xl text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.35)]">
+                        ★
+                      </span>
                     ))}
                   </div>
-                  <p className="text-base leading-relaxed text-neutral-600 italic mb-8">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <div>
-                    <p className="text-sm font-semibold text-neutral-900 font-sans">{t.name}</p>
-                    <p className="text-xs text-neutral-400 font-sans">{t.role}</p>
+
+                  {/* Sharp Editorial Quote in Instrument Serif */}
+                  <blockquote className="font-serif italic text-2xl sm:text-3xl lg:text-4xl text-neutral-900 leading-[1.3] mb-8">
+                    &ldquo;{TESTIMONIALS[testimonialIndex].quote}&rdquo;
+                  </blockquote>
+
+                  {/* Author Meta */}
+                  <div className="pt-2">
+                    <p className="font-sans font-bold text-lg sm:text-xl text-neutral-900 tracking-tight">
+                      {TESTIMONIALS[testimonialIndex].author}
+                    </p>
+                    <p className="font-sans text-sm text-neutral-500 mt-1">
+                      {TESTIMONIALS[testimonialIndex].role} &middot; <span className="text-neutral-700 font-medium">{TESTIMONIALS[testimonialIndex].agency}</span>
+                    </p>
                   </div>
                 </div>
-              ))}
+
+                {/* Minimalist circular left/right navigation arrow buttons */}
+                <div className="flex items-center gap-3 mt-10 pt-6 border-t border-neutral-200/60">
+                  <button
+                    onClick={() => setTestimonialIndex((prev) => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1))}
+                    aria-label="Previous testimonial"
+                    className="w-11 h-11 rounded-full border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all duration-200 flex items-center justify-center text-neutral-700 active:scale-95 shadow-sm"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setTestimonialIndex((prev) => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1))}
+                    aria-label="Next testimonial"
+                    className="w-11 h-11 rounded-full border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white transition-all duration-200 flex items-center justify-center text-neutral-700 active:scale-95 shadow-sm"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <span className="text-xs font-sans text-neutral-400 ml-2">
+                    0{testimonialIndex + 1} / 0{TESTIMONIALS.length}
+                  </span>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
@@ -203,43 +265,40 @@ export default function LandingPage() {
         {/* 3. Feature Showcase */}
         <section id="features" className="py-32 px-6 max-w-7xl mx-auto">
           <div className="text-center mb-24">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Architected for dominance.</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-neutral-900">Architected for dominance.</h2>
             <p className="text-neutral-900 text-lg">Every tool you need to maximize lifetime value.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Feature 1 */}
-            <div className="bg-zinc-900/40 border border-zinc-800/60 p-10 rounded-[2rem] hover:bg-zinc-900/80 transition-colors group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white/10 transition-colors" />
-              <div className="w-14 h-14 bg-white/10 border border-burgundy-dark/40 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-glow-burgundy">
-                <MessageSquare className="w-6 h-6 text-white" />
+            <div className="bg-white border border-neutral-200/80 p-8 rounded-2xl shadow-sm hover:border-neutral-300 transition-all">
+              <div className="w-12 h-12 bg-neutral-100 border border-neutral-200/80 rounded-xl flex items-center justify-center mb-6">
+                <MessageSquare className="w-6 h-6 text-[#0F2942]" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">AI DM Engine</h3>
-              <p className="text-neutral-900 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold mb-3 text-neutral-900 font-sans">AI DM Engine</h3>
+              <p className="text-neutral-900 leading-relaxed text-sm font-sans">
                 Autonomous high-conversion chat sequencing. Generate perfectly toned payload hooks and PPV scripts instantly.
               </p>
             </div>
             
             {/* Feature 2 */}
-            <div className="bg-zinc-900/40 border border-zinc-800/60 p-10 rounded-[2rem] hover:bg-zinc-900/80 transition-colors group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white/10 transition-colors" />
-              <div className="w-14 h-14 bg-white/10 border border-burgundy-dark/40 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-glow-burgundy">
-                <PieChart className="w-6 h-6 text-white" />
+            <div className="bg-white border border-neutral-200/80 p-8 rounded-2xl shadow-sm hover:border-neutral-300 transition-all">
+              <div className="w-12 h-12 bg-neutral-100 border border-neutral-200/80 rounded-xl flex items-center justify-center mb-6">
+                <PieChart className="w-6 h-6 text-[#0F2942]" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Smart Segmentation</h3>
-              <p className="text-neutral-900 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold mb-3 text-neutral-900 font-sans">Smart Segmentation</h3>
+              <p className="text-neutral-900 leading-relaxed text-sm font-sans">
                 Identify whales instantly. Predictive analytics categorize your fans by spend habits, churn risk, and conversion opportunity.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-zinc-900/40 border border-zinc-800/60 p-10 rounded-[2rem] hover:bg-zinc-900/80 transition-colors group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white/10 transition-colors" />
-              <div className="w-14 h-14 bg-white/10 border border-burgundy-dark/40 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-glow-burgundy">
-                <BrainCircuit className="w-6 h-6 text-white" />
+            <div className="bg-white border border-neutral-200/80 p-8 rounded-2xl shadow-sm hover:border-neutral-300 transition-all">
+              <div className="w-12 h-12 bg-neutral-100 border border-neutral-200/80 rounded-xl flex items-center justify-center mb-6">
+                <BrainCircuit className="w-6 h-6 text-[#0F2942]" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Memory Vault</h3>
-              <p className="text-neutral-900 leading-relaxed text-sm">
+              <h3 className="text-xl font-bold mb-3 text-neutral-900 font-sans">Memory Vault</h3>
+              <p className="text-neutral-900 leading-relaxed text-sm font-sans">
                 Never forget a detail. Track interactions, store custom traits, and let AI build rich sub-context for every single fan.
               </p>
             </div>
