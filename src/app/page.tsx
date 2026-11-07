@@ -19,28 +19,16 @@ export default function LandingPage() {
   return (
     <div suppressHydrationWarning className="min-h-screen bg-[#FAF9F6] text-neutral-900 selection:bg-neutral-200 font-serif">
       {/* 1. Navigation Bar */}
-      <nav suppressHydrationWarning className="fixed top-0 inset-x-0 z-50 flex justify-center p-6">
-        <div suppressHydrationWarning className="w-full max-w-5xl rounded-2xl bg-white/80 border border-neutral-200/60 backdrop-blur-xl px-6 py-4 flex items-center justify-between shadow-lg shadow-neutral-950/[0.03]">
+      <nav suppressHydrationWarning className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 px-8 lg:px-12 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center font-bold text-xl">
+            <div className="w-8 h-8 rounded-lg bg-[#0F2942] text-white flex items-center justify-center font-bold text-xl">
               Ω
             </div>
             <span className="font-display text-lg tracking-wider uppercase text-neutral-900">Ataraxia</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-500 font-sans">
-            <a href="#features" className="hover:text-neutral-900 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-neutral-900 transition-colors">Pricing</a>
-            <a href="#contact" className="hover:text-neutral-900 transition-colors">Contact</a>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors font-sans">
-              Sign In
-            </Link>
-            <Link href="/login" className="text-sm font-bold bg-neutral-900 text-white px-5 py-2.5 rounded-xl hover:bg-neutral-800 transition-colors flex items-center gap-2 font-sans">
-              Get Started <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
+          <Link href="/login" className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors font-sans">
+            Sign In
+          </Link>
       </nav>
 
       <main>
@@ -63,7 +51,7 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
                   <Link
                     href="/login"
-                    className="bg-neutral-900 hover:bg-neutral-800 active:bg-black text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base font-sans shadow-lg shadow-neutral-950/10"
+                    className="bg-[#0F2942] hover:bg-[#153554] active:bg-[#0a1e30] text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base font-sans shadow-lg shadow-[#0F2942]/15"
                   >
                     Get Early Beta <ArrowRight className="w-5 h-5" />
                   </Link>
