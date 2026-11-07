@@ -37,54 +37,50 @@ export default function LandingPage() {
       <main>
         {/* 2. Editorial Hero Section — Light Mode Split Layout */}
         <section className="relative w-full overflow-hidden bg-[#FAF9F6]">
-          <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-40 sm:pt-48 pb-24 sm:pb-32">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center pt-32 sm:pt-40">
 
-              {/* Left Column — Copy & CTA */}
-              <div className="flex flex-col items-start max-w-xl">
-                <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] uppercase tracking-wider text-[#B91C1C] leading-[0.9] mb-10">
-                  Flawless Chatter Operations
-                </h1>
+            {/* Left Column — Copy & CTA */}
+            <div className="flex flex-col items-start max-w-xl px-6 sm:px-8 lg:pl-12 xl:pl-20 pb-20 sm:pb-28 lg:pb-0">
+              <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] uppercase tracking-wider text-[#B91C1C] leading-[0.9] mb-10">
+                Flawless Chatter Operations
+              </h1>
 
-                <p className="text-base sm:text-lg text-neutral-500 leading-relaxed mb-10 max-w-md italic mt-2">
-                  Eliminate chatter handoff chaos and protect VIP revenue. The structured CRM for agency owners who refuse to lose context between shifts.
-                </p>
+              <p className="text-base sm:text-lg text-neutral-500 leading-relaxed mb-10 max-w-md italic mt-2">
+                Eliminate chatter handoff chaos and protect VIP revenue. The structured CRM for agency owners who refuse to lose context between shifts.
+              </p>
 
-                {/* CTA Row */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
-                  <Link
-                    href="/login"
-                    className="bg-[#0F2942] hover:bg-[#153554] active:bg-[#0a1e30] text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base font-sans shadow-lg shadow-[#0F2942]/15"
-                  >
-                    Get Early Beta <ArrowRight className="w-5 h-5" />
-                  </Link>
-                  <a
-                    href="#features"
-                    className="text-sm font-medium text-neutral-400 hover:text-neutral-900 transition-colors flex items-center gap-1.5 font-sans"
-                  >
-                    Watch 10s Demo <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-
-                {/* Trust line */}
-                <p className="text-xs text-neutral-400 font-sans font-medium tracking-wide">
-                  Built for high-volume agency ops&nbsp;&nbsp;·&nbsp;&nbsp;100% Context Retention
-                </p>
+              {/* CTA Row */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
+                <Link
+                  href="/login"
+                  className="bg-[#0F2942] hover:bg-[#153554] active:bg-[#0a1e30] text-white font-bold px-8 py-4 rounded-xl transition-all duration-200 flex items-center gap-2.5 text-base font-sans shadow-lg shadow-[#0F2942]/15"
+                >
+                  Get Early Beta <ArrowRight className="w-5 h-5" />
+                </Link>
+                <a
+                  href="#features"
+                  className="text-sm font-medium text-neutral-400 hover:text-neutral-900 transition-colors flex items-center gap-1.5 font-sans"
+                >
+                  Watch 10s Demo <ArrowRight className="w-3.5 h-3.5" />
+                </a>
               </div>
 
-              {/* Right Column — Editorial Hero Portrait */}
-              <div className="relative flex items-center justify-center lg:justify-end w-full max-w-lg mx-auto lg:max-w-none">
-                <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-md">
-                  <img
-                    src="/hero-portrait.jpg"
-                    alt="Agency Operator"
-                    className="w-full h-full object-cover object-center"
-                    loading="eager"
-                  />
-                </div>
-              </div>
-
+              {/* Trust line */}
+              <p className="text-xs text-neutral-400 font-sans font-medium tracking-wide">
+                Built for high-volume agency ops&nbsp;&nbsp;·&nbsp;&nbsp;100% Context Retention
+              </p>
             </div>
+
+            {/* Right Column — Hero Portrait flush to right edge */}
+            <div className="relative w-full h-full min-h-[600px] overflow-hidden pr-0">
+              <img
+                src="/hero-portrait.jpg"
+                alt="Hero Portrait"
+                className="w-full h-full object-cover object-right-top"
+                loading="eager"
+              />
+            </div>
+
           </div>
         </section>
 
