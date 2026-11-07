@@ -51,11 +51,11 @@ export default function LandingPage() {
 
               {/* Left Column — Copy & CTA */}
               <div className="flex flex-col items-start max-w-xl">
-                <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] uppercase tracking-wider text-[#B91C1C] leading-[1.0] mb-7">
+                <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] uppercase tracking-wider text-[#B91C1C] leading-[0.9] mb-10">
                   Flawless Chatter Operations
                 </h1>
 
-                <p className="text-base sm:text-lg text-neutral-500 leading-relaxed mb-10 max-w-md italic">
+                <p className="text-base sm:text-lg text-neutral-500 leading-relaxed mb-10 max-w-md italic mt-2">
                   Eliminate chatter handoff chaos and protect VIP revenue. The structured CRM for agency owners who refuse to lose context between shifts.
                 </p>
 
@@ -81,9 +81,9 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Right Column — Memory Vault Product Card (Light) */}
+              {/* Right Column — Memory Vault (floating, no wrapper) */}
               <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="relative w-full max-w-md rounded-2xl border border-neutral-200/80 p-6 sm:p-8 bg-white shadow-2xl shadow-neutral-950/[0.05]">
+                <div className="relative w-full max-w-md p-6 sm:p-8">
                   {/* Terminal header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
@@ -175,19 +175,27 @@ export default function LandingPage() {
                   quote: "We lost \$12K in a single month from botched handoffs. Ataraxia made that impossible. Every chatter now picks up exactly where the last one left off.",
                   name: "J. Rivera",
                   role: "Agency Owner · 8 creators",
+                  stars: 5,
                 },
                 {
                   quote: "The Memory Vault changed everything. Our VIP renewal rate jumped 23% in the first 60 days because chatters finally had real context.",
                   name: "M. Chen",
                   role: "Operations Lead · Top 0.5% agency",
+                  stars: 5,
                 },
                 {
                   quote: "Clean, fast, no fluff. It's the first tool I've used that actually feels built for how agencies operate — not how developers think we should.",
                   name: "S. Okonkwo",
                   role: "Managing Partner · 14 chatters",
+                  stars: 4,
                 },
               ].map((t) => (
                 <div key={t.name} className="rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm">
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className={`text-sm ${i < t.stars ? 'text-amber-400' : 'text-neutral-200'}`}>★</span>
+                    ))}
+                  </div>
                   <p className="text-base leading-relaxed text-neutral-600 italic mb-8">
                     &ldquo;{t.quote}&rdquo;
                   </p>
