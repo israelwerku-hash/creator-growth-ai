@@ -72,13 +72,13 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              {/* Right Column — Editorial Portrait */}
-              <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="w-full max-w-[420px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl shadow-neutral-950/8">
+              {/* Right Column — Editorial Hero Portrait */}
+              <div className="relative flex items-center justify-center lg:justify-end w-full max-w-lg mx-auto lg:max-w-none">
+                <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-md">
                   <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop"
-                    alt="Agency operator"
-                    className="w-full h-full object-cover object-top"
+                    src="/hero-portrait.jpg"
+                    alt="Agency Operator"
+                    className="w-full h-full object-cover object-center"
                     loading="eager"
                   />
                 </div>
