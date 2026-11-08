@@ -37,7 +37,7 @@ export default function LandingPage() {
       <main>
         {/* 2. Editorial Hero Section — Light Mode Split Layout */}
         <section className="relative w-full overflow-hidden bg-[#FAF9F6]">
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center pt-32 sm:pt-40">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-start pt-32 sm:pt-40">
 
             {/* Left Column — Copy & CTA */}
             <div className="flex flex-col items-start max-w-xl px-6 sm:px-8 lg:pl-12 xl:pl-20 pb-20 sm:pb-28 lg:pb-0">
