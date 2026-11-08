@@ -76,7 +76,7 @@ export default function LandingPage() {
               <img
                 src="/hero-portrait.jpg"
                 alt="Hero Portrait"
-                className="w-full h-full object-cover object-right-top"
+                className="w-full h-full object-cover object-top"
                 loading="eager"
               />
             </div>
