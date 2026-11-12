@@ -76,7 +76,6 @@ export default function LandingPage() {
                     <div className="flex gap-1.5">
                       <div className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
                       <div className="w-2.5 h-2.5 rounded-full bg-amber-400/70" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/70" />
                     </div>
                     <div className="flex-1 mx-8">
                       <div className="bg-neutral-100 rounded-md px-3 py-1 text-[10px] text-neutral-400 font-mono text-center truncate">
@@ -93,9 +92,9 @@ export default function LandingPage() {
                         <div className="w-6 h-6 rounded-md bg-[#0F2942] text-white flex items-center justify-center text-[10px] font-bold">Ω</div>
                         <span className="text-white text-xs font-semibold tracking-wide">MEMORY VAULT</span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[9px] font-semibold text-emerald-400">LIVE</span>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-300 animate-pulse" />
+                        <span className="text-[9px] font-semibold text-neutral-300 tracking-wider">LIVE</span>
                       </div>
                     </div>
 
@@ -123,7 +122,7 @@ export default function LandingPage() {
                           <p className="text-[#4a6380] text-[9px] font-medium">Open Rate</p>
                         </div>
                         <div className="rounded-lg bg-white/[0.03] border border-white/[0.05] p-2 text-center">
-                          <p className="text-emerald-400 text-sm font-bold">Low</p>
+                          <p className="text-slate-200 text-sm font-bold">Low</p>
                           <p className="text-[#4a6380] text-[9px] font-medium">Churn Risk</p>
                         </div>
                       </div>
@@ -175,7 +174,7 @@ export default function LandingPage() {
 
                 {/* Floating badge */}
                 <div className="absolute -bottom-3 -right-3 bg-white rounded-xl border border-neutral-200 shadow-lg px-3 py-2 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[#0F2942] animate-pulse" />
                   <span className="text-[11px] font-semibold text-neutral-700 font-sans">Context synced across 4 chatters</span>
                 </div>
               </div>
@@ -233,30 +232,30 @@ export default function LandingPage() {
                   Identify whales instantly. AI categorizes fans by spend habits, churn risk, and conversion opportunity — surfacing who needs attention right now.
                 </p>
                 {/* Mini preview */}
-                <div className="rounded-xl bg-[#0B1A2B] p-4 space-y-2.5">
+                <div className="rounded-xl bg-[#0B1A2B] p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-[#6b82a0] font-semibold uppercase tracking-wider">Segment Breakdown</span>
-                    <span className="text-[9px] text-emerald-400 font-semibold">214 fans</span>
+                    <span className="text-[10px] text-[#6b82a0] font-sans font-medium uppercase tracking-wider">Segment Breakdown</span>
+                    <span className="text-[10px] text-slate-300 font-mono font-medium">214 fans</span>
                   </div>
                   {[
-                    { label: "Whales", pct: "12%", count: "26", color: "bg-amber-400", w: "w-[12%]" },
-                    { label: "Regulars", pct: "45%", count: "96", color: "bg-cyan-400", w: "w-[45%]" },
-                    { label: "At Risk", pct: "18%", count: "39", color: "bg-red-400", w: "w-[18%]" },
-                    { label: "New", pct: "25%", count: "53", color: "bg-violet-400", w: "w-[25%]" },
+                    { label: "Whales", pct: "12%", count: "26", color: "bg-white", w: "w-[12%]" },
+                    { label: "Regulars", pct: "45%", count: "96", color: "bg-slate-300", w: "w-[45%]" },
+                    { label: "At Risk", pct: "18%", count: "39", color: "bg-slate-400", w: "w-[18%]" },
+                    { label: "New", pct: "25%", count: "53", color: "bg-slate-600", w: "w-[25%]" },
                   ].map((seg) => (
                     <div key={seg.label} className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-[#8a9bb5] font-medium">{seg.label}</span>
-                        <span className="text-[10px] text-white font-semibold">{seg.count} · {seg.pct}</span>
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className="text-[#8a9bb5] font-sans font-medium">{seg.label}</span>
+                        <span className="text-slate-200 font-mono">{seg.count} <span className="text-slate-500">·</span> {seg.pct}</span>
                       </div>
                       <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
                         <div className={`h-full rounded-full ${seg.color} ${seg.w}`} />
                       </div>
                     </div>
                   ))}
-                  <div className="flex items-center gap-1.5 pt-1 px-2 py-1.5 rounded-lg bg-red-500/10 border border-red-500/15">
-                    <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
-                    <span className="text-[9px] text-red-300 font-medium">3 whales flagged high churn risk — action needed</span>
+                  <div className="flex items-center gap-2 pt-1 px-2.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.07]">
+                    <AlertTriangle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="text-[10px] text-slate-300 font-sans">3 whales flagged with retention alerts</span>
                   </div>
                 </div>
               </div>
@@ -283,8 +282,8 @@ export default function LandingPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[9px] text-emerald-400 font-semibold">92% open rate</span>
+                      <TrendingUp className="w-3 h-3 text-slate-300" />
+                      <span className="text-[9px] text-slate-300 font-medium">92% open rate</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Shield className="w-3 h-3 text-[#6b82a0]" />
