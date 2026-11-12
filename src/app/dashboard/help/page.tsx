@@ -2,7 +2,7 @@ import React from "react";
 import { HelpCircle, Chrome, MessageSquare, PieChart, Database, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Help & Tutorials | Creator Growth AI",
+  title: "Help & Tutorials | Ataraxia",
 };
 
 export default function HelpPage() {
@@ -81,7 +81,7 @@ export default function HelpPage() {
             
             <div className="space-y-6">
               <p className="text-zinc-300">
-                To unleash the full power of Creator Growth AI, you need to sync your real-time platform data using our secure Chrome Extension.
+                To unleash the full power of Ataraxia, you need to sync your real-time platform data using our secure Chrome Extension.
               </p>
               
               <div className="space-y-4">

@@ -80,7 +80,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
             <div>
               <span className="font-bold tracking-tight text-sm text-white block leading-tight">
-                {isAgency ? 'Agency Elite' : (creator?.tier === 'PRO' ? 'Pro Creator' : 'Free Tier')}
+                {isAgency ? 'Ataraxia Agency' : (creator?.tier === 'PRO' ? 'Ataraxia Pro' : 'Free Tier')}
               </span>
               <span className="text-[10px] text-zinc-600 font-medium">AI Growth Engine</span>
             </div>

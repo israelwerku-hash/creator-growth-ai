@@ -42,7 +42,7 @@ export default function RefundPolicyPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold text-white">4. Requesting a Refund</h2>
           <p>
-            To request a refund under the eligible conditions, please email support@creatorgrowthai.com with your account email and a brief explanation of the issue.
+            To request a refund under the eligible conditions, please email israelwerku@gmail.com with your account email and a brief explanation of the issue.
           </p>
         </section>
 

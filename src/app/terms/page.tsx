@@ -24,14 +24,14 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
             <p className="text-zinc-300 leading-relaxed mb-4">
-              By accessing or using Creator Growth AI, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+              By accessing or using Ataraxia, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
             </p>
           </section>
 
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-4">2. Description of Service</h2>
             <p className="text-zinc-300 leading-relaxed mb-4">
-              Creator Growth AI provides artificial intelligence tools designed to assist creators with content generation, segmentation, and audience management.
+              Ataraxia provides artificial intelligence tools designed to assist creators with content generation, segmentation, and audience management.
             </p>
           </section>
 

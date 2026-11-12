@@ -24,7 +24,7 @@ export default function RefundsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-4">1. 14-Day Money-Back Guarantee</h2>
             <p className="text-zinc-300 leading-relaxed mb-4">
-              We stand behind the quality of Creator Growth AI. If you are not completely satisfied with our service, we offer a full refund within the first 14 days of your initial subscription purchase. No questions asked.
+              We stand behind the quality of Ataraxia. If you are not completely satisfied with our service, we offer a full refund within the first 14 days of your initial subscription purchase. No questions asked.
             </p>
           </section>
 
@@ -38,7 +38,7 @@ export default function RefundsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-4">3. How to Request a Refund</h2>
             <p className="text-zinc-300 leading-relaxed mb-4">
-              To request a refund, please contact our support team at <a href="mailto:support@creatorgrowth.ai" className="text-amber-500 hover:text-amber-400">support@creatorgrowth.ai</a> using the email address associated with your account. Please include "Refund Request" in the subject line to ensure prompt processing.
+              To request a refund, please contact our support team at <a href="mailto:israelwerku@gmail.com" className="text-amber-500 hover:text-amber-400">israelwerku@gmail.com</a> using the email address associated with your account. Please include &quot;Refund Request&quot; in the subject line to ensure prompt processing.
             </p>
           </section>
 

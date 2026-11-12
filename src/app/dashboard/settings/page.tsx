@@ -3,7 +3,7 @@ import { Settings } from "lucide-react";
 import ApiKeyManager from "./ApiKeyManager";
 
 export const metadata = {
-  title: "Settings | Creator Growth AI",
+  title: "Settings | Ataraxia",
 };
 
 export default function SettingsPage() {

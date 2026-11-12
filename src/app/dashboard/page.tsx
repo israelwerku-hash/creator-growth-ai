@@ -55,7 +55,7 @@ export default async function DashboardPage() {
 
   const isPremium = creator?.tier === "PRO" || creator?.tier === "AGENCY";
   const credits = creator?.aiCredits ?? 0;
-  const tierLabel = creator?.tier === "AGENCY" ? "Agency Elite" : creator?.tier === "PRO" ? "Pro Creator" : "Free Tier";
+  const tierLabel = creator?.tier === "AGENCY" ? "Ataraxia Agency" : creator?.tier === "PRO" ? "Ataraxia Pro" : "Free Tier";
 
   function formatLogAction(action: string): string {
     if (action.includes("DM_GENERATION")) return "DM Generation";
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                        {creator?.tier === "AGENCY" ? "Agency Elite" : isPremium ? "Pro Creator Pass" : "Starter Pass"}
+                        {creator?.tier === "AGENCY" ? "Ataraxia Agency" : isPremium ? "Ataraxia Pro Pass" : "Starter Pass"}
                       </p>
                       <p className="text-xs text-zinc-400 font-mono mt-0.5">ACCT-{userId ? userId.slice(0, 8).toUpperCase() : "------"}</p>
                     </div>

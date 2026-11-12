@@ -59,7 +59,7 @@ function WelcomeContent() {
         </div>
         
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-6 bg-gradient-to-br from-white to-zinc-500 bg-clip-text text-transparent">
-          {isUpdating ? "Initializing Engine..." : (isAgency ? "Welcome to Agency Elite" : "Welcome to Pro Tier")}
+          {isUpdating ? "Initializing Engine..." : (isAgency ? "Welcome to Ataraxia" : "Welcome to Ataraxia Pro")}
         </h1>
         
         <p className={`text-lg md:text-xl text-zinc-400 mb-12 leading-relaxed font-medium max-w-lg transition-opacity duration-700 ${isUpdating ? 'opacity-50' : 'opacity-100'}`}>

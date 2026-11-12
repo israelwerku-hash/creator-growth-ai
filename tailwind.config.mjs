@@ -22,7 +22,8 @@ const config = {
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'sans-serif'],
-        serif: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif']
+        serif: ['"Instrument Serif"', 'Georgia', '"Times New Roman"', 'serif'],
+        display: ['"Bebas Neue"', 'Impact', 'sans-serif']
       }
     }
   },

@@ -265,7 +265,7 @@ export default function LoginPage() {
             Ω
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight">{isSignUp ? "Join the Elite Tier" : "Welcome Back"}</h1>
-          <p className="text-zinc-400 text-sm mt-1">{isSignUp ? "Create your Agency Elite workspace" : "Log in to your Agency Elite workspace"}</p>
+          <p className="text-zinc-400 text-sm mt-1">{isSignUp ? "Create your Ataraxia workspace" : "Log in to your Ataraxia workspace"}</p>
         </div>
 
         {/* 3. Social Authentication */}

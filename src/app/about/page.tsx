@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight, MessageSquare, Brain, Languages, Chrome, Users, Building2, Headphones } from "lucide-react";
 
 export const metadata = {
-  title: "About Agency Elite - AI Growth Companion for Creators",
-  description: "Discover how Agency Elite helps creators and management agencies scale fan engagement with AI-powered DM generation, Memory Vault, and real-time analytics.",
+  title: "About Ataraxia - AI-Powered CRM for Agency Operators",
+  description: "Discover how Ataraxia helps agency operators eliminate chatter handoff chaos, protect VIP revenue, and scale operations with AI-powered context retention.",
 };
 
 export default function AboutPage() {
@@ -15,7 +15,7 @@ export default function AboutPage() {
         <div className="w-full max-w-5xl rounded-2xl bg-white/5 border border-burgundy-dark/40 backdrop-blur-xl px-6 py-4 flex items-center justify-between shadow-2xl">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(255,255,255,0.5)]">Ω</div>
-            <span className="font-bold tracking-tight text-lg">Agency Elite</span>
+            <span className="font-bold tracking-tight text-lg">Ataraxia</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-sm font-bold bg-white text-black px-5 py-2.5 rounded-xl hover:bg-zinc-200 transition-colors flex items-center gap-2">
@@ -33,10 +33,10 @@ export default function AboutPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1]">
             The AI Growth Companion<br />
-            <span className="text-zinc-500">for Elite Creators.</span>
+            <span className="text-zinc-500">for Agency Operators.</span>
           </h1>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            Agency Elite is the all-in-one AI engine that automates fan engagement, personalizes outreach at scale, and maximizes revenue for creators and management agencies.
+            Ataraxia is the all-in-one AI engine that automates fan engagement, personalizes outreach at scale, and maximizes revenue for creators and management agencies.
           </p>
         </section>
 
@@ -131,7 +131,7 @@ export default function AboutPage() {
       </main>
 
       <footer className="border-t border-white/5 py-10 text-center text-sm text-zinc-600">
-        &copy; {new Date().getFullYear()} Agency Elite. All rights reserved.
+        &copy; {new Date().getFullYear()} Ataraxia. All rights reserved.
       </footer>
     </div>
   );

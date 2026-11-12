@@ -22,7 +22,7 @@ export default function GuidePage() {
                 <Chrome className="w-5 h-5 text-[#800020]" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Agency Elite Chrome Extension</h4>
+                <h4 className="text-sm font-bold text-white">Ataraxia Chrome Extension</h4>
                 <p className="text-xs text-zinc-500">v1.2.0 • ZIP Archive</p>
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function GuidePage() {
       content: (
         <div className="space-y-4">
           <p className="text-zinc-400 text-sm leading-relaxed">
-            Once connected, navigate to your creator platform's chat page. You will see the Agency Elite floating action button in the bottom right corner.
+            Once connected, navigate to your creator platform's chat page. You will see the Ataraxia floating action button in the bottom right corner.
           </p>
           <div className="flex items-center gap-3 bg-[#121218] border border-white/5 rounded-xl p-4">
             <div className="w-12 h-12 bg-black rounded-full border border-zinc-800 flex items-center justify-center shadow-lg relative">
